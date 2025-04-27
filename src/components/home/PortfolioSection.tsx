@@ -1,28 +1,40 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 
-// Updated portfolio projects data with real examples
 const portfolioProjects = [
   {
     id: 1,
-    title: "E-Commerce Platform",
-    category: "Web Development",
-    description: "Modern e-commerce platform built with React and Stripe integration, featuring a responsive design and intuitive shopping experience.",
-    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    title: "Shys Luxury Hairstyles",
+    category: "Small Business Website",
+    description: "Elegant website for a luxury hair styling business, showcasing services and brand identity.",
+    imageUrl: "/lovable-uploads/345c72d1-a533-4510-8208-bfff7be2dc0a.png",
+    websiteUrl: "https://shysluxuryhairstyles.com/",
   },
   {
     id: 2,
-    title: "AI-Powered Analytics Dashboard",
-    category: "UI/UX Design",
-    description: "Data visualization platform with real-time analytics and AI-driven insights for business intelligence.",
+    title: "Hakuna Matata Business",
+    category: "Corporate Website",
+    description: "Modern and professional website for a diverse business platform.",
     imageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    websiteUrl: "https://hakunamatata.biz/",
   },
   {
     id: 3,
-    title: "SaaS Platform",
-    category: "Web Application",
-    description: "Full-featured SaaS application with user authentication, subscription management, and real-time collaboration tools.",
+    title: "Precision Fabricated",
+    category: "Industrial Services Website",
+    description: "Technical website highlighting precision fabrication services and capabilities.",
     imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    websiteUrl: "https://precisionfabricated.com/",
+  },
+  {
+    id: 4,
+    title: "Robinson Concrete LLC",
+    category: "Construction Services Website",
+    description: "Professional website for a concrete services company, showcasing expertise and past projects.",
+    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    websiteUrl: "https://robinsonconcretellc.com/",
   }
 ];
 
@@ -39,7 +51,7 @@ const PortfolioSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {portfolioProjects.map((project) => (
             <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
               <div className="aspect-[16/10] overflow-hidden">
@@ -56,9 +68,14 @@ const PortfolioSection = () => {
                 <span className="text-flyy-600 text-sm font-medium">{project.category}</span>
                 <h3 className="text-xl font-bold mt-1 mb-2">{project.title}</h3>
                 <p className="text-gray-600 mb-4">{project.description}</p>
-                <Link to={`/portfolio/${project.id}`} className="text-flyy-600 font-medium hover:underline">
-                  View Project →
-                </Link>
+                <a 
+                  href={project.websiteUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center text-flyy-600 font-medium hover:underline"
+                >
+                  Visit Website <ExternalLink className="ml-2 w-4 h-4" />
+                </a>
               </div>
             </div>
           ))}
