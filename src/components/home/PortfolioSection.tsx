@@ -31,7 +31,7 @@ const portfolioProjects = [
   {
     id: 4,
     title: "Robinson Concrete LLC",
-    category: "Construction Services Website",
+    category: "Construction Services Website", 
     description: "Professional website for a concrete services company, showcasing expertise and past projects.",
     imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     websiteUrl: "https://robinsonconcretellc.com/",
