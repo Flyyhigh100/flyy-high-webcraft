@@ -51,23 +51,62 @@ const PortfolioSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {portfolioProjects.map((project) => (
+        <div className="flex justify-center items-center mb-12">
+          <div className="w-full max-w-4xl">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              {/* Browser window header */}
+              <div className="bg-gray-100 border-b border-gray-300 p-2 flex items-center">
+                <div className="flex space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <div className="mx-auto">
+                  <div className="w-64 h-6 bg-gray-200 rounded-full"></div>
+                </div>
+              </div>
+              
+              {/* Featured project preview */}
+              <div className="aspect-video relative">
+                <img 
+                  src={portfolioProjects[0].imageUrl}
+                  alt={portfolioProjects[0].title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              <div className="p-4 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-medium">{portfolioProjects[0].title}</h3>
+                  <p className="text-gray-600">{portfolioProjects[0].category}</p>
+                </div>
+                <a 
+                  href={portfolioProjects[0].websiteUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center text-flyy-600 bg-flyy-600 text-white px-4 py-2 rounded-md hover:bg-flyy-700 transition-colors"
+                >
+                  Visit Site <ExternalLink className="ml-2 w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {portfolioProjects.slice(1).map((project) => (
             <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="aspect-[16/10] overflow-hidden">
-                <div 
-                  className="w-full h-full bg-gray-200"
-                  style={{
-                    backgroundImage: `url(${project.imageUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
+              <div className="aspect-video overflow-hidden">
+                <img
+                  src={project.imageUrl}
+                  alt={project.title}
+                  className="w-full h-full object-cover"
                 />
               </div>
               <div className="p-6">
                 <span className="text-flyy-600 text-sm font-medium">{project.category}</span>
                 <h3 className="text-xl font-bold mt-1 mb-2">{project.title}</h3>
-                <p className="text-gray-600 mb-4">{project.description}</p>
+                <p className="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
                 <a 
                   href={project.websiteUrl} 
                   target="_blank" 
