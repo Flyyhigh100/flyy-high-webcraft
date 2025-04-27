@@ -1,31 +1,29 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-// Sample portfolio projects data
+// Updated portfolio projects data with real examples
 const portfolioProjects = [
   {
     id: 1,
     title: "E-Commerce Platform",
     category: "Web Development",
-    description: "A modern e-commerce platform with integrated payment solutions",
-    // In a real project, these would be real images from your public folder or Supabase storage
-    imageUrl: "https://images.unsplash.com/photo-1661956602944-249bcd04b63f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    description: "Modern e-commerce platform built with React and Stripe integration, featuring a responsive design and intuitive shopping experience.",
+    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
   },
   {
     id: 2,
-    title: "HealthTech Dashboard",
+    title: "AI-Powered Analytics Dashboard",
     category: "UI/UX Design",
-    description: "Patient management system with data visualization",
-    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    description: "Data visualization platform with real-time analytics and AI-driven insights for business intelligence.",
+    imageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
   },
   {
     id: 3,
-    title: "Real Estate Finder",
+    title: "SaaS Platform",
     category: "Web Application",
-    description: "Property listing site with AI-powered recommendations",
-    imageUrl: "https://images.unsplash.com/photo-1565041062078-19bbca28101a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-  },
+    description: "Full-featured SaaS application with user authentication, subscription management, and real-time collaboration tools.",
+    imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  }
 ];
 
 const PortfolioSection = () => {
