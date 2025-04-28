@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
@@ -37,6 +38,41 @@ const portfolioProjects = [
   }
 ];
 
+const WebsitePreview = ({ url, fallbackImage, title }: { url: string; fallbackImage: string; title: string }) => {
+  const [iframeError, setIframeError] = useState(false);
+
+  return (
+    <div className="w-full h-full">
+      {!iframeError ? (
+        <iframe
+          src={url}
+          className="w-full h-full border-none"
+          onError={() => setIframeError(true)}
+          onLoad={(e) => {
+            try {
+              const iframe = e.target as HTMLIFrameElement;
+              if (iframe.contentWindow) {
+                iframe.contentWindow.document;
+              }
+            } catch (error) {
+              setIframeError(true);
+            }
+          }}
+          title={title}
+        />
+      ) : (
+        <div className="w-full h-full">
+          <img 
+            src={fallbackImage}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PortfolioSection = () => {
   return (
     <section className="section bg-secondary/30">
@@ -53,24 +89,24 @@ const PortfolioSection = () => {
         <div className="flex justify-center items-center mb-12">
           <div className="w-full max-w-4xl">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              {/* Browser window header */}
               <div className="bg-gray-100 border-b border-gray-300 p-2 flex items-center">
                 <div className="flex space-x-2">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <div className="mx-auto">
-                  <div className="w-64 h-6 bg-gray-200 rounded-full"></div>
+                <div className="mx-auto flex items-center justify-center">
+                  <div className="px-4 py-1 bg-white rounded-full text-sm text-gray-600">
+                    {portfolioProjects[0].websiteUrl}
+                  </div>
                 </div>
               </div>
               
-              {/* Featured project preview */}
               <div className="aspect-video relative">
-                <img 
-                  src={portfolioProjects[0].imageUrl}
-                  alt={portfolioProjects[0].title}
-                  className="w-full h-full object-cover"
+                <WebsitePreview 
+                  url={portfolioProjects[0].websiteUrl}
+                  fallbackImage={portfolioProjects[0].imageUrl}
+                  title={portfolioProjects[0].title}
                 />
               </div>
               
