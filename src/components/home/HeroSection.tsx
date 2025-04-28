@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -53,11 +52,11 @@ const HeroSection = () => {
                   <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                   <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                 </div>
-                <div className="aspect-[16/9] bg-white">
+                <div className="aspect-[16/9] bg-white flex items-center justify-center">
                   <img 
                     src="/lovable-uploads/603b50e7-cdb6-4645-a9af-4a479819c1b4.png" 
                     alt="CSI Labs Trading Chart" 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               </div>
