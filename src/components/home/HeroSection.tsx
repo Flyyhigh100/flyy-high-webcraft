@@ -45,6 +45,7 @@ const HeroSection = () => {
           </div>
           
           <div className="w-full lg:w-1/2 relative">
+            {/* Main browser window with website preview */}
             <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 p-2 mx-auto w-full max-w-lg">
               <div className="rounded-lg overflow-hidden">
                 <div className="bg-gray-100 flex space-x-2 p-3">
@@ -52,14 +53,20 @@ const HeroSection = () => {
                   <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                   <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                 </div>
-                <div className="aspect-[16/9] bg-gradient-to-br from-flyy-500 to-blue-500 animate-gradient-x"></div>
+                <div className="aspect-[16/9] bg-[#7B68EE]">
+                  <img 
+                    src="/lovable-uploads/b300970d-5fb4-4ccd-844a-5cc3e1c1a0dc.png" 
+                    alt="Website Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
               <div className="p-4 text-center bg-white">
-                <div className="h-2 w-24 bg-gray-200 rounded-full mx-auto mb-3"></div>
-                <div className="h-2 w-32 bg-gray-200 rounded-full mx-auto mb-3"></div>
+                <div className="h-2 w-64 bg-gray-200 rounded-full mx-auto mb-3"></div>
+                <div className="h-2 w-44 bg-gray-200 rounded-full mx-auto mb-3"></div>
                 <div className="flex justify-center space-x-2 mt-4">
-                  <div className="h-6 w-16 bg-flyy-500 rounded"></div>
-                  <div className="h-6 w-16 bg-gray-200 rounded"></div>
+                  <div className="h-6 w-24 bg-[#7B68EE] rounded"></div>
+                  <div className="h-6 w-24 bg-gray-200 rounded"></div>
                 </div>
               </div>
             </div>
