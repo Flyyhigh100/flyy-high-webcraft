@@ -9,7 +9,7 @@ const portfolioProjects = [
     title: "Shys Luxury Hairstyles",
     category: "Small Business Website",
     description: "Elegant website for a luxury hair styling business, showcasing services and brand identity.",
-    imageUrl: "/lovable-uploads/345c72d1-a533-4510-8208-bfff7be2dc0a.png",
+    imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     websiteUrl: "https://shysluxuryhairstyles.com/",
   },
   {
@@ -17,7 +17,7 @@ const portfolioProjects = [
     title: "Hakuna Matata Business",
     category: "Corporate Website",
     description: "Modern and professional website for a diverse business platform.",
-    imageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     websiteUrl: "https://hakunamatata.biz/",
   },
   {
@@ -25,7 +25,7 @@ const portfolioProjects = [
     title: "Precision Fabricated",
     category: "Industrial Services Website",
     description: "Technical website highlighting precision fabrication services and capabilities.",
-    imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     websiteUrl: "https://precisionfabricated.com/",
   },
   {
@@ -33,7 +33,7 @@ const portfolioProjects = [
     title: "Robinson Concrete LLC",
     category: "Construction Services Website", 
     description: "Professional website for a concrete services company, showcasing expertise and past projects.",
-    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     websiteUrl: "https://robinsonconcretellc.com/",
   }
 ];
