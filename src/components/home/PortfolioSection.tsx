@@ -38,41 +38,6 @@ const portfolioProjects = [
   }
 ];
 
-const WebsitePreview = ({ url, fallbackImage, title }: { url: string; fallbackImage: string; title: string }) => {
-  const [iframeError, setIframeError] = useState(false);
-
-  return (
-    <div className="w-full h-full">
-      {!iframeError ? (
-        <iframe
-          src={url}
-          className="w-full h-full border-none"
-          onError={() => setIframeError(true)}
-          onLoad={(e) => {
-            try {
-              const iframe = e.target as HTMLIFrameElement;
-              if (iframe.contentWindow) {
-                iframe.contentWindow.document;
-              }
-            } catch (error) {
-              setIframeError(true);
-            }
-          }}
-          title={title}
-        />
-      ) : (
-        <div className="w-full h-full">
-          <img 
-            src={fallbackImage}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
 const PortfolioSection = () => {
   return (
     <section className="section bg-secondary/30">
@@ -86,50 +51,8 @@ const PortfolioSection = () => {
           </p>
         </div>
 
-        <div className="flex justify-center items-center mb-12">
-          <div className="w-full max-w-4xl">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="bg-gray-100 border-b border-gray-300 p-2 flex items-center">
-                <div className="flex space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                </div>
-                <div className="mx-auto flex items-center justify-center">
-                  <div className="px-4 py-1 bg-white rounded-full text-sm text-gray-600">
-                    {portfolioProjects[0].websiteUrl}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="aspect-video relative">
-                <WebsitePreview 
-                  url={portfolioProjects[0].websiteUrl}
-                  fallbackImage={portfolioProjects[0].imageUrl}
-                  title={portfolioProjects[0].title}
-                />
-              </div>
-              
-              <div className="p-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-medium">{portfolioProjects[0].title}</h3>
-                  <p className="text-gray-600">{portfolioProjects[0].category}</p>
-                </div>
-                <a 
-                  href={portfolioProjects[0].websiteUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center text-flyy-600 bg-flyy-600 text-white px-4 py-2 rounded-md hover:bg-flyy-700 transition-colors"
-                >
-                  Visit Site <ExternalLink className="ml-2 w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {portfolioProjects.slice(1).map((project) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+          {portfolioProjects.map((project) => (
             <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
               <div className="aspect-video overflow-hidden">
                 <img
