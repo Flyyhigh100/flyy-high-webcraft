@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
@@ -6,11 +5,11 @@ import { ExternalLink } from "lucide-react";
 const portfolioProjects = [
   {
     id: 1,
-    title: "Shys Luxury Hairstyles",
-    category: "Small Business Website",
-    description: "Elegant website for a luxury hair styling business, showcasing services and brand identity.",
-    imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    websiteUrl: "https://shysluxuryhairstyles.com/",
+    title: "CSI Labs Investment Growth",
+    category: "Healthcare Technology Platform",
+    description: "Advanced platform showcasing affordable cancer treatments and investment opportunities in medical innovation.",
+    imageUrl: "/lovable-uploads/2f3ff55c-2d9b-4367-ba52-fb592d82cdeb.png",
+    websiteUrl: "https://csilabs.io/",
   },
   {
     id: 2,
