@@ -53,10 +53,10 @@ const HeroSection = () => {
                   <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                   <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                 </div>
-                <div className="aspect-[16/9] bg-[#7B68EE]">
+                <div className="aspect-[16/9] bg-white">
                   <img 
-                    src="/lovable-uploads/b300970d-5fb4-4ccd-844a-5cc3e1c1a0dc.png" 
-                    alt="Website Preview" 
+                    src="/lovable-uploads/603b50e7-cdb6-4645-a9af-4a479819c1b4.png" 
+                    alt="CSI Labs Trading Chart" 
                     className="w-full h-full object-cover"
                   />
                 </div>
