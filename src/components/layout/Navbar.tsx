@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -11,6 +10,16 @@ const Navbar = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  // Update the links array to include the dashboard link
+  const links = [
+    { href: "/", label: "Home" },
+    { href: "/services", label: "Services" },
+    { href: "/portfolio", label: "Portfolio" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/contact", label: "Contact" },
+    { href: "/dashboard", label: "Dashboard" },
+  ];
+
   return (
     <nav className="py-4 border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
@@ -20,21 +29,15 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="text-gray-700 hover:text-flyy-600 font-medium">
-            Home
-          </Link>
-          <Link to="/services" className="text-gray-700 hover:text-flyy-600 font-medium">
-            Services
-          </Link>
-          <Link to="/portfolio" className="text-gray-700 hover:text-flyy-600 font-medium">
-            Portfolio
-          </Link>
-          <Link to="/pricing" className="text-gray-700 hover:text-flyy-600 font-medium">
-            Pricing
-          </Link>
-          <Link to="/contact" className="text-gray-700 hover:text-flyy-600 font-medium">
-            Contact
-          </Link>
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              to={link.href}
+              className="text-gray-700 hover:text-flyy-600 font-medium"
+            >
+              {link.label}
+            </Link>
+          ))}
           <Button className="bg-flyy-600 hover:bg-flyy-700 transition-all">
             Client Login
           </Button>
@@ -55,21 +58,16 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-16 inset-x-0 bg-white shadow-md z-50">
           <div className="container mx-auto py-4 flex flex-col space-y-4">
-            <Link to="/" className="text-gray-700 hover:text-flyy-600 font-medium px-4 py-2" onClick={toggleMobileMenu}>
-              Home
-            </Link>
-            <Link to="/services" className="text-gray-700 hover:text-flyy-600 font-medium px-4 py-2" onClick={toggleMobileMenu}>
-              Services
-            </Link>
-            <Link to="/portfolio" className="text-gray-700 hover:text-flyy-600 font-medium px-4 py-2" onClick={toggleMobileMenu}>
-              Portfolio
-            </Link>
-            <Link to="/pricing" className="text-gray-700 hover:text-flyy-600 font-medium px-4 py-2" onClick={toggleMobileMenu}>
-              Pricing
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-flyy-600 font-medium px-4 py-2" onClick={toggleMobileMenu}>
-              Contact
-            </Link>
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="text-gray-700 hover:text-flyy-600 font-medium px-4 py-2"
+                onClick={toggleMobileMenu}
+              >
+                {link.label}
+              </Link>
+            ))}
             <div className="px-4 py-2">
               <Button className="w-full bg-flyy-600 hover:bg-flyy-700 transition-all">
                 Client Login

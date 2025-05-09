@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const PricingSection = () => {
   const [isYearly, setIsYearly] = useState(false);
+  const navigate = useNavigate();
   
   // Calculate savings percentage
   const monthlyCost = 15;
@@ -20,11 +22,12 @@ const PricingSection = () => {
       features: [
         "99.9% uptime guarantee",
         "Fast global CDN",
-        "Basic SEO optimization",
-        "Automatic backups",
+        "Basic SEO tools (meta tags, sitemap)",
+        "Weekly backups",
         "SSL certificate included",
         "24/7 infrastructure monitoring",
         "1 GB storage",
+        "Basic website analytics",
       ],
       featured: false,
       cta: "Get Started",
@@ -37,17 +40,22 @@ const PricingSection = () => {
       features: [
         "Everything in Basic",
         "99.99% uptime guarantee",
-        "Advanced SEO tools",
+        "Advanced SEO tools (keyword tracking, reports)",
         "Priority support",
         "Performance optimization",
         "Daily backups",
         "5 GB storage",
         "Custom domain included",
+        "Enhanced website analytics",
       ],
       featured: true,
       cta: "Get Started",
     },
   ];
+  
+  const handleGetStarted = () => {
+    navigate('/dashboard');
+  };
 
   return (
     <section className="section bg-white">
@@ -114,6 +122,7 @@ const PricingSection = () => {
                 </div>
                 <Button 
                   className={`w-full mb-8 ${plan.featured ? "bg-flyy-600 hover:bg-flyy-700" : "bg-gray-800 hover:bg-gray-900"}`}
+                  onClick={handleGetStarted}
                 >
                   {plan.cta}
                 </Button>
@@ -134,7 +143,10 @@ const PricingSection = () => {
           <p className="text-lg text-gray-600">
             Need a custom hosting solution for your business?
           </p>
-          <Button className="mt-4 px-8 py-6 text-lg bg-flyy-800 hover:bg-flyy-900">
+          <Button 
+            className="mt-4 px-8 py-6 text-lg bg-flyy-800 hover:bg-flyy-900"
+            onClick={() => navigate('/contact')}
+          >
             Contact Us for Custom Pricing
           </Button>
         </div>
