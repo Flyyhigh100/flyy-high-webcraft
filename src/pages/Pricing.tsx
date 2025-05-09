@@ -6,48 +6,49 @@ import PricingSection from '@/components/home/PricingSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import CTASection from '@/components/home/CTASection';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
 const Pricing = () => {
   // FAQ items
   const faqs = [
     {
-      question: "What's included in the website development package?",
-      answer: "Our website development packages include design, development, responsive layouts, basic SEO setup, contact forms, and cross-browser testing. Each plan varies in terms of number of pages, features, and support duration."
+      question: "What's included in the hosting plan?",
+      answer: "Our hosting plans include reliable server infrastructure, global CDN, automatic backups, SSL certificates, site monitoring, and basic SEO optimization tools. The Pro plan adds additional storage, priority support, and more advanced features."
     },
     {
-      question: "How long does it take to build a website?",
-      answer: "The timeline varies depending on the complexity of the project. A basic website typically takes 2-4 weeks, while more complex projects with custom features can take 6-12 weeks. We'll provide a specific timeline during our initial consultation."
+      question: "How reliable is your hosting service?",
+      answer: "We guarantee 99.9% uptime for our Basic plan and 99.99% for our Pro plan. Our infrastructure is built on industry-leading cloud providers with redundancy across multiple regions to ensure your website stays online."
     },
     {
-      question: "Do you offer ongoing maintenance?",
-      answer: "Yes, we offer ongoing maintenance and support packages to ensure your website remains secure, up-to-date, and performing optimally. Our plans include regular updates, backups, security monitoring, and technical support."
+      question: "Do you offer site migration services?",
+      answer: "Yes, we can help migrate your existing website to our hosting platform. Our team will ensure a smooth transition with minimal downtime. Contact us for details on our migration services."
     },
     {
       question: "Can I upgrade my plan later?",
-      answer: "Absolutely! You can upgrade to a higher-tier plan at any time. We'll work with you to smoothly transition and implement any additional features or services included in your new plan."
+      answer: "Absolutely! You can upgrade to a higher-tier plan at any time. We'll prorate your billing so you only pay the difference for the remainder of your billing cycle."
     },
     {
-      question: "Do you offer custom solutions outside of these packages?",
-      answer: "Yes, we specialize in custom solutions tailored to your specific business needs. Contact us to discuss your project requirements, and we'll create a custom proposal for you."
+      question: "Do you offer custom hosting solutions?",
+      answer: "Yes, we provide custom hosting solutions for businesses with specific requirements. Contact us to discuss your needs, and we'll create a tailored hosting package for you."
     },
     {
       question: "What payment methods do you accept?",
-      answer: "We accept credit/debit cards, bank transfers, and PayPal. For our development projects, we typically require a 50% deposit upfront, with the remaining balance due upon project completion."
+      answer: "We accept credit/debit cards, bank transfers, and PayPal. For annual plans, we also offer invoicing options for businesses that require it."
     },
   ];
 
   // Comparison table data
   const features = [
-    { name: "Responsive Design", basic: true, growth: true, enterprise: true },
-    { name: "SEO Optimization", basic: "Basic", growth: "Advanced", enterprise: "Comprehensive" },
-    { name: "Number of Pages", basic: "Up to 5", growth: "Up to 10", enterprise: "Unlimited" },
-    { name: "Content Management System", basic: true, growth: true, enterprise: true },
-    { name: "E-commerce Functionality", basic: false, growth: "Basic", enterprise: "Advanced" },
-    { name: "Custom Design", basic: "Template-based", growth: "Semi-custom", enterprise: "Fully Custom" },
-    { name: "Maintenance & Support", basic: "1 month", growth: "3 months", enterprise: "12 months" },
-    { name: "Performance Optimization", basic: "Basic", growth: "Standard", enterprise: "Advanced" },
-    { name: "Analytics Setup", basic: false, growth: true, enterprise: true },
-    { name: "AI Integration", basic: false, growth: false, enterprise: true },
+    { name: "Uptime Guarantee", basic: "99.9%", pro: "99.99%" },
+    { name: "Storage Space", basic: "1 GB", pro: "5 GB" },
+    { name: "SSL Certificate", basic: true, pro: true },
+    { name: "Global CDN", basic: true, pro: true },
+    { name: "Automated Backups", basic: "Weekly", pro: "Daily" },
+    { name: "SEO Tools", basic: "Basic", pro: "Advanced" },
+    { name: "Site Performance", basic: "Standard", pro: "Optimized" },
+    { name: "Support", basic: "Email", pro: "Priority" },
+    { name: "Custom Domain", basic: false, pro: true },
+    { name: "Analytics", basic: "Basic", pro: "Advanced" },
   ];
 
   return (
@@ -57,9 +58,9 @@ const Pricing = () => {
       <main className="flex-grow">
         <div className="bg-secondary/30 py-16 md:py-24">
           <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">Pricing Plans</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">Website Hosting</h1>
             <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto">
-              Transparent pricing with no hidden fees. Choose the plan that fits your business needs.
+              Reliable, fast and secure hosting to keep your website running smoothly 24/7.
             </p>
           </div>
         </div>
@@ -69,22 +70,21 @@ const Pricing = () => {
         {/* Feature comparison table */}
         <div className="section bg-white">
           <div className="container mx-auto">
-            <h2 className="text-3xl font-bold mb-8 text-center">Features Comparison</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-gray-700 font-bold">Feature</th>
-                    <th className="px-6 py-4 text-center text-gray-700 font-bold">Basic</th>
-                    <th className="px-6 py-4 text-center text-flyy-700 font-bold">Growth</th>
-                    <th className="px-6 py-4 text-center text-gray-700 font-bold">Enterprise</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
+            <h2 className="text-3xl font-bold mb-8 text-center">Hosting Plans Comparison</h2>
+            <div className="overflow-x-auto max-w-4xl mx-auto">
+              <Table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
+                <TableHeader className="bg-gray-50">
+                  <TableRow>
+                    <TableHead className="px-6 py-4 text-left text-gray-700 font-bold">Feature</TableHead>
+                    <TableHead className="px-6 py-4 text-center text-gray-700 font-bold">Basic</TableHead>
+                    <TableHead className="px-6 py-4 text-center text-flyy-700 font-bold">Pro</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-gray-200">
                   {features.map((feature, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-700 font-medium">{feature.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <TableRow key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-gray-700 font-medium">{feature.name}</TableCell>
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-center">
                         {feature.basic === true ? (
                           <Check className="w-5 h-5 text-green-500 mx-auto" />
                         ) : feature.basic === false ? (
@@ -92,29 +92,20 @@ const Pricing = () => {
                         ) : (
                           <span>{feature.basic}</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center bg-flyy-50">
-                        {feature.growth === true ? (
+                      </TableCell>
+                      <TableCell className="px-6 py-4 whitespace-nowrap text-center bg-flyy-50">
+                        {feature.pro === true ? (
                           <Check className="w-5 h-5 text-green-500 mx-auto" />
-                        ) : feature.growth === false ? (
+                        ) : feature.pro === false ? (
                           <span className="text-gray-400">—</span>
                         ) : (
-                          <span>{feature.growth}</span>
+                          <span>{feature.pro}</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {feature.enterprise === true ? (
-                          <Check className="w-5 h-5 text-green-500 mx-auto" />
-                        ) : feature.enterprise === false ? (
-                          <span className="text-gray-400">—</span>
-                        ) : (
-                          <span>{feature.enterprise}</span>
-                        )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
         </div>

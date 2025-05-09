@@ -6,56 +6,46 @@ import { Check } from "lucide-react";
 const PricingSection = () => {
   const [isYearly, setIsYearly] = useState(false);
   
+  // Calculate savings percentage
+  const monthlyCost = 15;
+  const yearlyCost = 10;
+  const savingsPercentage = Math.round(((monthlyCost - yearlyCost) / monthlyCost) * 100);
+  
   const plans = [
     {
-      name: "Basic",
-      description: "Perfect for small businesses just getting started.",
-      monthlyPrice: 99,
-      yearlyPrice: 79,
+      name: "Hosting Basic",
+      description: "Everything you need to keep your website online and performing well.",
+      monthlyPrice: monthlyCost,
+      yearlyPrice: yearlyCost,
       features: [
-        "Responsive website (5 pages)",
-        "Basic SEO setup",
-        "Contact form",
-        "Mobile optimization",
-        "1 month of support",
+        "99.9% uptime guarantee",
+        "Fast global CDN",
+        "Basic SEO optimization",
+        "Automatic backups",
+        "SSL certificate included",
+        "24/7 infrastructure monitoring",
+        "1 GB storage",
       ],
       featured: false,
       cta: "Get Started",
     },
     {
-      name: "Growth",
-      description: "Ideal for growing businesses that need more features.",
-      monthlyPrice: 199,
-      yearlyPrice: 159,
+      name: "Hosting Pro",
+      description: "Enhanced features for growing businesses with higher traffic needs.",
+      monthlyPrice: monthlyCost * 2,
+      yearlyPrice: yearlyCost * 2,
       features: [
         "Everything in Basic",
-        "Up to 10 pages",
-        "Blog setup",
-        "Newsletter integration",
-        "E-commerce functionality (basic)",
-        "3 months of support & maintenance",
-        "Analytics setup",
+        "99.99% uptime guarantee",
+        "Advanced SEO tools",
+        "Priority support",
+        "Performance optimization",
+        "Daily backups",
+        "5 GB storage",
+        "Custom domain included",
       ],
       featured: true,
       cta: "Get Started",
-    },
-    {
-      name: "Enterprise",
-      description: "For established businesses requiring advanced solutions.",
-      monthlyPrice: 349,
-      yearlyPrice: 279,
-      features: [
-        "Everything in Growth",
-        "Unlimited pages",
-        "Custom features & integrations",
-        "Advanced e-commerce",
-        "AI recommendation engine",
-        "12 months of support & maintenance",
-        "Performance optimization",
-        "Security hardening",
-      ],
-      featured: false,
-      cta: "Contact Us",
     },
   ];
 
@@ -64,10 +54,10 @@ const PricingSection = () => {
       <div className="container mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="gradient-text">Simple Pricing</span>, No Hidden Fees
+            <span className="gradient-text">Hosting Plans</span>, Keep Your Site Running Smoothly
           </h2>
           <p className="text-gray-700 text-lg mb-8">
-            Choose the perfect plan for your business needs.
+            Reliable hosting with all the essential features you need.
           </p>
           
           <div className="flex items-center justify-center mb-8">
@@ -90,12 +80,12 @@ const PricingSection = () => {
               </div>
             </div>
             <span className={`ml-3 ${isYearly ? "font-medium text-flyy-800" : "text-gray-500"}`}>
-              Yearly <span className="text-flyy-600 font-medium">(Save 20%)</span>
+              Yearly <span className="text-flyy-600 font-medium">(Save {savingsPercentage}%)</span>
             </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <div 
               key={index} 
@@ -142,7 +132,7 @@ const PricingSection = () => {
         
         <div className="text-center mt-16 max-w-2xl mx-auto">
           <p className="text-lg text-gray-600">
-            Need a custom solution for your business?
+            Need a custom hosting solution for your business?
           </p>
           <Button className="mt-4 px-8 py-6 text-lg bg-flyy-800 hover:bg-flyy-900">
             Contact Us for Custom Pricing
