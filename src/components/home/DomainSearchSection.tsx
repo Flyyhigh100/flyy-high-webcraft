@@ -40,7 +40,8 @@ const DomainSearchSection = () => {
             extension: tld.extension,
             price: tld.price,
             available: response.available,
-            fallback: response.fallback || false
+            // Since the API response doesn't have a fallback property, we'll set it to false by default
+            fallback: false
           };
         } catch (err) {
           console.error(`Error checking ${domainName}:`, err);

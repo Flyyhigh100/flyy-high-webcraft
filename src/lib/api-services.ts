@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 
 // API key for WhoisXML API
@@ -30,7 +31,8 @@ const tryDirectApiCall = async (domain: string) => {
     return {
       domain,
       available: response.data.DomainInfo.domainAvailability === 'AVAILABLE',
-      status: response.data.DomainInfo.domainAvailability
+      status: response.data.DomainInfo.domainAvailability,
+      fallback: false // Adding fallback property to match the expected structure
     };
   } catch (error) {
     console.error('Direct API call failed:', error);
