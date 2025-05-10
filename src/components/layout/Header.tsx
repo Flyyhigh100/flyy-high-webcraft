@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -82,9 +83,7 @@ export function Header() {
                 <Link to="/login">
                   <Button variant="ghost">Sign In</Button>
                 </Link>
-                <Link to="/signup">
-                  <Button>Sign Up</Button>
-                </Link>
+                {/* Sign Up button removed */}
               </div>
             )}
           </nav>
@@ -157,9 +156,7 @@ export function Header() {
                     Sign In
                   </Button>
                 </Link>
-                <Link to="/signup" onClick={() => setMenuOpen(false)}>
-                  <Button className="w-full">Sign Up</Button>
-                </Link>
+                {/* Sign Up button removed from mobile menu */}
               </div>
             )}
           </nav>
