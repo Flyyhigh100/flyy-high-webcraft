@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
@@ -106,100 +104,94 @@ const caseStudies = [
 
 const Portfolio = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow">
-        <div className="bg-secondary/30 py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">Our Portfolio</h1>
-            <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto">
-              Explore our latest projects and see how we've helped businesses achieve their digital goals.
-            </p>
-          </div>
+    <>
+      <div className="bg-secondary/30 py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">Our Portfolio</h1>
+          <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto">
+            Explore our latest projects and see how we've helped businesses achieve their digital goals.
+          </p>
         </div>
-        
-        <div className="section bg-white">
-          <div className="container mx-auto">
-            <div className="grid grid-cols-1 gap-16">
-              {caseStudies.map((project, index) => (
-                <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
-                  <div className="bg-gray-100 border-b border-gray-300 p-2 flex items-center">
-                    <div className="flex space-x-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    </div>
-                  </div>
-                  <div className="grid md:grid-cols-2">
-                    <div className="aspect-auto md:aspect-square overflow-hidden">
-                      <img 
-                        src={project.imageUrl} 
-                        alt={project.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-8">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-flyy-600 text-sm font-medium">{project.category}</span>
-                        <span className="text-gray-500 text-sm">Client: {project.client}</span>
-                      </div>
-                      <h3 className="text-2xl font-bold mb-3">{project.title}</h3>
-                      <p className="text-gray-600 mb-6">{project.description}</p>
-                      
-                      <div className="mb-6">
-                        <h4 className="font-medium text-lg mb-2">Technologies:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {project.technologies.map((tech, index) => (
-                            <span key={index} className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full">
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="mb-6">
-                        <h4 className="font-medium text-lg mb-2">Results:</h4>
-                        <ul className="list-disc list-inside space-y-1 text-gray-600">
-                          {project.results.map((result, index) => (
-                            <li key={index}>{result}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      {project.websiteUrl !== "#" && (
-                        <a 
-                          href={project.websiteUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center bg-flyy-600 text-white px-6 py-3 rounded-md hover:bg-flyy-700 transition-colors w-full md:w-auto"
-                        >
-                          Visit Live Website <ExternalLink className="ml-2 w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
+      </div>
+      
+      <div className="section bg-white">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 gap-16">
+            {caseStudies.map((project, index) => (
+              <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
+                <div className="bg-gray-100 border-b border-gray-300 p-2 flex items-center">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="grid md:grid-cols-2">
+                  <div className="aspect-auto md:aspect-square overflow-hidden">
+                    <img 
+                      src={project.imageUrl} 
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-8">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-flyy-600 text-sm font-medium">{project.category}</span>
+                      <span className="text-gray-500 text-sm">Client: {project.client}</span>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-3">{project.title}</h3>
+                    <p className="text-gray-600 mb-6">{project.description}</p>
+                    
+                    <div className="mb-6">
+                      <h4 className="font-medium text-lg mb-2">Technologies:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {project.technologies.map((tech, index) => (
+                          <span key={index} className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <h4 className="font-medium text-lg mb-2">Results:</h4>
+                      <ul className="list-disc list-inside space-y-1 text-gray-600">
+                        {project.results.map((result, index) => (
+                          <li key={index}>{result}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    {project.websiteUrl !== "#" && (
+                      <a 
+                        href={project.websiteUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center bg-flyy-600 text-white px-6 py-3 rounded-md hover:bg-flyy-700 transition-colors w-full md:w-auto"
+                      >
+                        Visit Live Website <ExternalLink className="ml-2 w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
 
-        <div className="bg-flyy-50 py-16">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Want to See More?</h2>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              We have more projects we'd love to share. Contact us to request our extended portfolio or discuss your project needs.
-            </p>
-            <Button className="bg-flyy-600 hover:bg-flyy-700">
-              Contact Us
-            </Button>
-          </div>
+      <div className="bg-flyy-50 py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">Want to See More?</h2>
+          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            We have more projects we'd love to share. Contact us to request our extended portfolio or discuss your project needs.
+          </p>
+          <Button className="bg-flyy-600 hover:bg-flyy-700">
+            Contact Us
+          </Button>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 
