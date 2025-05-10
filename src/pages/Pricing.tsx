@@ -1,8 +1,8 @@
-
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PricingSection from '@/components/home/PricingSection';
+import DomainSearchSection from '@/components/home/DomainSearchSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import CTASection from '@/components/home/CTASection';
@@ -64,6 +64,8 @@ const Pricing = () => {
             </p>
           </div>
         </div>
+        
+        <DomainSearchSection />
         
         <PricingSection />
         
