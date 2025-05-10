@@ -12,12 +12,14 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AdminRoute } from "./components/auth/AdminRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Layout } from "./components/layout/Layout";
 
@@ -54,6 +56,14 @@ const App = () => (
               <Route element={<Layout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 {/* Add more protected routes here */}
+              </Route>
+            </Route>
+            
+            {/* Admin routes */}
+            <Route element={<AdminRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                {/* Add more admin routes here */}
               </Route>
             </Route>
             

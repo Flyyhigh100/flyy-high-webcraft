@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
   const [saveLoading, setSaveLoading] = useState(false);
   
   if (isLoading) {
@@ -30,8 +31,21 @@ export default function Dashboard() {
   
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-      <p className="text-gray-500 mb-8">Manage your account and website settings</p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-gray-500">Manage your account and website settings</p>
+        </div>
+        
+        {isAdmin && (
+          <Link to="/admin">
+            <Button className="bg-purple-600 hover:bg-purple-700">
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Admin Dashboard
+            </Button>
+          </Link>
+        )}
+      </div>
       
       <Tabs defaultValue="account" className="w-full">
         <TabsList className="mb-8">
