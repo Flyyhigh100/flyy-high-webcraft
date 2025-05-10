@@ -16,7 +16,7 @@ const domainTLDs = [
 
 const DomainSearchSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<{ name: string; extension: string; price: number; available: boolean }[]>([]);
+  const [searchResults, setSearchResults] = useState<{ name: string; extension: string; price: number; available: boolean; fallback?: boolean }[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +40,7 @@ const DomainSearchSection = () => {
             extension: tld.extension,
             price: tld.price,
             available: response.available,
+            fallback: response.fallback || false
           };
         } catch (err) {
           console.error(`Error checking ${domainName}:`, err);
@@ -49,6 +50,7 @@ const DomainSearchSection = () => {
             extension: tld.extension,
             price: tld.price,
             available: false,
+            fallback: true // This is a fallback since we couldn't check it
           };
         }
       });
@@ -143,12 +145,12 @@ const DomainSearchSection = () => {
                               {result.available ? (
                                 <>
                                   <Check className="w-4 h-4 mr-1" /> 
-                                  Available
+                                  {result.fallback ? "Likely Available" : "Available"}
                                 </>
                               ) : (
                                 <>
                                   <X className="w-4 h-4 mr-1" /> 
-                                  Unavailable
+                                  {result.fallback ? "Likely Unavailable" : "Unavailable"}
                                 </>
                               )}
                             </span>
@@ -162,6 +164,12 @@ const DomainSearchSection = () => {
                               </p>
                             )}
                           </div>
+                          
+                          {result.fallback && (
+                            <div className="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                              Note: Availability is estimated. Contact us to confirm.
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
