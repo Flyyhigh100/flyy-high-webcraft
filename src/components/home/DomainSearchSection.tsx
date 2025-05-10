@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search } from "lucide-react";
+import { Search, Check, X } from "lucide-react";
 
 // Domain TLD options with their yearly prices
 const domainTLDs = [
@@ -61,11 +61,11 @@ const DomainSearchSection = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="flex-grow text-lg py-6 px-6 h-auto"
+              className="flex-grow text-lg py-6 px-6 h-auto shadow-sm"
             />
             <Button 
               onClick={handleSearch}
-              className="bg-flyy-600 hover:bg-flyy-700 transition-all h-auto py-6 px-8"
+              className="bg-accent hover:bg-accent/90 text-white transition-all h-auto py-6 px-8 font-medium text-lg shadow-sm"
             >
               <Search className="mr-2 h-5 w-5" />
               Search Domain
@@ -73,50 +73,62 @@ const DomainSearchSection = () => {
           </div>
 
           {hasSearched && (
-            <div className="mt-10">
+            <div className="mt-10 animate-fadeIn">
               <h3 className="text-xl font-semibold mb-4">Domain Availability</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {searchResults.map((result) => (
                   <Card 
                     key={result.name + result.extension}
-                    className={`overflow-hidden transition-all duration-300 hover:shadow-lg border-2 ${
-                      result.available ? "border-flyy-100" : "border-gray-100"
+                    className={`overflow-hidden transition-all duration-300 hover:shadow-lg border ${
+                      result.available ? "border-green-100" : "border-gray-100"
                     }`}
                   >
                     <CardContent className="p-6">
                       <div className="flex justify-between items-center mb-4">
                         <h4 className="font-bold text-lg">{result.name}{result.extension}</h4>
                         <span 
-                          className={`text-sm px-3 py-1 rounded-full ${
+                          className={`text-sm px-3 py-1 rounded-full flex items-center ${
                             result.available 
                               ? "bg-green-100 text-green-700" 
                               : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          {result.available ? "Available" : "Unavailable"}
+                          {result.available ? (
+                            <>
+                              <Check className="w-4 h-4 mr-1" /> 
+                              Available
+                            </>
+                          ) : (
+                            <>
+                              <X className="w-4 h-4 mr-1" /> 
+                              Unavailable
+                            </>
+                          )}
                         </span>
                       </div>
                       
                       <div className="flex justify-between items-center">
-                        <p className="text-lg font-medium">${result.price}/year</p>
-                        <Button 
-                          className={result.available 
-                            ? "bg-flyy-600 hover:bg-flyy-700" 
-                            : "bg-gray-300 cursor-not-allowed"}
-                          disabled={!result.available}
-                        >
-                          {result.available ? "Buy Now" : "Taken"}
-                        </Button>
+                        <p className="text-md text-gray-600">${result.price}/year</p>
+                        {result.available && (
+                          <p className="text-sm text-green-700 font-medium">
+                            Included with hosting
+                          </p>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
               
-              <p className="text-gray-600 text-sm mt-6 text-center">
-                All domain purchases include free WHOIS privacy protection and easy connection to your site.
-              </p>
+              <div className="mt-6 text-center space-y-4">
+                <p className="text-gray-700">
+                  We'll register this domain for you as part of your hosting – no extra work needed.
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Domain registration is included free with yearly hosting plans. We'll take care of everything.
+                </p>
+              </div>
             </div>
           )}
         </div>

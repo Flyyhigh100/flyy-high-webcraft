@@ -99,6 +99,10 @@ export default {
 					'50%': {
 						'background-position': '100% 50%'
 					},
+				},
+				'fadeIn': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
 				}
 			},
 			animation: {
@@ -106,6 +110,7 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'float': 'float 3s ease-in-out infinite',
 				'gradient-x': 'gradient-x 15s ease infinite',
+				'fadeIn': 'fadeIn 0.5s ease-in-out',
 			},
 			backgroundImage: {
 				'hero-pattern': "url('/images/hero-bg.svg')",
