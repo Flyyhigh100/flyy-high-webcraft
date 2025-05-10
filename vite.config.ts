@@ -6,35 +6,14 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    port: 4000,
-    strictPort: true,
-    host: '127.0.0.1',
-    open: true, // automatically open browser
+    port: 5173,
+    strictPort: false,
+    host: 'localhost',
     proxy: {
       '/api/domain-check': {
-        target: 'https://domain-availability.whoisxmlapi.com/api/v1',
+        target: 'http://localhost:3000/api/domain-check',
         changeOrigin: true,
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq, req) => {
-            // Add the API key to the request
-            const url = new URL(req.url, 'http://localhost');
-            url.searchParams.append('apiKey', process.env.WHOIS_API_KEY || 'at_OismLMJ7VEed3qZ9bUIEe9zMJDC6T');
-            
-            // Rewrite the URL to include the API key
-            proxyReq.path = url.pathname + url.search;
-          });
-        },
-        rewrite: (path) => {
-          // Extract the domain parameter from the original request
-          const url = new URL(path, 'http://localhost');
-          const domain = url.searchParams.get('domain');
-          
-          // Create a new URL for the WhoisXML API
-          if (domain) {
-            return `?domainName=${domain}`;
-          }
-          return path;
-        },
+        rewrite: () => '',
       },
     },
   },
