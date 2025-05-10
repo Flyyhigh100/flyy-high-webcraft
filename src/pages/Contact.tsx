@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -12,7 +11,6 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
     company: '',
     subject: '',
     message: '',
@@ -40,7 +38,6 @@ const Contact = () => {
       setFormData({
         name: '',
         email: '',
-        phone: '',
         company: '',
         subject: '',
         message: '',
@@ -104,19 +101,6 @@ const Contact = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
-                      </label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="(123) 456-7890"
-                        className="w-full"
-                      />
-                    </div>
-                    <div>
                       <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
                         Company
                       </label>
@@ -129,26 +113,25 @@ const Contact = () => {
                         className="w-full"
                       />
                     </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject *
-                    </label>
-                    <select
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      required
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-flyy-500 focus:border-flyy-500"
-                    >
-                      <option value="" disabled>Select a subject</option>
-                      <option value="New Project">New Project</option>
-                      <option value="Website Redesign">Website Redesign</option>
-                      <option value="Maintenance Request">Maintenance Request</option>
-                      <option value="General Inquiry">General Inquiry</option>
-                    </select>
+                    <div>
+                      <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                        Subject *
+                      </label>
+                      <select
+                        id="subject"
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleChange}
+                        required
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-flyy-500 focus:border-flyy-500"
+                      >
+                        <option value="" disabled>Select a subject</option>
+                        <option value="New Project">New Project</option>
+                        <option value="Website Redesign">Website Redesign</option>
+                        <option value="Maintenance Request">Maintenance Request</option>
+                        <option value="General Inquiry">General Inquiry</option>
+                      </select>
+                    </div>
                   </div>
                   
                   <div>
@@ -182,25 +165,9 @@ const Contact = () => {
                 <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-lg font-medium mb-2">Address</h3>
-                    <address className="not-italic text-gray-600">
-                      <p>123 Web Dev Lane</p>
-                      <p>San Francisco, CA 94103</p>
-                      <p>United States</p>
-                    </address>
-                  </div>
-                  
-                  <div>
                     <h3 className="text-lg font-medium mb-2">Email</h3>
                     <a href="mailto:info@flyyhighai.com" className="text-flyy-600 hover:underline">
                       info@flyyhighai.com
-                    </a>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">Phone</h3>
-                    <a href="tel:+15551234567" className="text-flyy-600 hover:underline">
-                      (555) 123-4567
                     </a>
                   </div>
                   
@@ -239,15 +206,12 @@ const Contact = () => {
                   </div>
                 </div>
                 
-                {/* Map placeholder */}
-                <div className="mt-8 bg-gray-100 rounded-lg h-64 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <p>Map placeholder</p>
-                  </div>
+                {/* Remove map placeholder */}
+                <div className="mt-8 bg-primary/10 rounded-lg p-8 text-center">
+                  <h3 className="text-lg font-medium mb-2">Get in Touch</h3>
+                  <p className="text-gray-600">
+                    We'll get back to you within 24 hours during business days.
+                  </p>
                 </div>
               </div>
             </div>

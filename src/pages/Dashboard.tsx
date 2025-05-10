@@ -1,165 +1,209 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
-import React, { useState } from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Check, X, AlertCircle } from 'lucide-react';
-import DomainManager from '@/components/dashboard/DomainManager';
-import PaymentHistory from '@/components/dashboard/PaymentHistory';
-import PlanManager from '@/components/dashboard/PlanManager';
-import { useToast } from '@/hooks/use-toast';
-
-const Dashboard = () => {
-  // In a real app, this would come from your backend/database
-  const [currentPlan, setCurrentPlan] = useState({
-    name: 'Hosting Basic',
-    price: '$15/month',
-    renewalDate: '2025-06-09',
-    status: 'active',
-  });
-
-  const { toast } = useToast();
+export default function Dashboard() {
+  const { user, isLoading } = useAuth();
+  const [saveLoading, setSaveLoading] = useState(false);
   
-  const handleUpgrade = () => {
-    toast({
-      title: "Upgrade initialized",
-      description: "You'll be redirected to payment page to complete the upgrade.",
-    });
+  if (isLoading) {
+    return (
+      <div className="container mx-auto flex items-center justify-center min-h-[70vh]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  const handleSaveSettings = () => {
+    setSaveLoading(true);
+    // Simulate saving settings
+    setTimeout(() => {
+      setSaveLoading(false);
+    }, 1500);
   };
-
+  
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <div className="container mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+      <p className="text-gray-500 mb-8">Manage your account and website settings</p>
       
-      <main className="flex-grow">
-        <div className="bg-secondary/30 py-8 md:py-12">
-          <div className="container mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Hosting Dashboard</h1>
-            <p className="text-gray-600">Manage your website hosting services</p>
-          </div>
-        </div>
+      <Tabs defaultValue="account" className="w-full">
+        <TabsList className="mb-8">
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="websites">My Websites</TabsTrigger>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
         
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Account Summary */}
-            <Card className="lg:col-span-3">
-              <CardHeader className="bg-gray-50">
-                <CardTitle className="flex items-center justify-between">
-                  <span>Account Summary</span>
-                  <Badge className="bg-green-500">{currentPlan.status}</Badge>
-                </CardTitle>
+        <TabsContent value="account">
+          <div className="grid gap-8 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Information</CardTitle>
+                <CardDescription>
+                  Your personal account details
+                </CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Current Plan</h3>
-                    <p className="text-lg font-semibold">{currentPlan.name}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Monthly Fee</h3>
-                    <p className="text-lg font-semibold">{currentPlan.price}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Next Renewal</h3>
-                    <p className="text-lg font-semibold">{currentPlan.renewalDate}</p>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" value={user?.email || ''} disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input id="name" defaultValue="" placeholder="Enter your name" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company (Optional)</Label>
+                  <Input id="company" defaultValue="" placeholder="Enter your company name" />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSaveSettings} disabled={saveLoading}>
+                  {saveLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>
+                  Manage your password and security options
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button variant="outline" className="w-full">
+                  Change Password
+                </Button>
+                
+                <div className="space-y-2 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Two-Factor Authentication</Label>
+                      <p className="text-sm text-gray-500">
+                        Add an extra layer of security to your account
+                      </p>
+                    </div>
+                    <Switch defaultChecked={false} />
                   </div>
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Main Dashboard Tabs */}
-            <div className="lg:col-span-3">
-              <Tabs defaultValue="plan" className="w-full">
-                <TabsList className="w-full justify-start mb-6 bg-transparent border-b border-gray-200 rounded-none">
-                  <TabsTrigger value="plan" className="text-base py-3 px-6 data-[state=active]:border-b-2 data-[state=active]:border-flyy-600 rounded-none data-[state=active]:shadow-none">
-                    My Plan
-                  </TabsTrigger>
-                  <TabsTrigger value="domains" className="text-base py-3 px-6 data-[state=active]:border-b-2 data-[state=active]:border-flyy-600 rounded-none data-[state=active]:shadow-none">
-                    Domains
-                  </TabsTrigger>
-                  <TabsTrigger value="billing" className="text-base py-3 px-6 data-[state=active]:border-b-2 data-[state=active]:border-flyy-600 rounded-none data-[state=active]:shadow-none">
-                    Billing History
-                  </TabsTrigger>
-                  <TabsTrigger value="settings" className="text-base py-3 px-6 data-[state=active]:border-b-2 data-[state=active]:border-flyy-600 rounded-none data-[state=active]:shadow-none">
-                    Settings
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="plan">
-                  <PlanManager currentPlan={currentPlan} onUpgrade={handleUpgrade} />
-                </TabsContent>
-                
-                <TabsContent value="domains">
-                  <DomainManager />
-                </TabsContent>
-                
-                <TabsContent value="billing">
-                  <PaymentHistory />
-                </TabsContent>
-                
-                <TabsContent value="settings">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Account Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <div className="flex items-start">
-                            <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5 mr-3" />
-                            <div>
-                              <h4 className="font-medium text-yellow-800">Authentication Not Enabled</h4>
-                              <p className="text-yellow-700 text-sm mt-1">
-                                This dashboard is currently in demonstration mode without secure authentication. 
-                                Authentication will be added in a future update for secure account access.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <h3 className="font-medium mb-2">Account Information</h3>
-                            <div className="space-y-2">
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">Name</span>
-                                <span>Demo User</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">Email</span>
-                                <span>demo@example.com</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <h3 className="font-medium mb-2">Preferences</h3>
-                            <div className="space-y-2">
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">Email Notifications</span>
-                                <span className="text-gray-400">Not configured</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <Button className="mt-4" variant="outline">Update Profile Information</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
           </div>
-        </div>
-      </main>
-      
-      <Footer />
+        </TabsContent>
+        
+        <TabsContent value="websites">
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Your Websites</CardTitle>
+              <CardDescription>
+                Manage your websites and domains
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <p className="text-gray-500 mb-4">You don't have any websites yet.</p>
+                <Button>Create Your First Website</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="billing">
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Billing Information</CardTitle>
+              <CardDescription>
+                Manage your subscription and payment methods
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Current Plan</h3>
+                  <div className="bg-primary/10 p-4 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">Free Plan</p>
+                        <p className="text-sm text-gray-500">Basic features and functionality</p>
+                      </div>
+                      <Button>Upgrade</Button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Payment Methods</h3>
+                  <p className="text-gray-500">No payment methods added yet.</p>
+                  <Button variant="outline" className="mt-4">
+                    Add Payment Method
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="settings">
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Notification Settings</CardTitle>
+              <CardDescription>
+                Manage how you receive notifications
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Email Notifications</Label>
+                    <p className="text-sm text-gray-500">
+                      Receive updates and alerts via email
+                    </p>
+                  </div>
+                  <Switch defaultChecked={true} />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Marketing Updates</Label>
+                    <p className="text-sm text-gray-500">
+                      Receive tips, special offers, and updates
+                    </p>
+                  </div>
+                  <Switch defaultChecked={false} />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleSaveSettings} disabled={saveLoading}>
+                {saveLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-export default Dashboard;
+}
