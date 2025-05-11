@@ -5,6 +5,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { X, Menu, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Define a proper type for navigation links that includes optional icon
+interface NavLink {
+  href: string;
+  label: string;
+  icon?: React.ElementType; // Make icon optional
+}
+
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
@@ -27,7 +34,7 @@ const Navbar = () => {
   }, [isAdmin, user]);
 
   // Update the links array to include the dashboard link
-  const links = [
+  const links: NavLink[] = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
     { href: "/portfolio", label: "Portfolio" },
@@ -36,7 +43,7 @@ const Navbar = () => {
   ];
 
   // Auth related links that change based on authentication status
-  const authLinks = user ? [
+  const authLinks: NavLink[] = user ? [
     { href: "/dashboard", label: "Dashboard" },
     ...(isAdmin ? [{ href: "/admin", label: "Admin Dashboard", icon: Shield }] : [])
   ] : [];
