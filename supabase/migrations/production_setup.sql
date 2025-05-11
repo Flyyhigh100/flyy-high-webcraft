@@ -17,13 +17,17 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 -- Automatically create profiles for new users
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   INSERT INTO public.profiles (id, user_id, email)
   VALUES (NEW.id, NEW.id, NEW.email);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Create trigger for new user registration
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
