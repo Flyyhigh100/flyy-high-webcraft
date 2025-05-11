@@ -19,6 +19,9 @@ type AuthContextType = {
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Known admin email - hardcoded for production safety
+const ADMIN_EMAIL = 'flyyhigh824@gmail.com';
+
 // Provider component that wraps your app and makes auth object available to any child component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -33,12 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Checking admin status for user:', user.email);
       
-      // TEMPORARY: Force admin to true for testing until DB is set up properly
-      console.log('⚠️ FORCING ADMIN STATUS TO TRUE FOR TESTING');
-      setIsAdmin(true);
-      return true;
+      // PRODUCTION FIX: Directly check if email matches known admin email
+      if (user.email === ADMIN_EMAIL) {
+        console.log('Admin access granted via direct email match');
+        setIsAdmin(true);
+        return true;
+      }
       
-      /*
       // Try querying the profiles table to check admin role
       const { data, error } = await supabase
         .from('profiles')
@@ -50,6 +54,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('Error checking admin status:', error);
+        
+        // Even if there's an error, grant admin access to the known admin email
+        if (user.email === ADMIN_EMAIL) {
+          console.log('Admin fallback: Granting access despite DB error');
+          setIsAdmin(true);
+          return true;
+        }
+        
         return false;
       }
       
@@ -58,9 +70,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Is user admin?', isUserAdmin);
       setIsAdmin(isUserAdmin);
       return isUserAdmin;
-      */
     } catch (err) {
       console.error('Error checking admin status:', err);
+      
+      // Even if there's an exception, grant admin access to the known admin email
+      if (user.email === ADMIN_EMAIL) {
+        console.log('Admin exception handler: Granting access despite error');
+        setIsAdmin(true);
+        return true;
+      }
+      
       return false;
     }
   };
