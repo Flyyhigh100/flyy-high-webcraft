@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -110,13 +111,18 @@ export default function AdminDashboard() {
             const { data: paymentsData, error: paymentsError } = await supabase.rpc<Payment[]>('get_completed_payments');
             
             if (!paymentsError && paymentsData) {
-              setPayments(paymentsData);
+              // Ensure we're working with a flat array of Payment objects
+              const paymentsList: Payment[] = Array.isArray(paymentsData) ? 
+                (Array.isArray(paymentsData[0]) ? paymentsData.flat() : paymentsData) : 
+                [];
+              
+              setPayments(paymentsList);
               
               // Calculate revenue data
-              if (paymentsData.length > 0) {
+              if (paymentsList.length > 0) {
                 const monthlyRevenue = Array(12).fill(0);
                 
-                paymentsData.forEach((payment: Payment) => {
+                paymentsList.forEach((payment: Payment) => {
                   const date = new Date(payment.payment_date);
                   const month = date.getMonth();
                   monthlyRevenue[month] += payment.amount;
@@ -136,7 +142,12 @@ export default function AdminDashboard() {
             const { data: upcomingData, error: upcomingError } = await supabase.rpc<Payment[]>('get_upcoming_payments');
             
             if (!upcomingError && upcomingData) {
-              setUpcomingPayments(upcomingData);
+              // Ensure we're working with a flat array of Payment objects
+              const upcomingList: Payment[] = Array.isArray(upcomingData) ? 
+                (Array.isArray(upcomingData[0]) ? upcomingData.flat() : upcomingData) : 
+                [];
+              
+              setUpcomingPayments(upcomingList);
             }
           } else {
             console.log('Payments table does not exist yet');
