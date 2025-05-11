@@ -41,8 +41,8 @@ export default function AdminAccess() {
     setMessage("Granting admin access...");
     
     try {
-      // Make sure the profiles table exists - we'll cast the function name to any to avoid type issues
-      await supabase.rpc('create_profiles_if_not_exists' as any);
+      // Make sure the profiles table exists - using proper typing
+      await supabase.rpc('create_profiles_if_not_exists', {});
       
       // Update or insert the profile with admin role using a properly typed approach
       const { error } = await supabase
@@ -52,7 +52,7 @@ export default function AdminAccess() {
           user_id: user.id,
           email: user.email,
           role: 'admin'
-        } as any);
+        });
       
       if (error) {
         console.error("Database error:", error);

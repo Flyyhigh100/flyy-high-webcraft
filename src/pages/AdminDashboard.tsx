@@ -99,17 +99,18 @@ export default function AdminDashboard() {
         
         try {
           // Check if payments table exists before querying
-          const { data: tableExists } = await supabase
-            .rpc('table_exists', { table_name: 'payments', schema_name: 'public' })
-            .single();
+          const { data, error } = await supabase
+            .rpc<boolean>('table_exists', { table_name: 'payments', schema_name: 'public' });
+          
+          const tableExists = data === true;
           
           // Only fetch payments if the table exists
           if (tableExists) {
             // Fetch completed payments
-            const { data: paymentsData } = await supabase.rpc('get_completed_payments');
+            const { data: paymentsData, error: paymentsError } = await supabase.rpc<Payment[]>('get_completed_payments');
             
-            if (paymentsData) {
-              setPayments(paymentsData as Payment[]);
+            if (!paymentsError && paymentsData) {
+              setPayments(paymentsData);
               
               // Calculate revenue data
               if (paymentsData.length > 0) {
@@ -132,10 +133,10 @@ export default function AdminDashboard() {
             }
             
             // Fetch upcoming payments
-            const { data: upcomingData } = await supabase.rpc('get_upcoming_payments');
+            const { data: upcomingData, error: upcomingError } = await supabase.rpc<Payment[]>('get_upcoming_payments');
             
-            if (upcomingData) {
-              setUpcomingPayments(upcomingData as Payment[]);
+            if (!upcomingError && upcomingData) {
+              setUpcomingPayments(upcomingData);
             }
           } else {
             console.log('Payments table does not exist yet');
@@ -241,7 +242,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                    <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold">${payments.reduce((sum, payment) => sum + payment.amount, 0).toFixed(2)}</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-green-500" />
                 </div>
