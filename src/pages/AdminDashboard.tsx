@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -101,10 +100,7 @@ export default function AdminDashboard() {
         try {
           // Check if payments table exists before querying
           const { data: tableExists } = await supabase
-            .from('information_schema.tables')
-            .select('table_name')
-            .eq('table_name', 'payments')
-            .eq('table_schema', 'public')
+            .rpc('table_exists', { table_name: 'payments', schema_name: 'public' })
             .single();
           
           // Only fetch payments if the table exists

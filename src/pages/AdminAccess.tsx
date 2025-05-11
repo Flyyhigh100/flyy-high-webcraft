@@ -41,8 +41,8 @@ export default function AdminAccess() {
     setMessage("Granting admin access...");
     
     try {
-      // Make sure the profiles table exists - use a type assertion to avoid the TS error
-      await supabase.rpc('create_profiles_if_not_exists');
+      // Make sure the profiles table exists - we'll cast the function name to any to avoid type issues
+      await supabase.rpc('create_profiles_if_not_exists' as any);
       
       // Update or insert the profile with admin role using a properly typed approach
       const { error } = await supabase
