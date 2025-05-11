@@ -31,10 +31,10 @@ BEGIN
             'id', gen_random_uuid(),
             'user_id', auth.uid(),
             'user_email', (SELECT email FROM auth.users WHERE id = auth.uid()),
-            'amount', 19.99,
+            'amount', 29.99,
             'status', 'completed',
-            'payment_date', (now() - interval '1 month')::text,
-            'plan', 'Basic Plan'
+            'payment_date', (now() - interval '7 days')::text,
+            'plan', 'Premium Plan'
         )
         WHERE auth.uid() IS NOT NULL
         UNION ALL
@@ -42,10 +42,10 @@ BEGIN
             'id', gen_random_uuid(),
             'user_id', auth.uid(),
             'user_email', (SELECT email FROM auth.users WHERE id = auth.uid()),
-            'amount', 49.99,
+            'amount', 19.99,
             'status', 'completed',
-            'payment_date', (now() - interval '2 months')::text,
-            'plan', 'Premium Plan'
+            'payment_date', (now() - interval '14 days')::text,
+            'plan', 'Basic Plan'
         )
         WHERE auth.uid() IS NOT NULL;
     END IF;

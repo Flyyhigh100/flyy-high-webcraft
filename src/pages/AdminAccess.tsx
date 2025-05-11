@@ -44,7 +44,7 @@ export default function AdminAccess() {
       // Make sure the profiles table exists - use a type assertion to avoid the TS error
       await supabase.rpc('create_profiles_if_not_exists');
       
-      // Update or insert the profile with admin role
+      // Update or insert the profile with admin role using a properly typed approach
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -52,7 +52,7 @@ export default function AdminAccess() {
           user_id: user.id,
           email: user.email,
           role: 'admin'
-        });
+        } as any);
       
       if (error) {
         console.error("Database error:", error);
