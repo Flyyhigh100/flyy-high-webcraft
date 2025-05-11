@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +17,14 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Debug log to track admin status in the Header
+  useEffect(() => {
+    if (user) {
+      console.log("Header: Current user:", user.email, "isAdmin:", isAdmin);
+    }
+  }, [user, isAdmin]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -46,6 +54,19 @@ export function Header() {
             <Link to="/contact" className="text-gray-600 hover:text-primary">
               Contact
             </Link>
+            
+            {/* Admin Dashboard Link - Always visible for admins */}
+            {isAdmin && (
+              <Link 
+                to="/admin" 
+                className={`flex items-center text-purple-600 hover:text-purple-800 font-semibold ${
+                  location.pathname === '/admin' ? 'border-b-2 border-purple-600' : ''
+                }`}
+              >
+                <Shield className="mr-1 h-4 w-4" />
+                Admin
+              </Link>
+            )}
             
             {/* Auth Links - show different options based on authentication state */}
             {user ? (
@@ -149,9 +170,10 @@ export function Header() {
                 {isAdmin && (
                   <Link
                     to="/admin"
-                    className="block py-2 text-gray-600 hover:text-primary font-medium"
+                    className="flex items-center py-2 text-purple-600 hover:text-purple-800 font-medium"
                     onClick={() => setMenuOpen(false)}
                   >
+                    <Shield className="mr-2 h-4 w-4" />
                     Admin Dashboard
                   </Link>
                 )}

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +16,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
 
   useEffect(() => {
     console.log("AdminRoute: Starting admin access check");
+    console.log("Current auth state - isAdmin:", isAdmin, "User:", user?.email);
     
     const verifyAccess = async () => {
       setIsCheckingAccess(true);
@@ -39,6 +41,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
         }
         
         // Method 2: Check isAdmin state from AuthContext
+        console.log('AdminRoute: Checking isAdmin state:', isAdmin);
         if (isAdmin) {
           console.log('AdminRoute: Admin access granted via AuthContext isAdmin state');
           setHasAdminAccess(true);
@@ -47,7 +50,9 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
         }
         
         // Method 3: Force a fresh check of admin status from AuthContext
+        console.log('AdminRoute: Running refreshed admin status check');
         const refreshedAdminStatus = await checkAdminStatus();
+        console.log('AdminRoute: Refreshed admin status result:', refreshedAdminStatus);
         if (refreshedAdminStatus) {
           console.log('AdminRoute: Admin access granted via refreshed admin status');
           setHasAdminAccess(true);
@@ -57,6 +62,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
         
         // Method 4: Check localStorage fallback
         const localStorageAdmin = localStorage.getItem('flyy_high_admin');
+        console.log('AdminRoute: Checking localStorage admin status:', localStorageAdmin);
         if (localStorageAdmin === 'true') {
           console.log('AdminRoute: Admin access granted via localStorage fallback');
           setHasAdminAccess(true);

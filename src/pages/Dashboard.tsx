@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +13,13 @@ import { Link } from "react-router-dom";
 export default function Dashboard() {
   const { user, isLoading, isAdmin } = useAuth();
   const [saveLoading, setSaveLoading] = useState(false);
+  
+  // Debug log for admin status
+  useEffect(() => {
+    if (user) {
+      console.log("Dashboard: User is authenticated, isAdmin status:", isAdmin);
+    }
+  }, [user, isAdmin]);
   
   if (isLoading) {
     return (
@@ -39,13 +47,31 @@ export default function Dashboard() {
         
         {isAdmin && (
           <Link to="/admin">
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              <ShieldCheck className="mr-2 h-4 w-4" />
+            <Button className="bg-purple-600 hover:bg-purple-700 text-lg px-6 py-2 flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5" />
               Admin Dashboard
             </Button>
           </Link>
         )}
       </div>
+      
+      {/* Admin Notice - Always show this for admins regardless of other UI issues */}
+      {isAdmin && (
+        <div className="mb-8 bg-purple-100 border border-purple-300 rounded-md p-4">
+          <div className="flex items-center">
+            <ShieldCheck className="h-6 w-6 text-purple-700 mr-3" />
+            <div>
+              <h3 className="font-medium text-purple-800">Admin Access Detected</h3>
+              <p className="text-purple-700">
+                You have administrator privileges. Access the admin dashboard by clicking the button above or by navigating to{" "}
+                <Link to="/admin" className="underline font-medium">
+                  /admin
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <Tabs defaultValue="account" className="w-full">
         <TabsList className="mb-8">
