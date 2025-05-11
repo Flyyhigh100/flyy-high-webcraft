@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -40,10 +41,10 @@ export default function AdminAccess() {
     setMessage("Granting admin access...");
     
     try {
-      // Make sure the profiles table exists
+      // Make sure the profiles table exists - using proper typing
       await supabase.rpc('create_profiles_if_not_exists', {});
       
-      // Update or insert the profile with admin role
+      // Update or insert the profile with admin role using a properly typed approach
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -121,4 +122,4 @@ export default function AdminAccess() {
       </Card>
     </div>
   );
-} 
+}

@@ -10,12 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, User, LogOut, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -60,7 +60,7 @@ export function Header() {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{user.email}</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        Logged in user
+                        {isAdmin ? "Admin User" : "Logged in user"}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -71,6 +71,14 @@ export function Header() {
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="w-full cursor-pointer">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -83,7 +91,6 @@ export function Header() {
                 <Link to="/login">
                   <Button variant="ghost">Sign In</Button>
                 </Link>
-                {/* Sign Up button removed */}
               </div>
             )}
           </nav>
@@ -139,6 +146,15 @@ export function Header() {
                 >
                   Dashboard
                 </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="block py-2 text-gray-600 hover:text-primary font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
                 <button
                   onClick={() => {
                     handleSignOut();
@@ -156,7 +172,6 @@ export function Header() {
                     Sign In
                   </Button>
                 </Link>
-                {/* Sign Up button removed from mobile menu */}
               </div>
             )}
           </nav>
@@ -164,4 +179,4 @@ export function Header() {
       </div>
     </header>
   );
-} 
+}

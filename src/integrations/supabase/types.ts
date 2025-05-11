@@ -40,6 +40,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       payments: {
         Row: {
@@ -72,6 +73,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       websites: {
         Row: {
@@ -98,6 +100,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
     }
     Views: {
