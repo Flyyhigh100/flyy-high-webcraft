@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Setup Instructions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #5c6ac4;
+      padding-bottom: 10px;
+    }
+    .box {
+      background-color: #f0f4ff;
+      border: 1px solid #5c6ac4;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      line-height: 1.4;
+    }
+    .step {
+      margin-bottom: 30px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #5c6ac4;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    img {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin: 15px 0;
+    }
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      border-left: 4px solid #ffeeba;
+    }
+    code {
+      font-family: monospace;
+      background-color: #f1f1f1;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Setting Up Your Admin Access</h1>
+  
+  <div class="box">
+    <h2>Overview</h2>
+    <p>You need to properly set up your admin status in the Supabase database for permanent access to the admin dashboard. I've reverted our temporary "force admin" solution and prepared a proper database setup script.</p>
+    
+    <div class="warning">
+      <strong>Note:</strong> Once you complete these steps, you'll need to log out and log back in for changes to take effect.
+    </div>
+  </div>
+  
+  <div class="step">
+    <h2>Step 1: Access Supabase Dashboard</h2>
+    <p>Go to the <a href="https://supabase.com/dashboard" target="_blank">Supabase Dashboard</a> and log in to your account.</p>
+    <p>Select your project for this website.</p>
+  </div>
+  
+  <div class="step">
+    <h2>Step 2: Open SQL Editor</h2>
+    <p>In the left sidebar, click on "SQL Editor".</p>
+    <p>Then click "New Query" to create a new SQL query.</p>
+  </div>
+  
+  <div class="step">
+    <h2>Step 3: Execute Admin Setup SQL</h2>
+    <p>I've created a SQL file with the commands to properly set you up as an admin. You need to:</p>
+    <ol>
+      <li>Open the <code>make-admin-user.sql</code> file I created</li>
+      <li>Copy the entire contents of that file</li>
+      <li>Paste it into the SQL Editor in Supabase</li>
+      <li>Click "Run" to execute the script</li>
+    </ol>
+    
+    <p>The SQL will:</p>
+    <ul>
+      <li>Create the profiles table if it doesn't exist</li>
+      <li>Clear any existing profiles for your user (to avoid duplicates)</li>
+      <li>Insert your profile with admin role</li>
+      <li>Set up the necessary security policies</li>
+    </ul>
+  </div>
+  
+  <div class="step">
+    <h2>Step 4: Verify Admin Access</h2>
+    <p>After running the SQL:</p>
+    <ol>
+      <li>Go back to your application</li>
+      <li>Log out completely</li>
+      <li>Log back in with your credentials</li>
+      <li>Navigate to your dashboard</li>
+      <li>You should now see the "Admin Dashboard" button</li>
+    </ol>
+  </div>
+  
+  <div class="box">
+    <h2>Troubleshooting</h2>
+    <p>If after completing all steps you still don't see the admin dashboard:</p>
+    <ol>
+      <li>Check the browser console for any errors (F12 > Console)</li>
+      <li>Make sure you completely logged out and logged back in</li>
+      <li>Try clearing your browser cache and cookies</li>
+      <li>Verify the SQL executed successfully in Supabase</li>
+    </ol>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Force Logout</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .box {
+      background-color: #f0f4ff;
+      border: 1px solid #5c6ac4;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    button {
+      background-color: #5c6ac4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Complete Logout Tool</h1>
+    <p>This tool will completely clear your Supabase authentication tokens and cookies.</p>
+    <button onclick="forceLogout()">Force Complete Logout</button>
+    <div id="status"></div>
+  </div>
+  
+  <div class="box">
+    <h2>Steps to resolve admin dashboard access:</h2>
+    <ol>
+      <li>Click the "Force Complete Logout" button above</li>
+      <li>When you see "Logged out successfully", go to <a href="http://localhost:5174/login" target="_blank">Login Page</a></li>
+      <li>Log in with your credentials (flyyhigh824@gmail.com)</li>
+      <li>Go to your <a href="http://localhost:5174/dashboard" target="_blank">Dashboard</a></li>
+      <li>You should now see the Admin Dashboard button</li>
+    </ol>
+  </div>
+
+  <script>
+    function forceLogout() {
+      // Clear all possible storage locations for Supabase tokens
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear cookies
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
+      // Update status
+      document.getElementById('status').innerHTML = '<p class="success">Logged out successfully! Now go to the login page and log in again.</p>';
+    }
+  </script>
+</body>
+</html> 

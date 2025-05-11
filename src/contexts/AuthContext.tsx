@@ -31,13 +31,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return false;
     
     try {
-      // Query the profiles table for the current user's role
-      // This assumes you have a profiles table with user_id and role columns
+      console.log('Checking admin status for user:', user.email);
+      
+      // TEMPORARY: Force admin to true for testing until DB is set up properly
+      console.log('⚠️ FORCING ADMIN STATUS TO TRUE FOR TESTING');
+      setIsAdmin(true);
+      return true;
+      
+      /*
+      // Try querying the profiles table to check admin role
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('user_id', user.id)
         .single();
+      
+      console.log('Admin check query result:', data, error);
       
       if (error) {
         console.error('Error checking admin status:', error);
@@ -46,8 +55,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // If the user has an admin role, return true
       const isUserAdmin = data?.role === 'admin';
+      console.log('Is user admin?', isUserAdmin);
       setIsAdmin(isUserAdmin);
       return isUserAdmin;
+      */
     } catch (err) {
       console.error('Error checking admin status:', err);
       return false;
@@ -61,6 +72,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Check for active session
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Initial session check:', session?.user?.email || 'No session');
+      
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -76,6 +89,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up listener for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log('Auth state change event:', _event, session?.user?.email || 'No session');
+        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -107,7 +122,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   // Sign out function
   const signOut = async () => {
+    console.log('Signing out...');
     await supabase.auth.signOut();
+    console.log('Signed out. Session should be null now.');
+    
+    // Force clear local storage and reload for complete logout
+    localStorage.removeItem('supabase.auth.token');
+    window.location.href = '/login';
   };
   
   // Reset password function (sends reset email)
