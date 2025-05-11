@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,8 +7,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserCircle, DollarSign, CalendarClock, BarChart4, AlertCircle } from "lucide-react";
-import { format } from "date-fns";
 import { Line } from "react-chartjs-2";
+import { UserProfile, Payment, RevenueData } from "@/types/admin";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -30,25 +31,6 @@ ChartJS.register(
   Legend
 );
 
-// Type definitions
-interface UserProfile {
-  id: string;
-  email: string;
-  role: string;
-  created_at: string;
-  last_sign_in?: string;
-}
-
-interface Payment {
-  id: string;
-  user_id: string;
-  user_email: string;
-  amount: number;
-  status: string;
-  payment_date: string;
-  plan: string;
-}
-
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -57,7 +39,7 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Revenue chart data
-  const revenueData = {
+  const initialRevenueData: RevenueData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [
       {
@@ -69,6 +51,8 @@ export default function AdminDashboard() {
       },
     ],
   };
+
+  const [revenueData, setRevenueData] = useState<RevenueData>(initialRevenueData);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -83,11 +67,12 @@ export default function AdminDashboard() {
         
         if (authUsers && authUsers.users) {
           // Format user data
-          const formattedUsers = authUsers.users.map(user => ({
+          const formattedUsers: UserProfile[] = authUsers.users.map(user => ({
             id: user.id,
             email: user.email || '',
             role: 'user', // Default role
             created_at: user.created_at || '',
+            user_id: user.id,
             last_sign_in: user.last_sign_in_at || '',
           }));
           
@@ -113,76 +98,62 @@ export default function AdminDashboard() {
           setUsers(formattedUsers);
         }
         
-        // Fetch payments data
-        const { data: paymentsData, error: paymentsError } = await supabase
-          .from('payments')
-          .select('*')
-          .eq('status', 'completed');
+        try {
+          // Check if payments table exists before querying
+          const { data: tableExists } = await supabase
+            .from('information_schema.tables')
+            .select('table_name')
+            .eq('table_name', 'payments')
+            .eq('table_schema', 'public')
+            .single();
           
-        if (!paymentsError && paymentsData) {
-          // Format payments with user emails
-          const formattedPayments = [];
-          
-          for (const payment of paymentsData) {
-            // Get user email
-            const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-            const email = userData?.user?.email || 'Unknown';
+          // Only fetch payments if the table exists
+          if (tableExists) {
+            // Fetch completed payments
+            const { data: paymentsData } = await supabase.rpc('get_completed_payments');
             
-            formattedPayments.push({
-              id: payment.id,
-              user_id: payment.user_id,
-              user_email: email,
-              amount: payment.amount,
-              status: payment.status,
-              payment_date: payment.payment_date,
-              plan: payment.plan
-            });
+            if (paymentsData) {
+              setPayments(paymentsData as Payment[]);
+              
+              // Calculate revenue data
+              if (paymentsData.length > 0) {
+                const monthlyRevenue = Array(12).fill(0);
+                
+                paymentsData.forEach((payment: Payment) => {
+                  const date = new Date(payment.payment_date);
+                  const month = date.getMonth();
+                  monthlyRevenue[month] += payment.amount;
+                });
+                
+                setRevenueData({
+                  ...initialRevenueData,
+                  datasets: [{
+                    ...initialRevenueData.datasets[0],
+                    data: monthlyRevenue
+                  }]
+                });
+              }
+            }
+            
+            // Fetch upcoming payments
+            const { data: upcomingData } = await supabase.rpc('get_upcoming_payments');
+            
+            if (upcomingData) {
+              setUpcomingPayments(upcomingData as Payment[]);
+            }
+          } else {
+            console.log('Payments table does not exist yet');
+            // Set empty arrays if table doesn't exist
+            setPayments([]);
+            setUpcomingPayments([]);
           }
-          
-          setPayments(formattedPayments);
-          
-          // Calculate revenue data
-          if (formattedPayments.length > 0) {
-            const monthlyRevenue = Array(12).fill(0);
-            
-            formattedPayments.forEach(payment => {
-              const date = new Date(payment.payment_date);
-              const month = date.getMonth();
-              monthlyRevenue[month] += payment.amount;
-            });
-            
-            revenueData.datasets[0].data = monthlyRevenue;
-          }
+        } catch (error) {
+          console.error('Error fetching payments:', error);
+          // Fallback to empty arrays
+          setPayments([]);
+          setUpcomingPayments([]);
         }
         
-        // Fetch upcoming payments
-        const { data: upcomingData, error: upcomingError } = await supabase
-          .from('payments')
-          .select('*')
-          .eq('status', 'upcoming');
-          
-        if (!upcomingError && upcomingData) {
-          // Format upcoming payments with user emails
-          const formattedUpcoming = [];
-          
-          for (const payment of upcomingData) {
-            // Get user email
-            const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-            const email = userData?.user?.email || 'Unknown';
-            
-            formattedUpcoming.push({
-              id: payment.id,
-              user_id: payment.user_id,
-              user_email: email,
-              amount: payment.amount,
-              status: payment.status,
-              payment_date: payment.payment_date,
-              plan: payment.plan
-            });
-          }
-          
-          setUpcomingPayments(formattedUpcoming);
-        }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -585,4 +556,4 @@ export default function AdminDashboard() {
       )}
     </div>
   );
-} 
+}
