@@ -9,17 +9,31 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Dashboard() {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading, isAdmin, checkAdminStatus } = useAuth();
   const [saveLoading, setSaveLoading] = useState(false);
+  const { toast } = useToast();
   
-  // Debug log for admin status
+  // Recheck admin status on mount
   useEffect(() => {
-    if (user) {
-      console.log("Dashboard: User is authenticated, isAdmin status:", isAdmin);
-    }
-  }, [user, isAdmin]);
+    const verifyAdminStatus = async () => {
+      if (user) {
+        const isUserAdmin = await checkAdminStatus();
+        console.log("Dashboard: Admin status verification result:", isUserAdmin);
+        
+        if (isUserAdmin) {
+          toast({
+            title: "Admin Access Available",
+            description: "You have administrator privileges. Access the admin dashboard from the button above.",
+          });
+        }
+      }
+    };
+    
+    verifyAdminStatus();
+  }, [user, checkAdminStatus, toast]);
   
   if (isLoading) {
     return (
@@ -45,6 +59,7 @@ export default function Dashboard() {
           <p className="text-gray-500">Manage your account and website settings</p>
         </div>
         
+        {/* SUPER PROMINENT ADMIN BUTTON IF ADMIN */}
         {isAdmin && (
           <Link to="/admin">
             <Button className="bg-purple-600 hover:bg-purple-700 text-lg px-6 py-2 flex items-center gap-2">
@@ -55,19 +70,26 @@ export default function Dashboard() {
         )}
       </div>
       
-      {/* Admin Notice - Always show this for admins regardless of other UI issues */}
+      {/* Admin Notice - VERY VISIBLE admin access notification */}
       {isAdmin && (
-        <div className="mb-8 bg-purple-100 border border-purple-300 rounded-md p-4">
+        <div className="mb-8 bg-purple-100 border-2 border-purple-300 rounded-md p-6">
           <div className="flex items-center">
-            <ShieldCheck className="h-6 w-6 text-purple-700 mr-3" />
+            <ShieldCheck className="h-8 w-8 text-purple-700 mr-3" />
             <div>
-              <h3 className="font-medium text-purple-800">Admin Access Detected</h3>
-              <p className="text-purple-700">
+              <h3 className="font-bold text-lg text-purple-800">Admin Access Detected</h3>
+              <p className="text-purple-700 text-md">
                 You have administrator privileges. Access the admin dashboard by clicking the button above or by navigating to{" "}
-                <Link to="/admin" className="underline font-medium">
+                <Link to="/admin" className="underline font-bold">
                   /admin
                 </Link>
               </p>
+              <div className="mt-3">
+                <Link to="/admin">
+                  <Button variant="outline" className="border-purple-400 text-purple-700 hover:bg-purple-200">
+                    Go to Admin Dashboard
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
