@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Status Check</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .status {
+      font-size: 1.2rem;
+      margin: 16px 0;
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+    .status.success {
+      background-color: #e6f7ee;
+      color: #0d6832;
+      border: 1px solid #b4e6c8;
+    }
+    .status.error {
+      background-color: #fdebeb;
+      color: #b91c1c;
+      border: 1px solid #fbbfbf;
+    }
+    .status.info {
+      background-color: #eef4ff;
+      color: #1e3a8a;
+      border: 1px solid #c7dbff;
+    }
+    button {
+      background-color: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #6d28d9;
+    }
+    .log {
+      background-color: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow: auto;
+    }
+    h1 {
+      color: #4b5563;
+    }
+    h2 {
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Status Check</h1>
+  
+  <div class="card">
+    <h2>Current Status</h2>
+    <div id="statusDisplay" class="status info">Checking authentication status...</div>
+    
+    <div id="actionsArea" style="display: none;">
+      <button id="checkAdminBtn">Check Admin Status</button>
+      <button id="goToAdmin">Go to Admin Dashboard</button>
+      <button id="forceMakeAdmin">Force Admin Status (localStorage)</button>
+      <button id="clearAdmin">Clear Admin Status</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Debug Log</h2>
+    <div id="logOutput" class="log">Initializing...</div>
+  </div>
+  
+  <script>
+    // Initialize Supabase client
+    const SUPABASE_URL = "https://wutyryaqlmgsbllnyoop.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHlyeWFxbG1nc2JsbG55b29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NDgwNTgsImV4cCI6MjA2MTEyNDA1OH0.3dlF73k20xg6VhEQPiPgbBt5UifuE3O0J_4SsQ_wnFc";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // Elements
+    const statusDisplay = document.getElementById('statusDisplay');
+    const actionsArea = document.getElementById('actionsArea');
+    const logOutput = document.getElementById('logOutput');
+    const checkAdminBtn = document.getElementById('checkAdminBtn');
+    const goToAdminBtn = document.getElementById('goToAdmin');
+    const forceMakeAdminBtn = document.getElementById('forceMakeAdmin');
+    const clearAdminBtn = document.getElementById('clearAdmin');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // Logging function
+    function log(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      logOutput.textContent += `\n[${timestamp}] ${message}`;
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+    
+    // Set status display
+    function setStatus(message, type) {
+      statusDisplay.textContent = message;
+      statusDisplay.className = `status ${type}`;
+    }
+    
+    // Check authentication status
+    async function checkAuth() {
+      log('Checking authentication status...');
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        log(`Error: ${error.message}`);
+        setStatus('Authentication error: ' + error.message, 'error');
+        return null;
+      }
+      
+      if (data && data.session) {
+        const user = data.session.user;
+        log(`Authenticated as: ${user.email}`);
+        setStatus(`Authenticated as: ${user.email}`, 'success');
+        actionsArea.style.display = 'block';
+        return user;
+      } else {
+        log('Not authenticated');
+        setStatus('Not authenticated. Please login first.', 'error');
+        actionsArea.style.display = 'none';
+        
+        // Add login button
+        const loginBtn = document.createElement('button');
+        loginBtn.textContent = 'Go to Login Page';
+        loginBtn.addEventListener('click', () => {
+          window.location.href = '/login';
+        });
+        actionsArea.innerHTML = '';
+        actionsArea.appendChild(loginBtn);
+        actionsArea.style.display = 'block';
+        
+        return null;
+      }
+    }
+    
+    // Check admin status
+    async function checkAdminStatus(user) {
+      if (!user) {
+        log('No user to check admin status');
+        return false;
+      }
+      
+      // Check 1: Direct email check
+      const isAdminEmail = user.email === 'flyyhigh824@gmail.com';
+      log(`Admin email check: ${isAdminEmail ? 'YES' : 'NO'}`);
+      
+      // Check 2: localStorage check
+      const localStorageAdmin = localStorage.getItem('flyy_high_admin');
+      log(`Admin localStorage check: ${localStorageAdmin === 'true' ? 'YES' : 'NO'}`);
+      
+      // Check 3: Try to get from profiles table
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error) {
+          log(`Error checking profile: ${error.message}`);
+        } else if (data) {
+          log(`Profile role: ${data.role}`);
+          const isProfileAdmin = data.role === 'admin';
+          log(`Admin database check: ${isProfileAdmin ? 'YES' : 'NO'}`);
+          return isAdminEmail || isProfileAdmin || localStorageAdmin === 'true';
+        }
+      } catch (err) {
+        log(`Error: ${err.message}`);
+      }
+      
+      return isAdminEmail || localStorageAdmin === 'true';
+    }
+    
+    // Initialize
+    (async function init() {
+      log('Initializing...');
+      const user = await checkAuth();
+      
+      if (user) {
+        const isAdmin = await checkAdminStatus(user);
+        if (isAdmin) {
+          setStatus(`You have ADMIN access (${user.email})`, 'success');
+        } else {
+          setStatus(`You do NOT have admin access (${user.email})`, 'error');
+        }
+      }
+    })();
+    
+    // Setup event listeners
+    checkAdminBtn.addEventListener('click', async () => {
+      const user = await checkAuth();
+      if (user) {
+        const isAdmin = await checkAdminStatus(user);
+        if (isAdmin) {
+          setStatus(`You have ADMIN access (${user.email})`, 'success');
+        } else {
+          setStatus(`You do NOT have admin access (${user.email})`, 'error');
+        }
+      }
+    });
+    
+    goToAdminBtn.addEventListener('click', () => {
+      window.location.href = '/admin';
+    });
+    
+    forceMakeAdminBtn.addEventListener('click', () => {
+      localStorage.setItem('flyy_high_admin', 'true');
+      log('Set admin=true in localStorage');
+      setStatus('Forced admin status via localStorage', 'success');
+    });
+    
+    clearAdminBtn.addEventListener('click', () => {
+      localStorage.removeItem('flyy_high_admin');
+      log('Removed admin flag from localStorage');
+      setStatus('Cleared admin status', 'info');
+    });
+    
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      log('Logged out');
+      localStorage.removeItem('flyy_high_admin');
+      window.location.reload();
+    });
+  </script>
+</body>
+</html> 

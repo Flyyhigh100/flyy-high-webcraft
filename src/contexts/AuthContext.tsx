@@ -19,7 +19,7 @@ type AuthContextType = {
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Known admin email - hardcoded for production safety
+// Admin email - hardcoded for simplicity
 const ADMIN_EMAIL = 'flyyhigh824@gmail.com';
 
 // Provider component that wraps your app and makes auth object available to any child component
@@ -29,59 +29,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  // Check if user is an admin by querying a profile or role table
+  // Simple admin check - just compare email with hardcoded admin email
   const checkAdminStatus = async (): Promise<boolean> => {
     if (!user) return false;
     
-    try {
-      console.log('Checking admin status for user:', user.email);
-      
-      // PRODUCTION FIX: Directly check if email matches known admin email
-      if (user.email === ADMIN_EMAIL) {
-        console.log('Admin access granted via direct email match');
-        setIsAdmin(true);
-        return true;
-      }
-      
-      // Try querying the profiles table to check admin role
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-      
-      console.log('Admin check query result:', data, error);
-      
-      if (error) {
-        console.error('Error checking admin status:', error);
-        
-        // Even if there's an error, grant admin access to the known admin email
-        if (user.email === ADMIN_EMAIL) {
-          console.log('Admin fallback: Granting access despite DB error');
-          setIsAdmin(true);
-          return true;
-        }
-        
-        return false;
-      }
-      
-      // If the user has an admin role, return true
-      const isUserAdmin = data?.role === 'admin';
-      console.log('Is user admin?', isUserAdmin);
-      setIsAdmin(isUserAdmin);
-      return isUserAdmin;
-    } catch (err) {
-      console.error('Error checking admin status:', err);
-      
-      // Even if there's an exception, grant admin access to the known admin email
-      if (user.email === ADMIN_EMAIL) {
-        console.log('Admin exception handler: Granting access despite error');
-        setIsAdmin(true);
-        return true;
-      }
-      
-      return false;
+    // Check if user email matches admin email
+    const isUserAdmin = user.email === ADMIN_EMAIL;
+    
+    // Log this check to help with debugging
+    console.log(`Admin check: User email (${user.email}) ${isUserAdmin ? 'MATCHES' : 'does NOT match'} admin email (${ADMIN_EMAIL})`);
+    
+    // Always set the isAdmin state based on the email check
+    setIsAdmin(isUserAdmin);
+    
+    // Store this in localStorage as a fallback mechanism
+    if (isUserAdmin) {
+      localStorage.setItem('flyy_high_admin', 'true');
+      console.log('Admin status saved to localStorage');
     }
+    
+    return isUserAdmin;
   };
 
   useEffect(() => {
@@ -91,8 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Check for active session
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('Initial session check:', session?.user?.email || 'No session');
-      
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -108,8 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up listener for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        console.log('Auth state change event:', _event, session?.user?.email || 'No session');
-        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -141,12 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   // Sign out function
   const signOut = async () => {
-    console.log('Signing out...');
     await supabase.auth.signOut();
-    console.log('Signed out. Session should be null now.');
-    
-    // Force clear local storage and reload for complete logout
-    localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('flyy_high_admin');
     window.location.href = '/login';
   };
   
