@@ -121,7 +121,7 @@ export default function AdminDashboard() {
           
         if (!paymentsError && paymentsData) {
           // Format payments with user emails
-          const formattedPayments = [];
+          const formattedPayments: Payment[] = [];
           
           for (const payment of paymentsData) {
             // Get user email
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
           
         if (!upcomingError && upcomingData) {
           // Format upcoming payments with user emails
-          const formattedUpcoming = [];
+          const formattedUpcoming: Payment[] = [];
           
           for (const payment of upcomingData) {
             // Get user email
