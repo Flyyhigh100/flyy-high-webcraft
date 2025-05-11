@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,14 +105,13 @@ export function useAdminData() {
               });
             }
             
-            const safeParsedPayments = ensureFlatArray(formattedPayments);
-            setPayments(safeParsedPayments);
+            setPayments(formattedPayments);
             
             // Calculate revenue data
-            if (safeParsedPayments.length > 0) {
+            if (formattedPayments.length > 0) {
               const monthlyRevenue = Array(12).fill(0);
               
-              safeParsedPayments.forEach(payment => {
+              formattedPayments.forEach(payment => {
                 const date = new Date(payment.payment_date);
                 const month = date.getMonth();
                 monthlyRevenue[month] += payment.amount;
@@ -147,8 +147,7 @@ export function useAdminData() {
               });
             }
             
-            const safeParsedUpcoming = ensureFlatArray(formattedUpcoming);
-            setUpcomingPayments(safeParsedUpcoming);
+            setUpcomingPayments(formattedUpcoming);
           }
         } catch (paymentError) {
           console.error('Error fetching payment data:', paymentError);

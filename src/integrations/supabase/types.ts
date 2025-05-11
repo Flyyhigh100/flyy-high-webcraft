@@ -11,94 +11,28 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          created_at: string | null
+          email: string | null
           id: string
-          user_id: string
-          email: string
-          full_name: string | null
-          company: string | null
-          role: string
-          created_at: string
-          updated_at: string
+          role: string | null
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
+          created_at?: string | null
+          email?: string | null
           id: string
-          user_id: string
-          email: string
-          full_name?: string | null
-          company?: string | null
-          role?: string
-          created_at?: string
-          updated_at?: string
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
+          created_at?: string | null
+          email?: string | null
           id?: string
-          user_id?: string
-          email?: string
-          full_name?: string | null
-          company?: string | null
-          role?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      payments: {
-        Row: {
-          id: string
-          user_id: string
-          amount: number
-          status: string
-          payment_date: string
-          plan: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          amount: number
-          status: string
-          payment_date: string
-          plan: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          amount?: number
-          status?: string
-          payment_date?: string
-          plan?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      websites: {
-        Row: {
-          id: string
-          user_id: string
-          domain: string
-          status: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          domain: string
-          status: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          domain?: string
-          status?: string
-          created_at?: string
-          updated_at?: string
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
