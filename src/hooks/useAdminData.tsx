@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,77 +79,90 @@ export function useAdminData() {
         }
         
         try {
-          // Fetch payments data
-          const { data: paymentsData, error: paymentsError } = await supabase
-            .from('payments')
-            .select('*')
-            .eq('status', 'completed');
-            
-          if (!paymentsError && paymentsData) {
-            // Format payments with user emails
-            const formattedPayments: Payment[] = [];
-            
-            for (const payment of paymentsData) {
-              // Get user email
-              const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-              const email = userData?.user?.email || 'Unknown';
-              
-              formattedPayments.push({
-                id: payment.id,
-                user_id: payment.user_id,
-                user_email: email,
-                amount: payment.amount,
-                status: payment.status,
-                payment_date: payment.payment_date,
-                plan: payment.plan
-              });
-            }
-            
-            const safeParsedPayments = ensureFlatArray(formattedPayments);
-            setPayments(safeParsedPayments);
-            
-            // Calculate revenue data
-            if (safeParsedPayments.length > 0) {
-              const monthlyRevenue = Array(12).fill(0);
-              
-              safeParsedPayments.forEach(payment => {
-                const date = new Date(payment.payment_date);
-                const month = date.getMonth();
-                monthlyRevenue[month] += payment.amount;
-              });
-              
-              revenueData.datasets[0].data = monthlyRevenue;
-            }
-          }
+          // Check if payments table exists before querying it
+          const { data: tableExistsData, error: tableExistsError } = await supabase
+            .rpc('table_exists', { 
+              table_name: 'payments', 
+              schema_name: 'public' 
+            });
           
-          // Fetch upcoming payments
-          const { data: upcomingData, error: upcomingError } = await supabase
-            .from('payments')
-            .select('*')
-            .eq('status', 'upcoming');
-            
-          if (!upcomingError && upcomingData) {
-            // Format upcoming payments with user emails
-            const formattedUpcoming: Payment[] = [];
-            
-            for (const payment of upcomingData) {
-              // Get user email
-              const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-              const email = userData?.user?.email || 'Unknown';
+          // If the payments table exists, fetch the data
+          if (!tableExistsError && tableExistsData) {
+            // Fetch payments data
+            const { data: paymentsData, error: paymentsError } = await supabase
+              .from('payments')
+              .select('*')
+              .eq('status', 'completed');
               
-              formattedUpcoming.push({
-                id: payment.id,
-                user_id: payment.user_id,
-                user_email: email,
-                amount: payment.amount,
-                status: payment.status,
-                payment_date: payment.payment_date,
-                plan: payment.plan
-              });
+            if (!paymentsError && paymentsData) {
+              // Format payments with user emails
+              const formattedPayments: Payment[] = [];
+              
+              for (const payment of paymentsData) {
+                // Get user email
+                const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
+                const email = userData?.user?.email || 'Unknown';
+                
+                formattedPayments.push({
+                  id: payment.id,
+                  user_id: payment.user_id,
+                  user_email: email,
+                  amount: payment.amount,
+                  status: payment.status,
+                  payment_date: payment.payment_date,
+                  plan: payment.plan
+                });
+              }
+              
+              setPayments(formattedPayments);
+              
+              // Calculate revenue data
+              if (formattedPayments.length > 0) {
+                const monthlyRevenue = Array(12).fill(0);
+                
+                formattedPayments.forEach(payment => {
+                  const date = new Date(payment.payment_date);
+                  const month = date.getMonth();
+                  monthlyRevenue[month] += payment.amount;
+                });
+                
+                revenueData.datasets[0].data = monthlyRevenue;
+              }
             }
             
-            const safeParsedUpcoming = ensureFlatArray(formattedUpcoming);
-            setUpcomingPayments(safeParsedUpcoming);
+            // Fetch upcoming payments
+            const { data: upcomingData, error: upcomingError } = await supabase
+              .from('payments')
+              .select('*')
+              .eq('status', 'upcoming');
+              
+            if (!upcomingError && upcomingData) {
+              // Format upcoming payments with user emails
+              const formattedUpcoming: Payment[] = [];
+              
+              for (const payment of upcomingData) {
+                // Get user email
+                const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
+                const email = userData?.user?.email || 'Unknown';
+                
+                formattedUpcoming.push({
+                  id: payment.id,
+                  user_id: payment.user_id,
+                  user_email: email,
+                  amount: payment.amount,
+                  status: payment.status,
+                  payment_date: payment.payment_date,
+                  plan: payment.plan
+                });
+              }
+              
+              setUpcomingPayments(formattedUpcoming);
+            }
+          } else {
+            console.log("Payments table does not exist yet or function failed");
+            // If there's an error or the table doesn't exist, set empty arrays for payments
+            setPayments([]);
+            setUpcomingPayments([]);
           }
         } catch (paymentError) {
           console.error('Error fetching payment data:', paymentError);

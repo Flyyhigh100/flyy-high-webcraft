@@ -1,7 +1,10 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AdminRouteProps {
   redirectPath?: string;
@@ -12,9 +15,11 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     console.log("AdminRoute: Starting admin access check");
+    console.log("Current auth state - isAdmin:", isAdmin, "User:", user?.email);
     
     const verifyAccess = async () => {
       setIsCheckingAccess(true);
@@ -28,52 +33,87 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
       
       console.log(`AdminRoute: User authenticated: ${user?.email}`);
       
-      // Then check admin status through multiple methods
-      if (!isLoading && user) {
-        // Method 1: Direct email check (most reliable)
-        if (user.email === 'flyyhigh824@gmail.com') {
-          console.log('AdminRoute: Admin access granted via direct email match');
-          setHasAdminAccess(true);
-          setIsCheckingAccess(false);
-          return;
+      // Direct database check - most reliable
+      if (user) {
+        try {
+          // Method 1: Direct email check
+          if (user.email === 'flyyhigh824@gmail.com') {
+            console.log('AdminRoute: Admin access granted via direct email match');
+            setHasAdminAccess(true);
+            setIsCheckingAccess(false);
+            return;
+          }
+          
+          // Method 2: Query the profile directly
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+            
+          if (error) {
+            console.error('Error checking profile:', error);
+            // Don't fail here, try other methods
+          }
+          
+          if (data && data.role === 'admin') {
+            console.log('AdminRoute: Admin access granted via database role');
+            setHasAdminAccess(true);
+            setIsCheckingAccess(false);
+            return;
+          }
+          
+          // Method 3: Check isAdmin state
+          if (isAdmin) {
+            console.log('AdminRoute: Admin access granted via AuthContext isAdmin state');
+            setHasAdminAccess(true);
+            setIsCheckingAccess(false);
+            return;
+          }
+          
+          // Method 4: Force a fresh check of admin status
+          const refreshedAdminStatus = await checkAdminStatus();
+          console.log('AdminRoute: Refreshed admin status check:', refreshedAdminStatus);
+          if (refreshedAdminStatus) {
+            console.log('AdminRoute: Admin access granted via refreshed check');
+            setHasAdminAccess(true);
+            setIsCheckingAccess(false);
+            return;
+          }
+          
+          // Last resort: Check localStorage
+          const localStorageAdmin = localStorage.getItem('flyy_high_admin');
+          if (localStorageAdmin === 'true') {
+            console.log('AdminRoute: Admin access granted via localStorage');
+            setHasAdminAccess(true);
+            setIsCheckingAccess(false);
+            return;
+          }
+          
+          // If all checks fail, redirect
+          console.log('AdminRoute: No admin access confirmed, redirecting');
+          toast({
+            title: "Access Denied",
+            description: "You don't have admin privileges to access this page",
+            variant: "destructive",
+          });
+          navigate(redirectPath, { replace: true });
+        } catch (error) {
+          console.error('Error verifying admin status:', error);
+          toast({
+            title: "Error",
+            description: "Failed to verify admin access",
+            variant: "destructive",
+          });
+          navigate(redirectPath, { replace: true });
         }
-        
-        // Method 2: Check isAdmin state from AuthContext
-        if (isAdmin) {
-          console.log('AdminRoute: Admin access granted via AuthContext isAdmin state');
-          setHasAdminAccess(true);
-          setIsCheckingAccess(false);
-          return;
-        }
-        
-        // Method 3: Force a fresh check of admin status from AuthContext
-        const refreshedAdminStatus = await checkAdminStatus();
-        if (refreshedAdminStatus) {
-          console.log('AdminRoute: Admin access granted via refreshed admin status');
-          setHasAdminAccess(true);
-          setIsCheckingAccess(false);
-          return;
-        }
-        
-        // Method 4: Check localStorage fallback
-        const localStorageAdmin = localStorage.getItem('flyy_high_admin');
-        if (localStorageAdmin === 'true') {
-          console.log('AdminRoute: Admin access granted via localStorage fallback');
-          setHasAdminAccess(true);
-          setIsCheckingAccess(false);
-          return;
-        }
-        
-        // If all methods fail, redirect to dashboard
-        console.log('AdminRoute: No admin access found, redirecting to dashboard');
-        navigate(redirectPath, { replace: true });
       }
       
       setIsCheckingAccess(false);
     };
     
     verifyAccess();
-  }, [user, isLoading, navigate, redirectPath, checkAdminStatus, isAdmin]);
+  }, [user, isLoading, navigate, redirectPath, checkAdminStatus, isAdmin, toast]);
 
   if (isLoading || isCheckingAccess) {
     return (

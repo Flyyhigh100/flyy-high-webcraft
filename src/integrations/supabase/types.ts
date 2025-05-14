@@ -9,96 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string
-          user_id: string
-          email: string
-          full_name: string | null
-          company: string | null
-          role: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id: string
-          user_id: string
-          email: string
-          full_name?: string | null
-          company?: string | null
-          role?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          email?: string
-          full_name?: string | null
-          company?: string | null
-          role?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       payments: {
         Row: {
-          id: string
-          user_id: string
           amount: number
-          status: string
-          payment_date: string
+          created_at: string | null
+          id: string
+          payment_date: string | null
           plan: string
-          created_at: string
-          updated_at: string
+          status: string
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
           amount: number
-          status: string
-          payment_date: string
+          created_at?: string | null
+          id?: string
+          payment_date?: string | null
           plan: string
-          created_at?: string
-          updated_at?: string
+          status: string
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
           amount?: number
-          status?: string
-          payment_date?: string
+          created_at?: string | null
+          id?: string
+          payment_date?: string | null
           plan?: string
-          created_at?: string
-          updated_at?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
-      websites: {
+      profiles: {
         Row: {
+          created_at: string | null
+          email: string | null
           id: string
-          user_id: string
-          domain: string
-          status: string
-          created_at: string
-          updated_at: string
+          role: string | null
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
-          id?: string
-          user_id: string
-          domain: string
-          status: string
-          created_at?: string
-          updated_at?: string
+          created_at?: string | null
+          email?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
+          created_at?: string | null
+          email?: string | null
           id?: string
-          user_id?: string
-          domain?: string
-          status?: string
-          created_at?: string
-          updated_at?: string
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -107,7 +74,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

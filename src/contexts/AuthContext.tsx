@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,9 +20,6 @@ type AuthContextType = {
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Admin email - hardcoded for simplicity
-const ADMIN_EMAIL = 'flyyhigh824@gmail.com';
-
 // Provider component that wraps your app and makes auth object available to any child component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -29,26 +27,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  // Simple admin check - just compare email with hardcoded admin email
+  // Improved admin check that queries the database directly
   const checkAdminStatus = async (): Promise<boolean> => {
     if (!user) return false;
     
-    // Check if user email matches admin email
-    const isUserAdmin = user.email === ADMIN_EMAIL;
+    console.log("Checking admin status for user:", user.email);
     
-    // Log this check to help with debugging
-    console.log(`Admin check: User email (${user.email}) ${isUserAdmin ? 'MATCHES' : 'does NOT match'} admin email (${ADMIN_EMAIL})`);
-    
-    // Always set the isAdmin state based on the email check
-    setIsAdmin(isUserAdmin);
-    
-    // Store this in localStorage as a fallback mechanism
-    if (isUserAdmin) {
-      localStorage.setItem('flyy_high_admin', 'true');
-      console.log('Admin status saved to localStorage');
+    try {
+      // Method 1: Check email directly (most reliable fallback)
+      const adminEmail = 'flyyhigh824@gmail.com';
+      if (user.email === adminEmail) {
+        console.log(`Email match found: ${user.email} is admin`);
+        setIsAdmin(true);
+        localStorage.setItem('flyy_high_admin', 'true');
+        return true;
+      }
+      
+      // Method 2: Query the profiles table for role
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error("Error checking profile role:", error);
+      }
+      
+      if (profile && profile.role === 'admin') {
+        console.log("Database role check: User is admin");
+        setIsAdmin(true);
+        localStorage.setItem('flyy_high_admin', 'true');
+        return true;
+      } else {
+        console.log("Database role check: User is NOT admin", profile);
+      }
+      
+      // Method 3: Check localStorage fallback
+      const localStorageAdmin = localStorage.getItem('flyy_high_admin');
+      if (localStorageAdmin === 'true') {
+        console.log("localStorage fallback: User is admin");
+        setIsAdmin(true);
+        return true;
+      }
+      
+      // If we get here, user is not admin
+      console.log("Final determination: User is NOT admin");
+      setIsAdmin(false);
+      localStorage.removeItem('flyy_high_admin');
+      return false;
+    } catch (err) {
+      console.error("Error in admin check:", err);
+      return false;
     }
-    
-    return isUserAdmin;
   };
 
   useEffect(() => {
@@ -58,10 +89,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Check for active session
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("Initial session check:", session ? "Session found" : "No session");
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log("Checking admin status during initial session");
         await checkAdminStatus();
       }
       
@@ -73,13 +106,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up listener for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log("Auth state change detected:", _event);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log("User authenticated, checking admin status");
           await checkAdminStatus();
         } else {
+          console.log("No user or session, setting isAdmin to false");
           setIsAdmin(false);
+          localStorage.removeItem('flyy_high_admin');
         }
         
         setIsLoading(false);
