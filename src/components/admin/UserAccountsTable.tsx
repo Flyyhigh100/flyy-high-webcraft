@@ -1,9 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { UserProfile } from "@/types/admin";
+import { useAdminRoleManagement } from "@/hooks/useAdminRoleManagement";
 
 interface UserAccountsTableProps {
   users: UserProfile[];
@@ -11,37 +10,7 @@ interface UserAccountsTableProps {
 }
 
 export function UserAccountsTable({ users, setUsers }: UserAccountsTableProps) {
-  const { toast } = useToast();
-
-  const makeUserAdmin = async (userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: 'admin' })
-        .eq('id', userId);
-        
-      if (error) throw error;
-      
-      // Update the local state
-      setUsers(users.map(user => 
-        user.id === userId 
-          ? { ...user, role: 'admin' } 
-          : user
-      ));
-      
-      toast({
-        title: "Success",
-        description: "User role updated to admin",
-      });
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update user role",
-        variant: "destructive",
-      });
-    }
-  };
+  const { makeUserAdmin } = useAdminRoleManagement();
 
   if (users.length === 0) {
     return (
@@ -83,7 +52,7 @@ export function UserAccountsTable({ users, setUsers }: UserAccountsTableProps) {
                   size="sm"
                   className={user.role === 'admin' ? 'bg-gray-100 text-gray-500' : ''}
                   disabled={user.role === 'admin'}
-                  onClick={() => makeUserAdmin(user.id)}
+                  onClick={() => makeUserAdmin(user.id, users, setUsers)}
                 >
                   Make Admin
                 </Button>
