@@ -4,15 +4,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Payment, UserProfile, RevenueData } from "@/types/admin";
 
-// Utility function to ensure we're working with a flat array
-const ensureFlatArray = <T,>(data: T[] | T[][]): T[] => {
-  if (data.length === 0) return [];
-  if (Array.isArray(data[0])) {
-    return (data as T[][]).flat();
-  }
-  return data as T[];
-};
-
 export function useAdminData() {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -38,44 +29,33 @@ export function useAdminData() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch users from Supabase auth
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+        console.log("Fetching admin data...");
         
-        if (authError) {
-          throw authError;
+        // CHANGE: Instead of using the admin API, query profiles directly
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('*');
+          
+        if (profilesError) {
+          console.error("Error fetching profiles:", profilesError);
+          throw profilesError;
         }
         
-        if (authUsers && authUsers.users) {
-          // Format user data
-          const formattedUsers: UserProfile[] = authUsers.users.map(user => ({
-            id: user.id,
-            email: user.email || '',
-            role: 'user', // Default role
-            created_at: user.created_at || '',
-            user_id: user.id,
-            last_sign_in: user.last_sign_in_at || '',
+        if (profilesData) {
+          console.log("Profiles data:", profilesData);
+          const formattedUsers = profilesData.map(profile => ({
+            id: profile.id,
+            email: profile.email || '',
+            role: profile.role || 'user',
+            created_at: profile.created_at || '',
+            updated_at: profile.updated_at || '',
+            user_id: profile.user_id || profile.id,
+            last_sign_in: ''  // We don't have this data from profiles table
           }));
           
-          // Try to get roles from profiles table
-          const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('user_id, role');
-            
-          if (!profilesError && profiles) {
-            // Update roles from profiles
-            const rolesMap = new Map();
-            profiles.forEach(profile => {
-              rolesMap.set(profile.user_id, profile.role);
-            });
-            
-            formattedUsers.forEach(user => {
-              if (rolesMap.has(user.id)) {
-                user.role = rolesMap.get(user.id);
-              }
-            });
-          }
-          
           setUsers(formattedUsers);
+        } else {
+          setUsers([]);
         }
         
         try {
@@ -99,9 +79,14 @@ export function useAdminData() {
               const formattedPayments: Payment[] = [];
               
               for (const payment of paymentsData) {
-                // Get user email
-                const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-                const email = userData?.user?.email || 'Unknown';
+                // Get user email from profiles
+                const { data: profileData } = await supabase
+                  .from('profiles')
+                  .select('email')
+                  .eq('id', payment.user_id)
+                  .single();
+                  
+                const email = profileData?.email || 'Unknown';
                 
                 formattedPayments.push({
                   id: payment.id,
@@ -141,9 +126,14 @@ export function useAdminData() {
               const formattedUpcoming: Payment[] = [];
               
               for (const payment of upcomingData) {
-                // Get user email
-                const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-                const email = userData?.user?.email || 'Unknown';
+                // Get user email from profiles
+                const { data: profileData } = await supabase
+                  .from('profiles')
+                  .select('email')
+                  .eq('id', payment.user_id)
+                  .single();
+                  
+                const email = profileData?.email || 'Unknown';
                 
                 formattedUpcoming.push({
                   id: payment.id,
@@ -194,7 +184,7 @@ export function useAdminData() {
       const { error } = await supabase
         .from('profiles')
         .update({ role: 'admin' })
-        .eq('user_id', userId);
+        .eq('id', userId);
         
       if (error) throw error;
       

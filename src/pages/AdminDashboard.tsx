@@ -1,137 +1,22 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, UserCircle, DollarSign, CalendarClock, BarChart4 } from "lucide-react";
-import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-// Interface for User Profile
-interface UserProfile {
-  id: string;
-  email: string;
-  role: string;
-  created_at: string;
-  last_sign_in?: string;
-}
-
-// Interface for Payment
-interface Payment {
-  id: string;
-  user_id: string;
-  user_email: string;
-  amount: number;
-  status: string;
-  payment_date: string;
-  plan: string;
-}
+import { useAdminData } from "@/hooks/useAdminData";
+import { UserAccountsTable } from "@/components/admin/UserAccountsTable";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [upcomingPayments, setUpcomingPayments] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Fetch data on component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch users from Supabase auth
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-        
-        if (authError) {
-          throw authError;
-        }
-        
-        if (authUsers && authUsers.users) {
-          // Format user data
-          const formattedUsers = authUsers.users.map(user => ({
-            id: user.id,
-            email: user.email || '',
-            role: 'user', // Default role
-            created_at: user.created_at || '',
-            last_sign_in: user.last_sign_in_at || '',
-          }));
-          
-          // Try to get roles from profiles table
-          const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('user_id, role');
-            
-          if (!profilesError && profiles) {
-            // Update roles from profiles
-            const rolesMap = new Map();
-            profiles.forEach(profile => {
-              rolesMap.set(profile.user_id, profile.role);
-            });
-            
-            formattedUsers.forEach(user => {
-              if (rolesMap.has(user.id)) {
-                user.role = rolesMap.get(user.id);
-              }
-            });
-          }
-          
-          setUsers(formattedUsers);
-        }
-        
-        // Placeholder - in the live app we'll fetch real payment data
-        setPayments([]);
-        setUpcomingPayments([]);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load dashboard data",
-          variant: "destructive",
-        });
-        
-        // Fallback to empty data
-        setUsers([]);
-        setPayments([]);
-        setUpcomingPayments([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [toast]);
-  
-  // Function to make a user an admin
-  const makeUserAdmin = async (userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: 'admin' })
-        .eq('user_id', userId);
-        
-      if (error) throw error;
-      
-      // Update the local state
-      setUsers(users.map(user => 
-        user.id === userId 
-          ? { ...user, role: 'admin' } 
-          : user
-      ));
-      
-      toast({
-        title: "Success",
-        description: "User role updated to admin",
-      });
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update user role",
-        variant: "destructive",
-      });
-    }
-  };
+  const {
+    users,
+    setUsers,
+    payments,
+    upcomingPayments,
+    isLoading,
+    revenueData
+  } = useAdminData();
   
   return (
     <div className="container mx-auto px-4 py-12">
@@ -225,53 +110,7 @@ export default function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {users.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      No users found
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Role</TableHead>
-                          <TableHead>Created</TableHead>
-                          <TableHead>Last Sign In</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {users.map(user => (
-                          <TableRow key={user.id}>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                              <span className={user.role === 'admin' ? 'text-purple-600 font-medium' : ''}>
-                                {user.role}
-                              </span>
-                            </TableCell>
-                            <TableCell>{format(new Date(user.created_at), 'MMM d, yyyy')}</TableCell>
-                            <TableCell>
-                              {user.last_sign_in 
-                                ? format(new Date(user.last_sign_in), 'MMM d, yyyy')
-                                : 'Never'
-                              }
-                            </TableCell>
-                            <TableCell>
-                              {user.role !== 'admin' && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => makeUserAdmin(user.id)}
-                                >
-                                  Make Admin
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
+                  <UserAccountsTable users={users} setUsers={setUsers} />
                 </CardContent>
               </Card>
             </TabsContent>

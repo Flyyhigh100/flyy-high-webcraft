@@ -18,7 +18,7 @@ export function UserAccountsTable({ users, setUsers }: UserAccountsTableProps) {
       const { error } = await supabase
         .from('profiles')
         .update({ role: 'admin' })
-        .eq('user_id', userId);
+        .eq('id', userId);
         
       if (error) throw error;
       
