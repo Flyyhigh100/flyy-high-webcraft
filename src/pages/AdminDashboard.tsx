@@ -1,11 +1,16 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, UserCircle, DollarSign, CalendarClock, BarChart4 } from "lucide-react";
+import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { useAdminData } from "@/hooks/useAdminData";
 import { UserAccountsTable } from "@/components/admin/UserAccountsTable";
+import { PaymentsTable } from "@/components/admin/PaymentsTable";
+import { UpcomingPaymentsTable } from "@/components/admin/UpcomingPaymentsTable";
+import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
+import { ClientWebsiteList } from "@/components/admin/ClientWebsiteList";
+import { AdminSummaryCards } from "@/components/admin/AdminSummaryCards";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -30,58 +35,18 @@ export default function AdminDashboard() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Total Users</p>
-                    <p className="text-2xl font-bold">{users.length}</p>
-                  </div>
-                  <UserCircle className="h-8 w-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                    <p className="text-2xl font-bold">$0.00</p>
-                  </div>
-                  <DollarSign className="h-8 w-8 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Recent Payments</p>
-                    <p className="text-2xl font-bold">{payments.length}</p>
-                  </div>
-                  <DollarSign className="h-8 w-8 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Upcoming Payments</p>
-                    <p className="text-2xl font-bold">{upcomingPayments.length}</p>
-                  </div>
-                  <CalendarClock className="h-8 w-8 text-amber-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <AdminSummaryCards 
+            users={users} 
+            payments={payments} 
+            upcomingPayments={upcomingPayments} 
+          />
           
-          <Tabs defaultValue="accounts" className="w-full">
+          <Tabs defaultValue="websites" className="w-full">
             <TabsList className="mb-8">
+              <TabsTrigger value="websites">
+                <Globe className="mr-2 h-4 w-4" />
+                Client Websites
+              </TabsTrigger>
               <TabsTrigger value="accounts">
                 <User className="mr-2 h-4 w-4" />
                 User Accounts
@@ -99,6 +64,21 @@ export default function AdminDashboard() {
                 Analytics
               </TabsTrigger>
             </TabsList>
+            
+            {/* Client Websites Tab */}
+            <TabsContent value="websites">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Client Websites</CardTitle>
+                  <CardDescription>
+                    Manage and monitor all client websites and projects
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ClientWebsiteList />
+                </CardContent>
+              </Card>
+            </TabsContent>
             
             {/* User Accounts Tab */}
             <TabsContent value="accounts">
@@ -125,9 +105,13 @@ export default function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    No payment data available
-                  </div>
+                  {payments.length > 0 ? (
+                    <PaymentsTable payments={payments} />
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No payment data available
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -142,9 +126,13 @@ export default function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    No upcoming payments
-                  </div>
+                  {upcomingPayments.length > 0 ? (
+                    <UpcomingPaymentsTable upcomingPayments={upcomingPayments} />
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No upcoming payments
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -159,9 +147,13 @@ export default function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    No analytics data available
-                  </div>
+                  {payments.length > 0 ? (
+                    <RevenueAnalytics payments={payments} />
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No analytics data available
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
