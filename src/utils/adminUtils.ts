@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin";
 
@@ -124,7 +125,7 @@ export async function fetchCompletedPayments(): Promise<Payment[]> {
       amount: payment.amount,
       status: payment.status,
       payment_date: payment.payment_date,
-      plan: payment.plan
+      plan: payment.plan_type // Fix: Changed from payment.plan to payment.plan_type
     });
   }
   
@@ -165,7 +166,7 @@ export async function fetchUpcomingPayments(): Promise<Payment[]> {
       amount: payment.amount,
       status: payment.status,
       payment_date: payment.payment_date,
-      plan: payment.plan
+      plan: payment.plan_type // Fix: Changed from payment.plan to payment.plan_type
     });
   }
   
