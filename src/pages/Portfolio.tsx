@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
@@ -38,6 +39,22 @@ const caseStudies = [
   },
   {
     id: 3,
+    title: "Delta Personal Service",
+    client: "Service Industry",
+    category: "Professional Services Website",
+    description: "Streamlined website for a personal services company, offering professional solutions and customer-focused services.",
+    imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    websiteUrl: "https://deltapersonalservice.biz/",
+    technologies: ["React", "Tailwind CSS", "Node.js", "MongoDB"],
+    results: [
+      "53% increase in client inquiries",
+      "Streamlined booking process",
+      "Improved service visibility",
+      "Enhanced client testimonial showcase"
+    ]
+  },
+  {
+    id: 4,
     title: "Precision Fabricated",
     client: "Manufacturing Industry",
     category: "Industrial Services Website",

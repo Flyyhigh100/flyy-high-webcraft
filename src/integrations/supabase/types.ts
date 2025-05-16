@@ -14,8 +14,10 @@ export type Database = {
           amount: number
           created_at: string | null
           id: string
+          method: string | null
           payment_date: string | null
-          plan: string
+          plan_type: string
+          site_id: string | null
           status: string
           updated_at: string | null
           user_id: string
@@ -24,8 +26,10 @@ export type Database = {
           amount: number
           created_at?: string | null
           id?: string
+          method?: string | null
           payment_date?: string | null
-          plan: string
+          plan_type: string
+          site_id?: string | null
           status: string
           updated_at?: string | null
           user_id: string
@@ -34,13 +38,23 @@ export type Database = {
           amount?: number
           created_at?: string | null
           id?: string
+          method?: string | null
           payment_date?: string | null
-          plan?: string
+          plan_type?: string
+          site_id?: string | null
           status?: string
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "payments_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -68,6 +82,44 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          site_id: string | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          site_id?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          site_id?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       websites: {
         Row: {
@@ -110,6 +162,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_monthly_payment_totals: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          month: string
+          total: number
+        }[]
+      }
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean

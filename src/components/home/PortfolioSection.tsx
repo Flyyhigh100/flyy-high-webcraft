@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -22,6 +23,14 @@ const portfolioProjects = [
   },
   {
     id: 3,
+    title: "Delta Personal Service",
+    category: "Professional Services Website",
+    description: "Streamlined website for a personal services company, offering professional solutions and customer-focused services.",
+    imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    websiteUrl: "https://deltapersonalservice.biz/",
+  },
+  {
+    id: 4,
     title: "Precision Fabricated",
     category: "Industrial Services Website",
     description: "Technical website highlighting precision fabrication services and capabilities.",
@@ -29,7 +38,7 @@ const portfolioProjects = [
     websiteUrl: "https://precisionfabricated.com/",
   },
   {
-    id: 4,
+    id: 5,
     title: "Robinson Concrete LLC",
     category: "Construction Services Website", 
     description: "Professional website for a concrete services company, showcasing expertise and past projects.",
