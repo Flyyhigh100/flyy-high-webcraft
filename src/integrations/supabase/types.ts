@@ -69,6 +69,42 @@ export type Database = {
         }
         Relationships: []
       }
+      websites: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          next_payment_amount: number | null
+          next_payment_date: string | null
+          plan_type: string
+          updated_at: string | null
+          url: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          next_payment_amount?: number | null
+          next_payment_date?: string | null
+          plan_type: string
+          updated_at?: string | null
+          url: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          next_payment_amount?: number | null
+          next_payment_date?: string | null
+          plan_type?: string
+          updated_at?: string | null
+          url?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -76,6 +112,10 @@ export type Database = {
     Functions: {
       is_admin: {
         Args: { _user_id: string }
+        Returns: boolean
+      }
+      websites_table_exists: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }

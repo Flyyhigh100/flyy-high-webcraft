@@ -1,12 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { Payment, UserProfile, RevenueData } from "@/types/admin";
+import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin";
 import { 
   fetchProfiles, 
-  checkPaymentsTableExists, 
+  checkPaymentsTableExists,
+  checkWebsitesTableExists,
   fetchCompletedPayments, 
-  fetchUpcomingPayments, 
+  fetchUpcomingPayments,
+  fetchClientWebsites,
   calculateRevenueData 
 } from "@/utils/adminUtils";
 import { useAdminRoleManagement } from "@/hooks/useAdminRoleManagement";
@@ -16,6 +18,7 @@ export function useAdminData() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [upcomingPayments, setUpcomingPayments] = useState<Payment[]>([]);
+  const [clientWebsites, setClientWebsites] = useState<ClientWebsite[]>([]);
   const [revenueData, setRevenueData] = useState<RevenueData>({
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [
@@ -42,9 +45,9 @@ export function useAdminData() {
         setUsers(profilesData);
         
         // Check if payments table exists and fetch payment data
-        const tableExists = await checkPaymentsTableExists();
+        const paymentsTableExists = await checkPaymentsTableExists();
         
-        if (tableExists) {
+        if (paymentsTableExists) {
           // Fetch completed payments
           const completedPayments = await fetchCompletedPayments();
           setPayments(completedPayments);
@@ -61,6 +64,19 @@ export function useAdminData() {
           setPayments([]);
           setUpcomingPayments([]);
         }
+        
+        // Check if websites table exists and fetch website data
+        const websitesTableExists = await checkWebsitesTableExists();
+        
+        if (websitesTableExists) {
+          // Fetch client websites
+          const websites = await fetchClientWebsites();
+          setClientWebsites(websites);
+        } else {
+          console.log("Websites table does not exist yet or function failed");
+          setClientWebsites([]);
+        }
+        
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -73,6 +89,7 @@ export function useAdminData() {
         setUsers([]);
         setPayments([]);
         setUpcomingPayments([]);
+        setClientWebsites([]);
       } finally {
         setIsLoading(false);
       }
@@ -90,6 +107,7 @@ export function useAdminData() {
     setUsers,
     payments,
     upcomingPayments,
+    clientWebsites,
     isLoading,
     revenueData,
     makeUserAdmin

@@ -19,6 +19,15 @@ export interface Payment {
   plan: string;
 }
 
+export interface ClientWebsite {
+  id: string;
+  name: string;
+  url: string;
+  planType: string;
+  nextPaymentDate: string;
+  nextPaymentAmount: number;
+}
+
 export interface RevenueData {
   labels: string[];
   datasets: {

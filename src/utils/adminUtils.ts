@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Payment, UserProfile, RevenueData } from "@/types/admin";
+import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin";
 
 // Fetch profiles from Supabase
 export async function fetchProfiles(): Promise<UserProfile[]> {
@@ -47,6 +46,48 @@ export async function checkPaymentsTableExists(): Promise<boolean> {
     console.error('Error checking if payments table exists:', error);
     return false;
   }
+}
+
+// Check if websites table exists
+export async function checkWebsitesTableExists(): Promise<boolean> {
+  try {
+    const { data: tableExistsData, error: tableExistsError } = await supabase
+      .rpc('websites_table_exists');
+    
+    if (tableExistsError) {
+      console.error("Error checking if websites table exists:", tableExistsError);
+      return false;
+    }
+    
+    return !!tableExistsData;
+  } catch (error) {
+    console.error('Error checking if websites table exists:', error);
+    return false;
+  }
+}
+
+// Fetch client websites
+export async function fetchClientWebsites(): Promise<ClientWebsite[]> {
+  const { data: websitesData, error: websitesError } = await supabase
+    .from('websites')
+    .select('*')
+    .order('name');
+    
+  if (websitesError) {
+    console.error("Error fetching client websites:", websitesError);
+    return [];
+  }
+  
+  if (!websitesData) return [];
+  
+  return websitesData.map(website => ({
+    id: website.id,
+    name: website.name,
+    url: website.url,
+    planType: website.plan_type,
+    nextPaymentDate: website.next_payment_date || '',
+    nextPaymentAmount: website.next_payment_amount || 0
+  }));
 }
 
 // Fetch completed payments

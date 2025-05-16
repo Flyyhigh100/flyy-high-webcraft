@@ -6,58 +6,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarClock, DollarSign, ExternalLink, Link as LinkIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-interface ClientWebsite {
-  id: string;
-  name: string;
-  url: string;
-  planType: string;
-  nextPaymentDate: string;
-  nextPaymentAmount: number;
-}
-
-// Sample data - in a real application, this would come from the database
-const sampleClients: ClientWebsite[] = [
-  {
-    id: "1",
-    name: "Robinson and Sons Concrete",
-    url: "https://robinsonconcretellc.com/",
-    planType: "Premium",
-    nextPaymentDate: "2025-06-15",
-    nextPaymentAmount: 29.99
-  },
-  {
-    id: "2",
-    name: "Q.U.A Home Health Services",
-    url: "https://www.homehealthservice.co/",
-    planType: "Basic",
-    nextPaymentDate: "2025-06-03",
-    nextPaymentAmount: 15.00
-  },
-  {
-    id: "3",
-    name: "Precision Fabricated Components",
-    url: "https://precisionfabricated.com/",
-    planType: "Premium",
-    nextPaymentDate: "2025-06-10",
-    nextPaymentAmount: 29.99
-  },
-  {
-    id: "4",
-    name: "Shy's Luxury Hair",
-    url: "https://shysluxuryhairstyles.com/",
-    planType: "Standard",
-    nextPaymentDate: "2025-05-28",
-    nextPaymentAmount: 19.99
-  }
-];
+import { ClientWebsite } from "@/types/admin";
+import { useAdminData } from "@/hooks/useAdminData";
 
 export function ClientWebsiteList() {
+  const { clientWebsites, isLoading } = useAdminData();
   const [selectedClient, setSelectedClient] = useState<ClientWebsite | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
-  // Sort clients alphabetically by name
-  const sortedClients = [...sampleClients].sort((a, b) => 
+  // Sort clients alphabetically by name (though they should already be sorted from the API)
+  const sortedClients = [...(clientWebsites || [])].sort((a, b) => 
     a.name.localeCompare(b.name)
   );
   
@@ -65,6 +23,22 @@ export function ClientWebsiteList() {
     setSelectedClient(client);
     setIsDetailOpen(true);
   };
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  if (sortedClients.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No client websites found. Please check your database connection.
+      </div>
+    );
+  }
   
   return (
     <>
