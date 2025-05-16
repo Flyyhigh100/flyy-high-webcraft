@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
+import { createClient } from '@supabase/supabase-js';
 
 // Setup for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -26,11 +27,34 @@ const envLocalPath = join(__dirname, '.env.local');
 if (!fs.existsSync(envLocalPath)) {
   fs.writeFileSync(envLocalPath, 
     'BOA_API_KEY=your_bank_of_america_api_key_here\n' +
-    'BOA_API_SECRET=your_bank_of_america_api_secret_here\n'
+    'BOA_API_SECRET=your_bank_of_america_api_secret_here\n' +
+    'NEXT_PUBLIC_SUPABASE_URL=https://wutyryaqlmgsbllnyoop.supabase.co\n' +
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHlyeWFxbG1nc2JsbG55b29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NDgwNTgsImV4cCI6MjA2MTEyNDA1OH0.3dlF73k20xg6VhEQPiPgbBt5UifuE3O0J_4SsQ_wnFc\n' +
+    'SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here\n'
   );
-  console.log('Created .env.local file with placeholder Bank of America API credentials.');
-  console.log('Please update with your actual credentials before processing payments.');
+  console.log('Created .env.local file with placeholder credentials.');
+  console.log('Please update with your actual credentials before processing data.');
 }
+
+// Initialize Supabase client with service role key for server-side operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wutyryaqlmgsbllnyoop.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Create Supabase client with service role for full admin access
+const adminSupabase = supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+  : null;
+
+// Create Supabase client with anon key for public access
+const publicSupabase = createClient(
+  supabaseUrl,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHlyeWFxbG1nc2JsbG55b29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NDgwNTgsImV4cCI6MjA2MTEyNDA1OH0.3dlF73k20xg6VhEQPiPgbBt5UifuE3O0J_4SsQ_wnFc'
+);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -142,4 +166,322 @@ app.post('/api/pay', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`API Server running on port ${PORT}`);
   console.log(`To check a domain, visit: http://localhost:${PORT}/api/domain-check?domain=example.com`);
+});
+
+// API endpoint for submitting support tickets
+app.post('/api/support/submit', async (req, res) => {
+  const { siteId, subject, message, userId } = req.body;
+  
+  // Basic validation
+  if (!siteId || !subject || !message) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Missing required fields: siteId, subject, and message are required' 
+    });
+  }
+
+  try {
+    // Check if the adminSupabase client is available
+    if (!adminSupabase) {
+      console.error('Supabase service role key not configured');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Database service configuration error' 
+      });
+    }
+
+    // Verify that the site exists
+    const { data: siteData, error: siteError } = await adminSupabase
+      .from('websites')
+      .select('id, user_id')
+      .eq('id', siteId)
+      .single();
+
+    if (siteError || !siteData) {
+      console.error('Site verification error:', siteError);
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Site not found' 
+      });
+    }
+
+    // Insert the support ticket
+    const { data, error } = await adminSupabase
+      .from('support_tickets')
+      .insert({
+        site_id: siteId,
+        subject,
+        message,
+        status: 'open',
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Support ticket creation error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to create support ticket' 
+      });
+    }
+
+    return res.status(201).json({ 
+      success: true, 
+      ticket: data 
+    });
+  } catch (error) {
+    console.error('Support ticket submission error:', error.message);
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Failed to process support ticket' 
+    });
+  }
+});
+
+// API endpoint for listing all support tickets (admin view)
+app.get('/api/support/list', async (req, res) => {
+  try {
+    // Check if the adminSupabase client is available
+    if (!adminSupabase) {
+      console.error('Supabase service role key not configured');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Database service configuration error' 
+      });
+    }
+
+    // Get all tickets with site information
+    const { data, error } = await adminSupabase
+      .from('support_tickets')
+      .select(`
+        *,
+        website:site_id (
+          id,
+          domain,
+          user_id
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Support ticket list error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to retrieve support tickets' 
+      });
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      tickets: data 
+    });
+  } catch (error) {
+    console.error('Support ticket list error:', error.message);
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Failed to process support tickets request' 
+    });
+  }
+});
+
+// API endpoint for getting payments for a specific site
+app.get('/api/payments/site/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  if (!id) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Site ID is required' 
+    });
+  }
+
+  try {
+    // Check if the adminSupabase client is available
+    if (!adminSupabase) {
+      console.error('Supabase service role key not configured');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Database service configuration error' 
+      });
+    }
+
+    // Get all payments for the specified site
+    const { data, error } = await adminSupabase
+      .from('payments')
+      .select('*')
+      .eq('site_id', id)
+      .order('payment_date', { ascending: false });
+
+    if (error) {
+      console.error('Site payments error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to retrieve payment data' 
+      });
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      payments: data 
+    });
+  } catch (error) {
+    console.error('Site payments error:', error.message);
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Failed to process payment data request' 
+    });
+  }
+});
+
+// API endpoint for payment graph data
+app.get('/api/payments/graph', async (req, res) => {
+  try {
+    // Check if the adminSupabase client is available
+    if (!adminSupabase) {
+      console.error('Supabase service role key not configured');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Database service configuration error' 
+      });
+    }
+
+    // Get monthly payment totals for the last 12 months
+    const { data, error } = await adminSupabase.rpc('get_monthly_payment_totals');
+
+    // If RPC function is not available, fall back to manual calculation
+    if (error && error.message.includes('function "get_monthly_payment_totals" does not exist')) {
+      // Get all payments from the last 12 months
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      
+      const { data: paymentsData, error: paymentsError } = await adminSupabase
+        .from('payments')
+        .select('amount, payment_date, status')
+        .gte('payment_date', oneYearAgo.toISOString())
+        .eq('status', 'completed');
+      
+      if (paymentsError) {
+        console.error('Payment graph data error:', paymentsError);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Failed to retrieve payment graph data' 
+        });
+      }
+      
+      // Process data for the graph - group by month
+      const monthlyData = {};
+      
+      paymentsData.forEach(payment => {
+        const date = new Date(payment.payment_date);
+        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (!monthlyData[monthYear]) {
+          monthlyData[monthYear] = 0;
+        }
+        
+        monthlyData[monthYear] += parseFloat(payment.amount);
+      });
+      
+      // Convert to array format for the graph
+      const graphData = Object.entries(monthlyData).map(([month, total]) => ({
+        month,
+        total
+      })).sort((a, b) => a.month.localeCompare(b.month));
+      
+      return res.status(200).json({
+        success: true, 
+        data: graphData
+      });
+    } else if (error) {
+      console.error('Payment graph data error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to retrieve payment graph data' 
+      });
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      data 
+    });
+  } catch (error) {
+    console.error('Payment graph data error:', error.message);
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Failed to process payment graph data request' 
+    });
+  }
+});
+
+// API endpoint for manually adding a payment
+app.post('/api/payments/add', async (req, res) => {
+  const { siteId, amount, planType, method = 'manual', paymentDate = new Date().toISOString() } = req.body;
+  
+  // Basic validation
+  if (!siteId || !amount || !planType) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Missing required fields: siteId, amount, and planType are required' 
+    });
+  }
+
+  try {
+    // Check if the adminSupabase client is available
+    if (!adminSupabase) {
+      console.error('Supabase service role key not configured');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Database service configuration error' 
+      });
+    }
+
+    // Verify that the site exists
+    const { data: siteData, error: siteError } = await adminSupabase
+      .from('websites')
+      .select('id, user_id')
+      .eq('id', siteId)
+      .single();
+
+    if (siteError || !siteData) {
+      console.error('Site verification error:', siteError);
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Site not found' 
+      });
+    }
+
+    // Insert the payment record
+    const { data, error } = await adminSupabase
+      .from('payments')
+      .insert({
+        site_id: siteId,
+        user_id: siteData.user_id,
+        amount: parseFloat(amount),
+        status: 'completed',
+        payment_date: paymentDate,
+        plan_type: planType,
+        method
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Payment creation error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to create payment record' 
+      });
+    }
+
+    return res.status(201).json({ 
+      success: true, 
+      payment: data 
+    });
+  } catch (error) {
+    console.error('Payment creation error:', error.message);
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Failed to process payment creation' 
+    });
+  }
 }); 
