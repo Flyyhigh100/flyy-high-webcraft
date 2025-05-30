@@ -123,7 +123,7 @@ const Portfolio = () => {
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2">
-                  <div className="aspect-auto md:aspect-square overflow-hidden bg-gray-50">
+                  <div className="h-80 md:h-96 overflow-hidden bg-gray-50 flex items-center justify-center p-4">
                     {imageErrors[project.id] ? (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                         <div className="text-center p-8">
@@ -136,7 +136,7 @@ const Portfolio = () => {
                       <img 
                         src={project.imageUrl} 
                         alt={project.title}
-                        className="w-full h-full object-cover"
+                        className="max-w-full max-h-full object-contain bg-white rounded shadow-sm"
                         onError={() => handleImageError(project.id, project.imageUrl)}
                         onLoad={() => handleImageLoad(project.id, project.imageUrl)}
                         loading="lazy"

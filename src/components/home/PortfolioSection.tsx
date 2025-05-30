@@ -98,7 +98,7 @@ const PortfolioSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           {portfolioProjects.map((project) => (
             <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="aspect-video overflow-hidden bg-gray-100">
+              <div className="h-48 overflow-hidden bg-gray-100">
                 {imageErrors[project.id] ? (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                     <div className="text-center">
@@ -110,7 +110,7 @@ const PortfolioSection = () => {
                   <img
                     src={project.imageUrl}
                     alt={project.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-white"
                     onError={() => handleImageError(project.id)}
                     onLoad={() => handleImageLoad(project.id)}
                     loading="lazy"
