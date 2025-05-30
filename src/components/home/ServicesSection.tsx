@@ -1,5 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react";
 
 const services = [
   {
@@ -60,10 +61,60 @@ const services = [
 ];
 
 const ServicesSection = () => {
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const [visibleCards, setVisibleCards] = useState<number[]>([]);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const headerObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsHeaderVisible(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    const cardsObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Stagger the card animations with 100ms delay between each
+          services.forEach((_, index) => {
+            setTimeout(() => {
+              setVisibleCards(prev => [...prev, index]);
+            }, index * 100);
+          });
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (headerRef.current) {
+      headerObserver.observe(headerRef.current);
+    }
+
+    if (cardsRef.current) {
+      cardsObserver.observe(cardsRef.current);
+    }
+
+    return () => {
+      headerObserver.disconnect();
+      cardsObserver.disconnect();
+    };
+  }, []);
+
   return (
     <section className="section bg-white">
       <div className="container mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div 
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-300 ease-in-out ${
+            isHeaderVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">Services</span> We Offer
           </h2>
@@ -73,15 +124,37 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <Card key={index} className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <Card 
+              key={index} 
+              className={`
+                border border-gray-100 shadow-sm cursor-pointer
+                transition-all duration-200 ease-in-out
+                md:hover:scale-105 md:hover:shadow-lg
+                active:bg-gray-50 active:border-flyy-200 md:active:bg-white md:active:border-gray-100
+                ${visibleCards.includes(index) 
+                  ? 'opacity-100 scale-100' 
+                  : 'opacity-0 scale-95'
+                }
+              `}
+              style={{
+                transitionDelay: visibleCards.includes(index) ? '0ms' : `${index * 100}ms`,
+                willChange: 'transform, opacity'
+              }}
+            >
               <CardHeader>
-                <div className="mb-4">{service.icon}</div>
-                <CardTitle>{service.title}</CardTitle>
+                <div className="mb-4 transition-transform duration-200 ease-in-out">
+                  {service.icon}
+                </div>
+                <CardTitle className="transition-colors duration-200">
+                  {service.title}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-gray-600">{service.description}</CardDescription>
+                <CardDescription className="text-gray-600 transition-colors duration-200">
+                  {service.description}
+                </CardDescription>
               </CardContent>
             </Card>
           ))}
