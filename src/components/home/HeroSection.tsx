@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -44,7 +45,7 @@ const HeroSection = () => {
           </div>
           
           <div className="w-full lg:w-1/2 relative">
-            {/* Main browser window with website preview */}
+            {/* Main browser window with 1 Million Strong website */}
             <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 p-2 mx-auto w-full max-w-lg">
               <div className="rounded-lg overflow-hidden">
                 <div className="bg-gray-100 flex space-x-2 p-3">
@@ -52,10 +53,10 @@ const HeroSection = () => {
                   <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                   <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                 </div>
-                <div className="aspect-[16/9] bg-white flex items-center justify-center">
+                <div className="aspect-[16/9] bg-white flex items-center justify-center p-2">
                   <img 
-                    src="/lovable-uploads/603b50e7-cdb6-4645-a9af-4a479819c1b4.png" 
-                    alt="CSI Labs Trading Chart" 
+                    src="/lovable-uploads/f78b96dc-5cfb-4143-a508-fec500284300.png" 
+                    alt="1 Million Strong Fight Club" 
                     className="w-full h-full object-contain"
                   />
                 </div>
@@ -70,18 +71,35 @@ const HeroSection = () => {
               </div>
             </div>
             
-            {/* Floating elements */}
-            <div className="absolute -top-4 -right-4 md:top-8 md:right-8 bg-white p-4 rounded-lg shadow-lg animate-float">
-              <div className="text-center">
-                <div className="h-2 w-12 bg-gray-200 rounded-full mb-2"></div>
-                <div className="h-8 w-24 bg-flyy-100 rounded"></div>
+            {/* Floating CageChain website */}
+            <div className="absolute -top-4 -right-4 md:top-8 md:right-8 bg-white rounded-lg shadow-lg animate-float overflow-hidden border border-gray-100 w-48">
+              <div className="bg-gray-100 flex space-x-1 p-2">
+                <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              </div>
+              <div className="aspect-[4/3] bg-white flex items-center justify-center p-1">
+                <img 
+                  src="/lovable-uploads/008c757f-a996-4036-b788-f7dbf9fce7c7.png" 
+                  alt="CageChain" 
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
             
-            <div className="absolute -bottom-4 -left-4 md:bottom-8 md:left-8 bg-white p-4 rounded-lg shadow-lg animate-float" style={{ animationDelay: '1s' }}>
-              <div className="text-center">
-                <div className="h-2 w-16 bg-gray-200 rounded-full mb-2"></div>
-                <div className="h-8 w-20 bg-blue-100 rounded"></div>
+            {/* Floating Precision Fabricated website */}
+            <div className="absolute -bottom-4 -left-4 md:bottom-8 md:left-8 bg-white rounded-lg shadow-lg animate-float overflow-hidden border border-gray-100 w-48" style={{ animationDelay: '1s' }}>
+              <div className="bg-gray-100 flex space-x-1 p-2">
+                <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              </div>
+              <div className="aspect-[4/3] bg-white flex items-center justify-center p-1">
+                <img 
+                  src="/lovable-uploads/da2a20ea-3bc6-448d-a5c5-ff2b68b40cd3.png" 
+                  alt="Precision Fabricated" 
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           </div>
