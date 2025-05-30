@@ -7,116 +7,84 @@ import { ExternalLink } from 'lucide-react';
 const caseStudies = [
   {
     id: 1,
-    title: "Shys Luxury Hairstyles",
-    client: "Small Business",
-    category: "Small Business Website",
-    description: "Elegant website for a luxury hair styling business, showcasing services and brand identity.",
-    imageUrl: "/lovable-uploads/345c72d1-a533-4510-8208-bfff7be2dc0a.png",
-    websiteUrl: "https://shysluxuryhairstyles.com/",
-    technologies: ["React", "Tailwind CSS", "Framer Motion", "Firebase"],
-    results: [
-      "40% increase in online bookings",
-      "Improved brand perception",
-      "Mobile-friendly responsive design",
-      "Seamless appointment scheduling system"
-    ]
+    title: "1 Million Strong Fight Club",
+    client: "Healthcare Technology",
+    category: "Healthcare Technology & Investment Platform",
+    description: "Comprehensive platform showcasing affordable cancer treatments and investment opportunities in medical innovation with token-based funding.",
+    imageUrl: "/lovable-uploads/daa6998c-e30b-48e2-ae07-e2c3ad092fe3.png",
+    websiteUrl: "https://1millionstrongfightclub.com/",
+    technologies: ["React", "Blockchain", "Chart.js", "Token Integration"]
   },
   {
     id: 2,
-    title: "Hakuna Matata Business",
-    client: "Corporate Client",
-    category: "Corporate Website",
-    description: "Modern and professional website for a diverse business platform.",
-    imageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    websiteUrl: "https://hakunamatata.biz/",
-    technologies: ["TypeScript", "React", "GraphQL", "AWS"],
-    results: [
-      "65% increase in lead generation",
-      "45% increase in user engagement",
-      "30% reduction in bounce rate",
-      "Improved SEO rankings"
-    ]
+    title: "Precision Fabricated",
+    client: "Manufacturing Industry",
+    category: "Industrial Manufacturing Website",
+    description: "Professional website for a DeLand-based family-owned fabrication business dedicated to delivering quality precision components and metal fabrication solutions.",
+    imageUrl: "/lovable-uploads/26b02aca-cdfb-47c9-a83d-327fa2113e91.png",
+    websiteUrl: "https://precisionfabricated.com/",
+    technologies: ["React", "Tailwind CSS", "Quote Management", "Industrial Design"]
   },
   {
     id: 3,
-    title: "Delta Personal Service",
-    client: "Service Industry",
-    category: "Professional Services Website",
-    description: "Streamlined website for a personal services company, offering professional solutions and customer-focused services.",
-    imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    websiteUrl: "https://deltapersonalservice.biz/",
-    technologies: ["React", "Tailwind CSS", "Node.js", "MongoDB"],
-    results: [
-      "53% increase in client inquiries",
-      "Streamlined booking process",
-      "Improved service visibility",
-      "Enhanced client testimonial showcase"
-    ]
+    title: "Hakuna Matata Daycare",
+    client: "Childcare Services",
+    category: "Childcare Services Website",
+    description: "Bilingual daycare website based in Germany offering exceptional child care services, featuring colorful and engaging design perfect for families seeking quality childcare.",
+    imageUrl: "/lovable-uploads/3cb2c39d-6785-49ef-8ced-0fea332bf950.png",
+    websiteUrl: "https://hakunamatata.biz/",
+    technologies: ["React", "Multilingual Support", "Booking System", "Child-Friendly Design"]
   },
   {
     id: 4,
-    title: "Precision Fabricated",
-    client: "Manufacturing Industry",
-    category: "Industrial Services Website",
-    description: "Technical website highlighting precision fabrication services and capabilities.",
-    imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    websiteUrl: "https://precisionfabricated.com/",
-    technologies: ["Next.js", "Tailwind CSS", "Sanity CMS", "Vercel"],
-    results: [
-      "85% increase in B2B inquiries",
-      "Virtual factory tours increased customer trust",
-      "Simplified quote request process",
-      "Multilingual support expanded market reach"
-    ]
-  },
-  {
-    id: 4,
-    title: "Robinson Concrete LLC",
-    client: "Construction Services",
-    category: "Construction Services Website", 
-    description: "Professional website for a concrete services company, showcasing expertise and past projects.",
-    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    websiteUrl: "https://robinsonconcretellc.com/",
-    technologies: ["WordPress", "Elementor", "WooCommerce", "Custom PHP"],
-    results: [
-      "120% increase in quote requests",
-      "Project gallery increased customer confidence",
-      "Streamlined contact process",
-      "Improved local SEO and map visibility"
-    ]
+    title: "CageChain",
+    client: "Cryptocurrency Education",
+    category: "Cryptocurrency Learning Platform",
+    description: "Educational crypto hub providing comprehensive resources for cryptocurrency and decentralized finance (DeFi) learning, featuring interactive dashboards and trading simulators.",
+    imageUrl: "/lovable-uploads/e5d00f09-03f4-4015-8eca-dde86b4d8619.png",
+    websiteUrl: "https://cagechain.com/",
+    technologies: ["React", "Crypto APIs", "Trading Simulation", "Educational Content Management"]
   },
   {
     id: 5,
-    title: "HealthTech Patient Dashboard",
-    client: "MediCare Solutions",
-    category: "UI/UX Design / Web Application",
-    description: "A comprehensive patient management system with intuitive data visualization and secure medical records access.",
-    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    websiteUrl: "#",
-    technologies: ["TypeScript", "React", "D3.js", "Firebase"],
-    results: [
-      "Reduced admin time by 40%",
-      "Improved patient satisfaction scores by 25%",
-      "HIPAA compliant data handling",
-      "Seamless integration with existing systems"
-    ]
+    title: "Shys Luxury Hairstyles",
+    client: "Beauty Services",
+    category: "Beauty & Luxury Services Website",
+    description: "Elegant website for premium hairstyling services, featuring sophisticated design with gold accents and luxury branding to attract discerning clientele.",
+    imageUrl: "/lovable-uploads/eb18f447-dbf5-4998-9756-ab30a2da4056.png",
+    websiteUrl: "https://shysluxuryhairstyles.com/",
+    technologies: ["React", "Booking System", "Luxury Design", "Service Showcase"]
   },
   {
     id: 6,
-    title: "Educational Platform Redesign",
-    client: "LearnForward Academy",
-    category: "UX/UI Design / E-learning",
-    description: "Complete redesign of a digital learning platform, focusing on improved engagement and accessibility for diverse learning needs.",
-    imageUrl: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    websiteUrl: "#",
-    technologies: ["React", "GraphQL", "MongoDB", "AWS"],
-    results: [
-      "55% increase in lesson completion rates",
-      "Student engagement increased by 47%",
-      "Accessible design improved inclusivity for all learners",
-      "Course enrollment increased by 32%"
-    ]
+    title: "Robinson Concrete LLC",
+    client: "Construction Services",
+    category: "Construction Services Website",
+    description: "Professional website for Robinson & Sons Concrete, emphasizing customer satisfaction and quality craftsmanship in residential and commercial concrete projects.",
+    imageUrl: "/lovable-uploads/475609c9-4bb9-47a3-bb6d-c6f18598aae5.png",
+    websiteUrl: "https://robinsonconcretellc.com/",
+    technologies: ["React", "Project Gallery", "Estimate Calculator", "Local SEO"]
   },
+  {
+    id: 7,
+    title: "Home Health Service",
+    client: "Healthcare Services",
+    category: "Healthcare Services Website",
+    description: "Comprehensive home health service platform offering personalized medical care, medication management, meal preparation, and companion care throughout Volusia County.",
+    imageUrl: "/lovable-uploads/76be8827-e3f5-44df-b369-c47ef397100f.png",
+    websiteUrl: "https://www.homehealthservice.co/",
+    technologies: ["React", "Service Management", "Healthcare Compliance", "Appointment Scheduling"]
+  },
+  {
+    id: 8,
+    title: "Delta Personal Service",
+    client: "Healthcare Recruitment",
+    category: "Healthcare Recruitment Website",
+    description: "Gateway platform connecting qualified nursing professionals with German healthcare opportunities, facilitating international healthcare career placement.",
+    imageUrl: "/lovable-uploads/9e4ec9de-e4c1-4339-acb3-3bbb27536e6b.png",
+    websiteUrl: "https://deltapersonalservice.biz/",
+    technologies: ["React", "Multilingual Support", "Career Portal", "Application Management"]
+  }
 ];
 
 const Portfolio = () => {
@@ -170,25 +138,14 @@ const Portfolio = () => {
                       </div>
                     </div>
                     
-                    <div className="mb-6">
-                      <h4 className="font-medium text-lg mb-2">Results:</h4>
-                      <ul className="list-disc list-inside space-y-1 text-gray-600">
-                        {project.results.map((result, index) => (
-                          <li key={index}>{result}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    {project.websiteUrl !== "#" && (
-                      <a 
-                        href={project.websiteUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center bg-flyy-600 text-white px-6 py-3 rounded-md hover:bg-flyy-700 transition-colors w-full md:w-auto"
-                      >
-                        Visit Live Website <ExternalLink className="ml-2 w-4 h-4" />
-                      </a>
-                    )}
+                    <a 
+                      href={project.websiteUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center bg-flyy-600 text-white px-6 py-3 rounded-md hover:bg-flyy-700 transition-colors w-full md:w-auto"
+                    >
+                      Visit Live Website <ExternalLink className="ml-2 w-4 h-4" />
+                    </a>
                   </div>
                 </div>
               </div>
