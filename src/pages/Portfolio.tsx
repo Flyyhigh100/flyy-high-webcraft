@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
-// Sample case studies with more detail
+// Updated case studies with proper image paths and no results arrays
 const caseStudies = [
   {
     id: 1,
@@ -88,6 +88,17 @@ const caseStudies = [
 ];
 
 const Portfolio = () => {
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+
+  const handleImageError = (projectId: number, imageUrl: string) => {
+    console.error(`Failed to load image for project ${projectId}:`, imageUrl);
+    setImageErrors(prev => ({ ...prev, [projectId]: true }));
+  };
+
+  const handleImageLoad = (projectId: number, imageUrl: string) => {
+    console.log(`Successfully loaded image for project ${projectId}:`, imageUrl);
+  };
+
   return (
     <>
       <div className="bg-secondary/30 py-16 md:py-24">
@@ -112,12 +123,25 @@ const Portfolio = () => {
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2">
-                  <div className="aspect-auto md:aspect-square overflow-hidden">
-                    <img 
-                      src={project.imageUrl} 
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="aspect-auto md:aspect-square overflow-hidden bg-gray-50">
+                    {imageErrors[project.id] ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <div className="text-center p-8">
+                          <div className="text-6xl mb-4">🌐</div>
+                          <p className="text-gray-600 font-medium">{project.title}</p>
+                          <p className="text-gray-500 text-sm mt-2">{project.category}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <img 
+                        src={project.imageUrl} 
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                        onError={() => handleImageError(project.id, project.imageUrl)}
+                        onLoad={() => handleImageLoad(project.id, project.imageUrl)}
+                        loading="lazy"
+                      />
+                    )}
                   </div>
                   <div className="p-8">
                     <div className="flex justify-between items-start mb-2">
