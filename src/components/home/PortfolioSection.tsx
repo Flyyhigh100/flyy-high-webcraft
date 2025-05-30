@@ -10,7 +10,7 @@ const portfolioProjects = [
     title: "1 Million Strong Fight Club",
     category: "Healthcare Technology & Investment Platform",
     description: "Comprehensive platform showcasing affordable cancer treatments and investment opportunities in medical innovation with token-based funding.",
-    imageUrl: "/lovable-uploads/daa6998c-e30b-48e2-ae07-e2c3ad092fe3.png",
+    imageUrl: "/lovable-uploads/f78b96dc-5cfb-4143-a508-fec500284300.png",
     websiteUrl: "https://1millionstrongfightclub.com/",
   },
   {
@@ -18,7 +18,7 @@ const portfolioProjects = [
     title: "Precision Fabricated",
     category: "Industrial Manufacturing Website",
     description: "Professional website for a DeLand-based family-owned fabrication business dedicated to delivering quality precision components and metal fabrication solutions.",
-    imageUrl: "/lovable-uploads/26b02aca-cdfb-47c9-a83d-327fa2113e91.png",
+    imageUrl: "/lovable-uploads/da2a20ea-3bc6-448d-a5c5-ff2b68b40cd3.png",
     websiteUrl: "https://precisionfabricated.com/",
   },
   {
@@ -26,7 +26,7 @@ const portfolioProjects = [
     title: "Hakuna Matata Daycare",
     category: "Childcare Services Website",
     description: "Bilingual daycare website based in Germany offering exceptional child care services, featuring colorful and engaging design perfect for families seeking quality childcare.",
-    imageUrl: "/lovable-uploads/3cb2c39d-6785-49ef-8ced-0fea332bf950.png",
+    imageUrl: "/lovable-uploads/1a09c143-cf6f-4cb4-8a37-3000e0efa2d0.png",
     websiteUrl: "https://hakunamatata.biz/",
   },
   {
@@ -34,7 +34,7 @@ const portfolioProjects = [
     title: "CageChain",
     category: "Cryptocurrency Learning Platform",
     description: "Educational crypto hub providing comprehensive resources for cryptocurrency and decentralized finance (DeFi) learning, featuring interactive dashboards and trading simulators.",
-    imageUrl: "/lovable-uploads/e5d00f09-03f4-4015-8eca-dde86b4d8619.png",
+    imageUrl: "/lovable-uploads/008c757f-a996-4036-b788-f7dbf9fce7c7.png",
     websiteUrl: "https://cagechain.com/",
   },
   {
@@ -42,7 +42,7 @@ const portfolioProjects = [
     title: "Shys Luxury Hairstyles",
     category: "Beauty & Luxury Services Website",
     description: "Elegant website for premium hairstyling services, featuring sophisticated design with gold accents and luxury branding to attract discerning clientele.",
-    imageUrl: "/lovable-uploads/eb18f447-dbf5-4998-9756-ab30a2da4056.png",
+    imageUrl: "/lovable-uploads/455e111d-d86f-4217-893b-fd46bc580648.png",
     websiteUrl: "https://shysluxuryhairstyles.com/",
   },
   {
@@ -50,7 +50,7 @@ const portfolioProjects = [
     title: "Robinson Concrete LLC",
     category: "Construction Services Website",
     description: "Professional website for Robinson & Sons Concrete, emphasizing customer satisfaction and quality craftsmanship in residential and commercial concrete projects.",
-    imageUrl: "/lovable-uploads/475609c9-4bb9-47a3-bb6d-c6f18598aae5.png",
+    imageUrl: "/lovable-uploads/749267d4-cf51-4a6a-ab90-d223a3eaf75e.png",
     websiteUrl: "https://robinsonconcretellc.com/",
   },
   {
@@ -58,7 +58,7 @@ const portfolioProjects = [
     title: "Home Health Service",
     category: "Healthcare Services Website",
     description: "Comprehensive home health service platform offering personalized medical care, medication management, meal preparation, and companion care throughout Volusia County.",
-    imageUrl: "/lovable-uploads/76be8827-e3f5-44df-b369-c47ef397100f.png",
+    imageUrl: "/lovable-uploads/bf714f6c-c702-44a2-8f28-3021c436b234.png",
     websiteUrl: "https://www.homehealthservice.co/",
   },
   {
@@ -66,7 +66,7 @@ const portfolioProjects = [
     title: "Delta Personal Service",
     category: "Healthcare Recruitment Website",
     description: "Gateway platform connecting qualified nursing professionals with German healthcare opportunities, facilitating international healthcare career placement.",
-    imageUrl: "/lovable-uploads/9e4ec9de-e4c1-4339-acb3-3bbb27536e6b.png",
+    imageUrl: "/lovable-uploads/7352b36f-b173-4f99-80f7-13efefb6db30.png",
     websiteUrl: "https://deltapersonalservice.biz/",
   }
 ];
