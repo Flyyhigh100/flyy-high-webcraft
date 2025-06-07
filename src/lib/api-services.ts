@@ -71,7 +71,11 @@ export const createWebsite = async (websiteData: WebsiteData) => {
     const { data, error } = await supabase
       .from('websites')
       .insert({
-        ...websiteData,
+        name: websiteData.name,
+        url: websiteData.url,
+        plan_type: websiteData.planType,
+        next_payment_date: websiteData.nextPaymentDate,
+        next_payment_amount: websiteData.nextPaymentAmount,
         user_id: user.id,
         payment_status: 'current'
       })
@@ -118,9 +122,17 @@ export const getUserWebsites = async () => {
 
 export const updateWebsite = async (id: string, updates: Partial<WebsiteData>) => {
   try {
+    // Map the interface properties to database column names
+    const dbUpdates: any = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.url !== undefined) dbUpdates.url = updates.url;
+    if (updates.planType !== undefined) dbUpdates.plan_type = updates.planType;
+    if (updates.nextPaymentDate !== undefined) dbUpdates.next_payment_date = updates.nextPaymentDate;
+    if (updates.nextPaymentAmount !== undefined) dbUpdates.next_payment_amount = updates.nextPaymentAmount;
+
     const { data, error } = await supabase
       .from('websites')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .single();

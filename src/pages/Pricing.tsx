@@ -1,6 +1,7 @@
+
 import React from 'react';
 import PricingSection from '@/components/home/PricingSection';
-import DomainSearchSection from '@/components/home/DomainSearchSection';
+import { DomainSearchSection } from '@/components/home/DomainSearchSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import CTASection from '@/components/home/CTASection';
