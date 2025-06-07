@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin";
 import { 
@@ -34,73 +34,77 @@ export function useAdminData() {
   const [isLoading, setIsLoading] = useState(true);
   const { makeUserAdmin: adminRoleMutation } = useAdminRoleManagement();
   
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        console.log("Fetching admin data...");
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      console.log("Fetching admin data...");
+      
+      // Fetch profiles
+      const profilesData = await fetchProfiles();
+      setUsers(profilesData);
+      
+      // Check if payments table exists and fetch payment data
+      const paymentsTableExists = await checkPaymentsTableExists();
+      
+      if (paymentsTableExists) {
+        // Fetch completed payments
+        const completedPayments = await fetchCompletedPayments();
+        setPayments(completedPayments);
         
-        // Fetch profiles
-        const profilesData = await fetchProfiles();
-        setUsers(profilesData);
+        // Calculate revenue data
+        const calculatedRevenueData = calculateRevenueData(completedPayments);
+        setRevenueData(calculatedRevenueData);
         
-        // Check if payments table exists and fetch payment data
-        const paymentsTableExists = await checkPaymentsTableExists();
-        
-        if (paymentsTableExists) {
-          // Fetch completed payments
-          const completedPayments = await fetchCompletedPayments();
-          setPayments(completedPayments);
-          
-          // Calculate revenue data
-          const calculatedRevenueData = calculateRevenueData(completedPayments);
-          setRevenueData(calculatedRevenueData);
-          
-          // Fetch upcoming payments
-          const upcoming = await fetchUpcomingPayments();
-          setUpcomingPayments(upcoming);
-        } else {
-          console.log("Payments table does not exist yet or function failed");
-          setPayments([]);
-          setUpcomingPayments([]);
-        }
-        
-        // Check if websites table exists and fetch website data
-        const websitesTableExists = await checkWebsitesTableExists();
-        
-        if (websitesTableExists) {
-          // Fetch client websites
-          const websites = await fetchClientWebsites();
-          setClientWebsites(websites);
-        } else {
-          console.log("Websites table does not exist yet or function failed");
-          setClientWebsites([]);
-        }
-        
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load dashboard data",
-          variant: "destructive",
-        });
-        
-        // Fallback to empty data
-        setUsers([]);
+        // Fetch upcoming payments
+        const upcoming = await fetchUpcomingPayments();
+        setUpcomingPayments(upcoming);
+      } else {
+        console.log("Payments table does not exist yet or function failed");
         setPayments([]);
         setUpcomingPayments([]);
-        setClientWebsites([]);
-      } finally {
-        setIsLoading(false);
       }
-    };
-    
-    fetchData();
+      
+      // Check if websites table exists and fetch website data
+      const websitesTableExists = await checkWebsitesTableExists();
+      
+      if (websitesTableExists) {
+        // Fetch client websites
+        const websites = await fetchClientWebsites();
+        setClientWebsites(websites);
+      } else {
+        console.log("Websites table does not exist yet or function failed");
+        setClientWebsites([]);
+      }
+      
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive",
+      });
+      
+      // Fallback to empty data
+      setUsers([]);
+      setPayments([]);
+      setUpcomingPayments([]);
+      setClientWebsites([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [toast]);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
   
   const makeUserAdmin = async (userId: string) => {
     await adminRoleMutation(userId, users, setUsers);
   };
+  
+  const refreshData = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
   
   return {
     users,
@@ -110,6 +114,7 @@ export function useAdminData() {
     clientWebsites,
     isLoading,
     revenueData,
-    makeUserAdmin
+    makeUserAdmin,
+    refreshData
   };
 }

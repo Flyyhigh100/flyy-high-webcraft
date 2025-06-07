@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { ClientWebsiteTable } from './ClientWebsiteTable';
 import { ClientWebsiteDetails } from './ClientWebsiteDetails';
+import { PaymentCollectionTools } from '../PaymentCollectionTools';
 import { ClientWebsite } from "@/types/admin";
 import { useAdminData } from "@/hooks/useAdminData";
 
 export function ClientWebsiteList() {
-  const { clientWebsites, isLoading } = useAdminData();
+  const { clientWebsites, isLoading, refreshData } = useAdminData();
   const [selectedClient, setSelectedClient] = useState<ClientWebsite | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
@@ -42,9 +43,12 @@ export function ClientWebsiteList() {
   
   return (
     <>
+      <PaymentCollectionTools onRefresh={refreshData} />
+      
       <ClientWebsiteTable 
         clients={sortedClients}
         onViewDetails={handleViewDetails}
+        onRefresh={refreshData}
       />
       
       <ClientWebsiteDetails 

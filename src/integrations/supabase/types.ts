@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      payment_reminders: {
+        Row: {
+          amount_due: number | null
+          created_at: string | null
+          email_status: string | null
+          id: string
+          reminder_type: string
+          sent_at: string | null
+          site_id: string | null
+        }
+        Insert: {
+          amount_due?: number | null
+          created_at?: string | null
+          email_status?: string | null
+          id?: string
+          reminder_type: string
+          sent_at?: string | null
+          site_id?: string | null
+        }
+        Update: {
+          amount_due?: number | null
+          created_at?: string | null
+          email_status?: string | null
+          id?: string
+          reminder_type?: string
+          sent_at?: string | null
+          site_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -124,33 +162,45 @@ export type Database = {
       websites: {
         Row: {
           created_at: string | null
+          grace_period_end_date: string | null
           id: string
+          last_payment_reminder_sent: string | null
           name: string
           next_payment_amount: number | null
           next_payment_date: string | null
+          payment_status: string | null
           plan_type: string
+          suspension_date: string | null
           updated_at: string | null
           url: string
           user_id: string | null
         }
         Insert: {
           created_at?: string | null
+          grace_period_end_date?: string | null
           id?: string
+          last_payment_reminder_sent?: string | null
           name: string
           next_payment_amount?: number | null
           next_payment_date?: string | null
+          payment_status?: string | null
           plan_type: string
+          suspension_date?: string | null
           updated_at?: string | null
           url: string
           user_id?: string | null
         }
         Update: {
           created_at?: string | null
+          grace_period_end_date?: string | null
           id?: string
+          last_payment_reminder_sent?: string | null
           name?: string
           next_payment_amount?: number | null
           next_payment_date?: string | null
+          payment_status?: string | null
           plan_type?: string
+          suspension_date?: string | null
           updated_at?: string | null
           url?: string
           user_id?: string | null
@@ -172,6 +222,10 @@ export type Database = {
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      update_payment_statuses: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       websites_table_exists: {
         Args: Record<PropertyKey, never>

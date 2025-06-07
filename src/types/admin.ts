@@ -26,6 +26,10 @@ export interface ClientWebsite {
   planType: string;
   nextPaymentDate: string;
   nextPaymentAmount: number;
+  paymentStatus?: string;
+  lastPaymentReminderSent?: string;
+  gracePeriodEndDate?: string;
+  suspensionDate?: string;
 }
 
 export interface RevenueData {
