@@ -41,25 +41,36 @@ export const checkWebsitesTableExists = async (): Promise<boolean> => {
 };
 
 export const fetchCompletedPayments = async (): Promise<Payment[]> => {
-  const { data, error } = await supabase
+  // First fetch payments
+  const { data: paymentsData, error: paymentsError } = await supabase
     .from('payments')
-    .select(`
-      *,
-      profiles!payments_user_id_fkey(email)
-    `)
+    .select('*')
     .eq('status', 'completed')
     .order('payment_date', { ascending: false });
   
-  if (error) {
-    console.error('Error fetching completed payments:', error);
-    throw error;
+  if (paymentsError) {
+    console.error('Error fetching completed payments:', paymentsError);
+    throw paymentsError;
   }
+
+  // Then fetch profiles to get email addresses
+  const { data: profilesData, error: profilesError } = await supabase
+    .from('profiles')
+    .select('user_id, email');
+  
+  if (profilesError) {
+    console.error('Error fetching profiles:', profilesError);
+    throw profilesError;
+  }
+
+  // Create a map of user_id to email for quick lookup
+  const emailMap = new Map(profilesData?.map(profile => [profile.user_id, profile.email]) || []);
   
   // Transform the data to match the Payment interface
-  return (data || []).map(payment => ({
+  return (paymentsData || []).map(payment => ({
     id: payment.id,
     user_id: payment.user_id,
-    user_email: payment.profiles?.email || 'Unknown',
+    user_email: emailMap.get(payment.user_id) || 'Unknown',
     amount: payment.amount,
     status: payment.status,
     payment_date: payment.payment_date,
@@ -68,31 +79,37 @@ export const fetchCompletedPayments = async (): Promise<Payment[]> => {
 };
 
 export const fetchUpcomingPayments = async (): Promise<Payment[]> => {
-  const { data, error } = await supabase
+  // First fetch websites with upcoming payments
+  const { data: websitesData, error: websitesError } = await supabase
     .from('websites')
-    .select(`
-      id,
-      name,
-      next_payment_date,
-      next_payment_amount,
-      plan_type,
-      payment_status,
-      profiles!websites_user_id_fkey(email)
-    `)
+    .select('*')
     .not('next_payment_date', 'is', null)
     .gte('next_payment_date', new Date().toISOString().split('T')[0])
     .order('next_payment_date', { ascending: true });
   
-  if (error) {
-    console.error('Error fetching upcoming payments:', error);
-    throw error;
+  if (websitesError) {
+    console.error('Error fetching upcoming payments:', websitesError);
+    throw websitesError;
   }
+
+  // Then fetch profiles to get email addresses
+  const { data: profilesData, error: profilesError } = await supabase
+    .from('profiles')
+    .select('user_id, email');
+  
+  if (profilesError) {
+    console.error('Error fetching profiles:', profilesError);
+    throw profilesError;
+  }
+
+  // Create a map of user_id to email for quick lookup
+  const emailMap = new Map(profilesData?.map(profile => [profile.user_id, profile.email]) || []);
   
   // Transform the data to match the Payment interface
-  return (data || []).map(website => ({
+  return (websitesData || []).map(website => ({
     id: website.id,
-    user_id: website.id, // Using website id as user_id for compatibility
-    user_email: website.profiles?.email || 'Unknown',
+    user_id: website.user_id || website.id, // Fallback to website id if user_id is null
+    user_email: emailMap.get(website.user_id) || 'Unknown',
     amount: website.next_payment_amount || 0,
     status: 'pending',
     payment_date: website.next_payment_date,
