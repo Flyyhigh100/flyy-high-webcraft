@@ -67,7 +67,7 @@ const Navbar = () => {
     <nav className="py-4 border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center">
-          <span className="text-2xl font-bold gradient-text">Flyy High A.I.</span>
+          <span className="text-2xl font-bold syde-vault-logo">Syde Vault</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -76,7 +76,7 @@ const Navbar = () => {
             <Link
               key={link.href}
               to={link.href}
-              className="text-gray-700 hover:text-flyy-600 font-medium flex items-center"
+              className="text-gray-700 hover:text-yellow-600 font-medium flex items-center"
             >
               {link.icon && <link.icon className="mr-1 h-4 w-4" />}
               {link.label}
@@ -95,13 +95,13 @@ const Navbar = () => {
           )}
           
           {user ? (
-            <Button onClick={handleSignOut} className="bg-flyy-600 hover:bg-flyy-700 transition-all">
+            <Button onClick={handleSignOut} className="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white transition-all">
               Sign Out
             </Button>
           ) : (
             <Button 
               onClick={() => navigate('/login')} 
-              className="bg-flyy-600 hover:bg-flyy-700 transition-all"
+              className="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white transition-all"
             >
               Client Login
             </Button>
@@ -112,7 +112,7 @@ const Navbar = () => {
         <div className="md:hidden">
           <button 
             onClick={toggleMobileMenu}
-            className="text-gray-700 hover:text-flyy-600 focus:outline-none"
+            className="text-gray-700 hover:text-yellow-600 focus:outline-none"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -127,7 +127,7 @@ const Navbar = () => {
               <Link
                 key={link.href}
                 to={link.href}
-                className="text-gray-700 hover:text-flyy-600 font-medium px-4 py-2 flex items-center"
+                className="text-gray-700 hover:text-yellow-600 font-medium px-4 py-2 flex items-center"
                 onClick={toggleMobileMenu}
               >
                 {link.icon && <link.icon className="mr-2 h-4 w-4" />}
@@ -154,7 +154,7 @@ const Navbar = () => {
                     handleSignOut();
                     setMobileMenuOpen(false);
                   }} 
-                  className="w-full bg-flyy-600 hover:bg-flyy-700 transition-all"
+                  className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white transition-all"
                 >
                   Sign Out
                 </Button>
@@ -164,7 +164,7 @@ const Navbar = () => {
                     navigate('/login');
                     setMobileMenuOpen(false);
                   }} 
-                  className="w-full bg-flyy-600 hover:bg-flyy-700 transition-all"
+                  className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white transition-all"
                 >
                   Client Login
                 </Button>

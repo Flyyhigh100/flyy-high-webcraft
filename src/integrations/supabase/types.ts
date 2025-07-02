@@ -223,6 +223,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      table_exists: {
+        Args: { table_name: string; schema_name?: string }
+        Returns: boolean
+      }
       update_payment_statuses: {
         Args: Record<PropertyKey, never>
         Returns: undefined

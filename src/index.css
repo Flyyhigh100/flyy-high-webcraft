@@ -78,6 +78,16 @@
   .gradient-text {
     @apply bg-gradient-to-r from-flyy-600 to-blue-600 bg-clip-text text-transparent;
   }
+  .syde-vault-logo {
+    background: linear-gradient(135deg, #D4AF37 0%, #FFD700 30%, #F4E87B 50%, #D4AF37 70%, #B8860B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
   .container {
     @apply px-4 md:px-6 lg:px-8;
   }

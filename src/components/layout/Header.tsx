@@ -36,22 +36,22 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-primary">
-            Flyy High
+          <Link to="/" className="text-2xl font-bold syde-vault-logo">
+            Syde Vault
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/services" className="text-gray-600 hover:text-primary">
+            <Link to="/services" className="text-gray-600 hover:text-yellow-600">
               Services
             </Link>
-            <Link to="/portfolio" className="text-gray-600 hover:text-primary">
+            <Link to="/portfolio" className="text-gray-600 hover:text-yellow-600">
               Portfolio
             </Link>
-            <Link to="/pricing" className="text-gray-600 hover:text-primary">
+            <Link to="/pricing" className="text-gray-600 hover:text-yellow-600">
               Pricing
             </Link>
-            <Link to="/contact" className="text-gray-600 hover:text-primary">
+            <Link to="/contact" className="text-gray-600 hover:text-yellow-600">
               Contact
             </Link>
             
@@ -130,28 +130,28 @@ export function Header() {
           <nav className="md:hidden pt-4 pb-2 space-y-4">
             <Link
               to="/services"
-              className="block py-2 text-gray-600 hover:text-primary"
+              className="block py-2 text-gray-600 hover:text-yellow-600"
               onClick={() => setMenuOpen(false)}
             >
               Services
             </Link>
             <Link
               to="/portfolio"
-              className="block py-2 text-gray-600 hover:text-primary"
+              className="block py-2 text-gray-600 hover:text-yellow-600"
               onClick={() => setMenuOpen(false)}
             >
               Portfolio
             </Link>
             <Link
               to="/pricing"
-              className="block py-2 text-gray-600 hover:text-primary"
+              className="block py-2 text-gray-600 hover:text-yellow-600"
               onClick={() => setMenuOpen(false)}
             >
               Pricing
             </Link>
             <Link
               to="/contact"
-              className="block py-2 text-gray-600 hover:text-primary"
+              className="block py-2 text-gray-600 hover:text-yellow-600"
               onClick={() => setMenuOpen(false)}
             >
               Contact
@@ -162,7 +162,7 @@ export function Header() {
               <>
                 <Link
                   to="/dashboard"
-                  className="block py-2 text-gray-600 hover:text-primary"
+                  className="block py-2 text-gray-600 hover:text-yellow-600"
                   onClick={() => setMenuOpen(false)}
                 >
                   Dashboard
@@ -182,7 +182,7 @@ export function Header() {
                     handleSignOut();
                     setMenuOpen(false);
                   }}
-                  className="block w-full text-left py-2 text-gray-600 hover:text-primary"
+                  className="block w-full text-left py-2 text-gray-600 hover:text-yellow-600"
                 >
                   Log Out
                 </button>
