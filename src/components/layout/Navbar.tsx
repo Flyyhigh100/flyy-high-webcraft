@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -69,7 +70,7 @@ const Navbar = () => {
           <img 
             src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
             alt="Syde Vault" 
-            className="h-16 w-auto md:h-20"
+            className="h-24 w-auto md:h-32 lg:h-36"
           />
         </Link>
 
@@ -124,7 +125,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-20 inset-x-0 bg-white shadow-md z-50">
+        <div className="md:hidden absolute top-28 inset-x-0 bg-white shadow-md z-50">
           <div className="container mx-auto py-4 flex flex-col space-y-4">
             {links.map((link) => (
               <Link

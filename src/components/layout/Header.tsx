@@ -40,7 +40,7 @@ export function Header() {
             <img 
               src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
               alt="Syde Vault" 
-              className="h-16 w-auto md:h-20"
+              className="h-24 w-auto md:h-32 lg:h-36"
             />
           </Link>
 
