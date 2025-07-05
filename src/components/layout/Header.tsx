@@ -36,8 +36,12 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold syde-vault-logo">
-            Syde Vault
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
+              alt="Syde Vault" 
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
