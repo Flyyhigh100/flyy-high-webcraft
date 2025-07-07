@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 const ContactForm = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    name: 'John Smith',
+    name: '',
     email: '',
     company: '',
     subject: '',
@@ -35,7 +35,7 @@ const ContactForm = () => {
         description: "Thank you for reaching out. We'll get back to you shortly.",
       });
       setFormData({
-        name: 'John Smith',
+        name: '',
         email: '',
         company: '',
         subject: '',
