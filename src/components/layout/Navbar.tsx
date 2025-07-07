@@ -45,7 +45,7 @@ const Navbar = () => {
     }
   }, [isAdmin, user]);
 
-  // Update the links array to include the dashboard link
+  // Update the links array to include the home link
   const links: NavLink[] = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },

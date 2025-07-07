@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to admin
     const adminEmailResponse = await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>",
-      to: ["admin@flyyhigh.com"], // Replace with your admin email
+      to: ["operations@sydevault.com"],
       subject: `New Contact Form Submission: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to user
     const confirmationEmailResponse = await resend.emails.send({
-      from: "Flyy High <onboarding@resend.dev>",
+      from: "Syde Vault <onboarding@resend.dev>",
       to: [email],
       subject: "Thank you for contacting us!",
       html: `
@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p><strong>Your message:</strong></p>
             <p style="white-space: pre-wrap;">${message}</p>
           </div>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The Syde Vault Team</p>
         </div>
       `,
     });

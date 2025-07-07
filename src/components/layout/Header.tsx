@@ -46,6 +46,9 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="text-gray-600 hover:text-yellow-600">
+              Home
+            </Link>
             <Link to="/services" className="text-gray-600 hover:text-yellow-600">
               Services
             </Link>
@@ -132,6 +135,13 @@ export function Header() {
         {/* Mobile Navigation */}
         {menuOpen && (
           <nav className="md:hidden pt-4 pb-2 space-y-4">
+            <Link
+              to="/"
+              className="block py-2 text-gray-600 hover:text-yellow-600"
+              onClick={() => setMenuOpen(false)}
+            >
+              Home
+            </Link>
             <Link
               to="/services"
               className="block py-2 text-gray-600 hover:text-yellow-600"
