@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const CTASection = () => {
   return (
-    <section className="py-20 bg-gradient-to-br from-flyy-600 to-flyy-900 text-white">
+    <section className="py-20 bg-gradient-to-br from-primary to-accent text-primary-foreground">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -14,10 +14,10 @@ const CTASection = () => {
             Let's create a website that works as hard as you do. Get in touch today for a free consultation.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button className="bg-white text-flyy-800 hover:bg-gray-100 px-8 py-6 text-lg">
+            <Button className="bg-background text-foreground hover:bg-muted px-8 py-6 text-lg font-semibold shadow-lg">
               Get Started
             </Button>
-            <Button variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg">
+            <Button variant="outline" className="border-2 border-background text-background hover:bg-background hover:text-foreground px-8 py-6 text-lg font-semibold">
               <Link to="/contact">Contact Us</Link>
             </Button>
           </div>
