@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ClientWebsiteTable } from './ClientWebsiteTable';
 import { ClientWebsiteDetails } from './ClientWebsiteDetails';
 import { PaymentCollectionTools } from '../PaymentCollectionTools';
+import { ClientInviteModal } from '../ClientInviteModal';
 import { ClientWebsite } from "@/types/admin";
 import { useAdminData } from "@/hooks/useAdminData";
 
@@ -43,6 +44,14 @@ export function ClientWebsiteList() {
   
   return (
     <>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Client Websites</h2>
+          <p className="text-gray-500">Manage client websites and invitations</p>
+        </div>
+        <ClientInviteModal onRefresh={refreshData} />
+      </div>
+      
       <PaymentCollectionTools onRefresh={refreshData} />
       
       <ClientWebsiteTable 

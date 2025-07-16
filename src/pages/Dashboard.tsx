@@ -10,6 +10,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import DomainManager from "@/components/dashboard/DomainManager";
+import { SubscriptionManager } from "@/components/dashboard/SubscriptionManager";
 
 export default function Dashboard() {
   const { user, isLoading, isAdmin, checkAdminStatus } = useAuth();
@@ -177,47 +179,13 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">You don't have any websites yet.</p>
-                <Button>Create Your First Website</Button>
-              </div>
+              <DomainManager />
             </CardContent>
           </Card>
         </TabsContent>
         
         <TabsContent value="billing">
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Billing Information</CardTitle>
-              <CardDescription>
-                Manage your subscription and payment methods
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Current Plan</h3>
-                  <div className="bg-primary/10 p-4 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">Free Plan</p>
-                        <p className="text-sm text-gray-500">Basic features and functionality</p>
-                      </div>
-                      <Button>Upgrade</Button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Payment Methods</h3>
-                  <p className="text-gray-500">No payment methods added yet.</p>
-                  <Button variant="outline" className="mt-4">
-                    Add Payment Method
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <SubscriptionManager />
         </TabsContent>
         
         <TabsContent value="settings">

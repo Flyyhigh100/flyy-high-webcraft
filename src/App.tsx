@@ -13,7 +13,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import AdminAccess from "./pages/AdminAccess";
+import ClientOnboarding from "./pages/ClientOnboarding";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -56,7 +56,7 @@ const App = () => (
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/admin-access" element={<AdminAccess />} />
+                <Route path="/client-onboarding" element={<ClientOnboarding />} />
                 {/* Add more protected routes here */}
               </Route>
             </Route>

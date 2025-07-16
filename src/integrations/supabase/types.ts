@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_invitations: {
+        Row: {
+          client_name: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invite_token: string
+          invited_by: string | null
+          plan_type: string
+          site_id: string | null
+          status: string | null
+          used_at: string | null
+          website_name: string
+          website_url: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invite_token: string
+          invited_by?: string | null
+          plan_type: string
+          site_id?: string | null
+          status?: string | null
+          used_at?: string | null
+          website_name: string
+          website_url: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invite_token?: string
+          invited_by?: string | null
+          plan_type?: string
+          site_id?: string | null
+          status?: string | null
+          used_at?: string | null
+          website_name?: string
+          website_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_invitations_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string
+          html_content: string
+          id: string
+          name: string
+          subject: string
+          updated_at: string
+          variables: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          html_content: string
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          html_content?: string
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Relationships: []
+      }
       payment_reminders: {
         Row: {
           amount_due: number | null
@@ -125,6 +211,62 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          current_period_end: string
+          current_period_start: string
+          id: string
+          plan_type: string
+          site_id: string | null
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          current_period_end: string
+          current_period_start: string
+          id?: string
+          plan_type: string
+          site_id?: string | null
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          plan_type?: string
+          site_id?: string | null
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_tickets: {
         Row: {
