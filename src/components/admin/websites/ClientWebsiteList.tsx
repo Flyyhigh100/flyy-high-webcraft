@@ -4,8 +4,12 @@ import { ClientWebsiteTable } from './ClientWebsiteTable';
 import { ClientWebsiteDetails } from './ClientWebsiteDetails';
 import { PaymentCollectionTools } from '../PaymentCollectionTools';
 import { ClientInviteModal } from '../ClientInviteModal';
+import { BulkClientImport } from '../BulkClientImport';
+import { EmailTemplateManager } from '../EmailTemplateManager';
+import { EnhancedPaymentReminders } from '../EnhancedPaymentReminders';
 import { ClientWebsite } from "@/types/admin";
 import { useAdminData } from "@/hooks/useAdminData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function ClientWebsiteList() {
   const { clientWebsites, isLoading, refreshData } = useAdminData();
@@ -43,28 +47,51 @@ export function ClientWebsiteList() {
   }
   
   return (
-    <>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold">Client Websites</h2>
-          <p className="text-gray-500">Manage client websites and invitations</p>
+    <Tabs defaultValue="websites" className="w-full">
+      <TabsList className="mb-6">
+        <TabsTrigger value="websites">Client Websites</TabsTrigger>
+        <TabsTrigger value="import">Bulk Import</TabsTrigger>
+        <TabsTrigger value="reminders">Payment Reminders</TabsTrigger>
+        <TabsTrigger value="templates">Email Templates</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="websites">
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold">Client Websites</h2>
+              <p className="text-gray-500">Manage client websites and invitations</p>
+            </div>
+            <ClientInviteModal onRefresh={refreshData} />
+          </div>
+          
+          <PaymentCollectionTools onRefresh={refreshData} />
+          
+          <ClientWebsiteTable 
+            clients={sortedClients}
+            onViewDetails={handleViewDetails}
+            onRefresh={refreshData}
+          />
         </div>
-        <ClientInviteModal onRefresh={refreshData} />
-      </div>
-      
-      <PaymentCollectionTools onRefresh={refreshData} />
-      
-      <ClientWebsiteTable 
-        clients={sortedClients}
-        onViewDetails={handleViewDetails}
-        onRefresh={refreshData}
-      />
-      
+      </TabsContent>
+
+      <TabsContent value="import">
+        <BulkClientImport onRefresh={refreshData} />
+      </TabsContent>
+
+      <TabsContent value="reminders">
+        <EnhancedPaymentReminders />
+      </TabsContent>
+
+      <TabsContent value="templates">
+        <EmailTemplateManager />
+      </TabsContent>
+
       <ClientWebsiteDetails 
         client={selectedClient}
         isOpen={isDetailOpen}
         onClose={handleCloseDetails}
       />
-    </>
+    </Tabs>
   );
 }
