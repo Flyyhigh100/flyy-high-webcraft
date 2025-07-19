@@ -38,13 +38,7 @@ export function ClientWebsiteList() {
     );
   }
   
-  if (sortedClients.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        No client websites found. Please check your database connection.
-      </div>
-    );
-  }
+  // Don't return early if no clients - we want to show the invite button
   
   return (
     <Tabs defaultValue="websites" className="w-full">

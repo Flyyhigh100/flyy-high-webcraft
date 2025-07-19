@@ -18,6 +18,14 @@ interface ClientWebsiteTableProps {
 export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: ClientWebsiteTableProps) {
   const { toast } = useToast();
 
+  if (clients.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No client websites found. Use the "Invite Client" button above to add your first client.
+      </div>
+    );
+  }
+
   const handleSendReminder = async (client: ClientWebsite, reminderType: '3_day' | '7_day' | '14_day' | '30_day' | 'final_notice') => {
     try {
       await sendPaymentReminder({
