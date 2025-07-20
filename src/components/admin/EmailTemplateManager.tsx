@@ -19,36 +19,35 @@ interface EmailTemplate {
 }
 
 const DEFAULT_TEMPLATES = {
-  'payment-reminder': {
-    name: 'Payment Reminder',
-    subject: 'Payment Due - {{clientName}} Website',
+  'client-invitation': {
+    name: 'Client Invitation',
+    subject: 'Welcome to SydeVault - Manage Your Website',
     html_content: `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-    <h1 style="color: white; margin: 0;">Payment Reminder</h1>
+    <h1 style="color: white; margin: 0;">Welcome to SydeVault</h1>
   </div>
   
   <div style="padding: 30px; background: #f9fafb;">
     <h2 style="color: #1f2937;">Hi {{clientName}},</h2>
     
     <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-      This is a friendly reminder that your payment for <strong>{{websiteName}}</strong> is due.
+      You've been invited to manage your website <strong>{{websiteName}}</strong> through our platform.
     </p>
     
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb;">
-      <h3 style="margin: 0 0 10px 0; color: #1f2937;">Payment Details:</h3>
+      <h3 style="margin: 0 0 10px 0; color: #1f2937;">Your Website Details:</h3>
       <p style="margin: 5px 0; color: #4b5563;"><strong>Website:</strong> {{websiteName}}</p>
-      <p style="margin: 5px 0; color: #4b5563;"><strong>Amount Due:</strong> $` + `{{paymentAmount}}` + `</p>
-      <p style="margin: 5px 0; color: #4b5563;"><strong>Due Date:</strong> {{dueDate}}</p>
+      <p style="margin: 5px 0; color: #4b5563;"><strong>URL:</strong> {{websiteUrl}}</p>
       <p style="margin: 5px 0; color: #4b5563;"><strong>Plan:</strong> {{planType}}</p>
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="{{paymentLink}}" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Make Payment</a>
+      <a href="{{invitationLink}}" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Create Your Account</a>
     </div>
     
     <p style="color: #6b7280; font-size: 14px;">
-      If you have any questions, please don't hesitate to contact us.
+      Click the button above to create your account and start managing your website.
     </p>
     
     <p style="color: #6b7280; font-size: 14px;">
@@ -57,48 +56,136 @@ const DEFAULT_TEMPLATES = {
     </p>
   </div>
 </div>`,
-    variables: ['clientName', 'websiteName', 'paymentAmount', 'dueDate', 'planType', 'paymentLink']
+    variables: ['clientName', 'websiteName', 'websiteUrl', 'planType', 'invitationLink']
   },
-  'payment-overdue': {
-    name: 'Payment Overdue Notice',
-    subject: 'URGENT: Payment Overdue - {{websiteName}}',
+  'payment-reminder-3day': {
+    name: '3-Day Payment Reminder',
+    subject: 'Friendly Reminder - Payment Due Soon for {{websiteName}}',
+    html_content: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center;">
+    <h1 style="color: white; margin: 0;">Payment Due Soon</h1>
+  </div>
+  
+  <div style="padding: 30px; background: #fffbeb;">
+    <h2 style="color: #92400e;">Hi {{clientName}},</h2>
+    
+    <p style="color: #78350f; font-size: 16px; line-height: 1.6;">
+      Your payment for <strong>{{websiteName}}</strong> is due in 3 days.
+    </p>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fbbf24;">
+      <h3 style="margin: 0 0 10px 0; color: #92400e;">Payment Details:</h3>
+      <p style="margin: 5px 0; color: #78350f;"><strong>Website:</strong> {{websiteName}}</p>
+      <p style="margin: 5px 0; color: #78350f;"><strong>Amount Due:</strong> $` + `{{paymentAmount}}` + `</p>
+      <p style="margin: 5px 0; color: #78350f;"><strong>Due Date:</strong> {{dueDate}}</p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{paymentLink}}" style="background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Make Payment</a>
+    </div>
+  </div>
+</div>`,
+    variables: ['clientName', 'websiteName', 'paymentAmount', 'dueDate', 'paymentLink']
+  },
+  'payment-reminder-7day': {
+    name: '7-Day Payment Overdue',
+    subject: 'Payment Overdue - {{websiteName}} - Action Required',
+    html_content: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  <div style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); padding: 30px; text-align: center;">
+    <h1 style="color: white; margin: 0;">Payment Overdue</h1>
+  </div>
+  
+  <div style="padding: 30px; background: #fff7ed;">
+    <h2 style="color: #c2410c;">Hi {{clientName}},</h2>
+    
+    <p style="color: #9a3412; font-size: 16px; line-height: 1.6;">
+      Your payment for <strong>{{websiteName}}</strong> is now 7 days overdue.
+    </p>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #fed7aa;">
+      <h3 style="margin: 0 0 10px 0; color: #c2410c;">Overdue Payment:</h3>
+      <p style="margin: 5px 0; color: #9a3412;"><strong>Amount Due:</strong> $` + `{{paymentAmount}}` + `</p>
+      <p style="margin: 5px 0; color: #9a3412;"><strong>Days Overdue:</strong> {{daysOverdue}}</p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{paymentLink}}" style="background: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Pay Now</a>
+    </div>
+  </div>
+</div>`,
+    variables: ['clientName', 'websiteName', 'paymentAmount', 'daysOverdue', 'paymentLink']
+  },
+  'payment-reminder-14day': {
+    name: '14-Day Payment Overdue',
+    subject: 'URGENT: Payment 14 Days Overdue - {{websiteName}}',
     html_content: `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px; text-align: center;">
-    <h1 style="color: white; margin: 0;">⚠️ Payment Overdue</h1>
+    <h1 style="color: white; margin: 0;">⚠️ URGENT: Payment Overdue</h1>
   </div>
   
   <div style="padding: 30px; background: #fef2f2;">
     <h2 style="color: #dc2626;">Hi {{clientName}},</h2>
     
     <p style="color: #991b1b; font-size: 16px; line-height: 1.6; font-weight: bold;">
-      Your payment for <strong>{{websiteName}}</strong> is now overdue.
+      Your payment for <strong>{{websiteName}}</strong> is now 14 days overdue.
     </p>
     
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #fca5a5;">
-      <h3 style="margin: 0 0 10px 0; color: #dc2626;">Overdue Payment:</h3>
-      <p style="margin: 5px 0; color: #991b1b;"><strong>Website:</strong> {{websiteName}}</p>
+      <h3 style="margin: 0 0 10px 0; color: #dc2626;">Critical Payment Notice:</h3>
       <p style="margin: 5px 0; color: #991b1b;"><strong>Amount Due:</strong> $` + `{{paymentAmount}}` + `</p>
       <p style="margin: 5px 0; color: #991b1b;"><strong>Days Overdue:</strong> {{daysOverdue}}</p>
-      <p style="margin: 5px 0; color: #991b1b;"><strong>Original Due Date:</strong> {{dueDate}}</p>
     </div>
     
     <div style="background: #fee2e2; padding: 15px; border-radius: 6px; margin: 20px 0;">
       <p style="color: #991b1b; margin: 0; font-weight: bold;">
-        To avoid service interruption, please make your payment immediately.
+        Service suspension may occur if payment is not received soon.
       </p>
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="{{paymentLink}}" style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Pay Now</a>
+      <a href="{{paymentLink}}" style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Pay Immediately</a>
     </div>
-    
-    <p style="color: #991b1b; font-size: 14px;">
-      If you have any questions or need to discuss payment arrangements, please contact us immediately.
-    </p>
   </div>
 </div>`,
-    variables: ['clientName', 'websiteName', 'paymentAmount', 'daysOverdue', 'dueDate', 'paymentLink']
+    variables: ['clientName', 'websiteName', 'paymentAmount', 'daysOverdue', 'paymentLink']
+  },
+  'payment-reminder-30day': {
+    name: '30-Day Final Notice',
+    subject: 'FINAL NOTICE: Payment 30 Days Overdue - Service Suspension Imminent',
+    html_content: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  <div style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%); padding: 30px; text-align: center;">
+    <h1 style="color: white; margin: 0;">🚨 FINAL NOTICE</h1>
+  </div>
+  
+  <div style="padding: 30px; background: #fef1f1;">
+    <h2 style="color: #7f1d1d;">Hi {{clientName}},</h2>
+    
+    <p style="color: #7f1d1d; font-size: 16px; line-height: 1.6; font-weight: bold;">
+      This is your FINAL NOTICE for <strong>{{websiteName}}</strong>.
+    </p>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 3px solid #dc2626;">
+      <h3 style="margin: 0 0 10px 0; color: #7f1d1d;">FINAL NOTICE:</h3>
+      <p style="margin: 5px 0; color: #7f1d1d;"><strong>Amount Due:</strong> $` + `{{paymentAmount}}` + `</p>
+      <p style="margin: 5px 0; color: #7f1d1d;"><strong>Days Overdue:</strong> {{daysOverdue}}</p>
+    </div>
+    
+    <div style="background: #dc2626; color: white; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center;">
+      <p style="margin: 0; font-weight: bold; font-size: 18px;">
+        SERVICE WILL BE SUSPENDED WITHOUT IMMEDIATE PAYMENT
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{paymentLink}}" style="background: #7f1d1d; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">PAY NOW TO AVOID SUSPENSION</a>
+    </div>
+  </div>
+</div>`,
+    variables: ['clientName', 'websiteName', 'paymentAmount', 'daysOverdue', 'paymentLink']
   }
 };
 

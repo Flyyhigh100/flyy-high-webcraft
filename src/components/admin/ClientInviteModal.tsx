@@ -140,7 +140,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
               </Label>
               <Input
                 id="websiteUrl"
-                type="url"
+                placeholder="https://example.com or www.example.com"
                 value={formData.websiteUrl}
                 onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
                 className="col-span-3"
