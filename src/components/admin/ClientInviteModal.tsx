@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,7 +38,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           name: formData.websiteName,
           url: formData.websiteUrl,
           plan_type: formData.planType,
-          payment_status: 'pending_setup',
           next_payment_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
         })
         .select()
