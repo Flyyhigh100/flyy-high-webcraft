@@ -83,9 +83,15 @@ serve(async (req) => {
 
     if (inviteError) throw new Error(`Failed to create invitation: ${inviteError.message}`);
 
-    const resend = new Resend(resendKey);
+    // Get email template from database
+    const { data: template, error: templateError } = await supabaseClient
+      .from('email_templates')
+      .select('subject, html_content')
+      .eq('name', 'Client Invitation')
+      .single();
 
-    const emailHtml = `
+    let emailSubject = `You're invited to join our hosting platform - ${websiteName}`;
+    let emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #DAA520; text-align: center;">Welcome to Our Hosting Platform</h1>
         
@@ -126,14 +132,33 @@ serve(async (req) => {
       </div>
     `;
 
+    // Use template if available
+    if (template && !templateError) {
+      logStep("Using database email template");
+      emailSubject = template.subject.replace('{{websiteName}}', websiteName);
+      emailHtml = template.html_content
+        .replace(/\{\{clientName\}\}/g, clientName)
+        .replace(/\{\{websiteName\}\}/g, websiteName)
+        .replace(/\{\{websiteUrl\}\}/g, websiteUrl)
+        .replace(/\{\{planType\}\}/g, planType)
+        .replace(/\{\{inviteUrl\}\}/g, inviteUrl);
+    } else {
+      logStep("Using fallback email template", { templateError: templateError?.message });
+    }
+
+    const resend = new Resend(resendKey);
+
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "Hosting Platform <onboarding@resend.dev>",
+      from: "Hosting Platform <no-reply@yourdomain.com>",
       to: [email],
-      subject: `You're invited to join our hosting platform - ${websiteName}`,
+      subject: emailSubject,
       html: emailHtml,
     });
 
-    if (emailError) throw new Error(`Failed to send email: ${emailError.message}`);
+    if (emailError) {
+      logStep("Resend error details", { emailError });
+      throw new Error(`Failed to send email: ${JSON.stringify(emailError)}`);
+    }
 
     logStep("Invitation sent successfully", { emailId: emailData?.id, inviteToken });
 
@@ -148,7 +173,7 @@ serve(async (req) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in invite-client", { message: errorMessage });
+    logStep("ERROR in invite-client", { message: errorMessage, stack: error instanceof Error ? error.stack : undefined });
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
