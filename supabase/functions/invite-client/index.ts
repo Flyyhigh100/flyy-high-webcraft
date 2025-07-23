@@ -149,7 +149,7 @@ serve(async (req) => {
     const resend = new Resend(resendKey);
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "Hosting Platform <no-reply@yourdomain.com>",
+      from: "Hosting Platform <no-reply@notifications.sydevault.com>",
       to: [email],
       subject: emailSubject,
       html: emailHtml,
