@@ -18,6 +18,8 @@ interface InviteClientRequest {
   websiteName: string;
   websiteUrl: string;
   planType: string;
+  nextPaymentDate?: string;
+  nextPaymentAmount?: number;
   siteId: string;
 }
 
@@ -58,15 +60,15 @@ serve(async (req) => {
       throw new Error("Unauthorized: Admin access required");
     }
 
-    const { email, clientName, websiteName, websiteUrl, planType, siteId }: InviteClientRequest = await req.json();
-    logStep("Processing invite request", { email, clientName, websiteName });
+    const { email, clientName, websiteName, websiteUrl, planType, nextPaymentDate, nextPaymentAmount, siteId }: InviteClientRequest = await req.json();
+    logStep("Processing invite request", { email, clientName, websiteName, nextPaymentDate, nextPaymentAmount });
 
     // Generate invitation token
     const inviteToken = crypto.randomUUID();
     const origin = req.headers.get("origin") || "https://wutyryaqlmgsbllnyoop.supabase.co";
     const inviteUrl = `${origin}/client-onboarding?token=${inviteToken}&site=${siteId}`;
 
-    // Store invitation in database
+    // Store invitation in database with payment details
     const { error: inviteError } = await supabaseClient
       .from('client_invitations')
       .insert({
@@ -75,6 +77,8 @@ serve(async (req) => {
         website_name: websiteName,
         website_url: websiteUrl,
         plan_type: planType,
+        next_payment_date: nextPaymentDate,
+        next_payment_amount: nextPaymentAmount,
         site_id: siteId,
         invite_token: inviteToken,
         invited_by: user.id,

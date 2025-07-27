@@ -22,33 +22,58 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     clientName: '',
     websiteName: '',
     websiteUrl: '',
-    planType: 'basic'
+    planType: 'basic',
+    nextPaymentDate: new Date().toISOString().split('T')[0], // Today's date as default
+    nextPaymentAmount: 15.00 // Default amount based on basic plan
   });
   const { toast } = useToast();
+
+  // Update payment amount when plan type changes
+  const handlePlanTypeChange = (value: string) => {
+    let amount = 15.00;
+    switch (value) {
+      case 'standard':
+        amount = 19.99;
+        break;
+      case 'premium':
+        amount = 29.99;
+        break;
+      default:
+        amount = 15.00;
+    }
+    setFormData({ ...formData, planType: value, nextPaymentAmount: amount });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // First create the website record
+      // Create the website record with payment details
       const { data: websiteData, error: websiteError } = await supabase
         .from('websites')
         .insert({
           name: formData.websiteName,
           url: formData.websiteUrl,
           plan_type: formData.planType,
-          next_payment_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
+          next_payment_date: formData.nextPaymentDate,
+          next_payment_amount: formData.nextPaymentAmount
         })
         .select()
         .single();
 
       if (websiteError) throw websiteError;
 
-      // Send invitation
+      // Send invitation with payment details
       const { data, error } = await supabase.functions.invoke('invite-client', {
         body: {
-          ...formData,
+          email: formData.email,
+          clientName: formData.clientName,
+          websiteName: formData.websiteName,
+          websiteUrl: formData.websiteUrl,
+          planType: formData.planType,
+          nextPaymentDate: formData.nextPaymentDate,
+          nextPaymentAmount: formData.nextPaymentAmount,
           siteId: websiteData.id
         }
       });
@@ -65,7 +90,9 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         clientName: '',
         websiteName: '',
         websiteUrl: '',
-        planType: 'basic'
+        planType: 'basic',
+        nextPaymentDate: new Date().toISOString().split('T')[0],
+        nextPaymentAmount: 15.00
       });
       setOpen(false);
       if (onRefresh) onRefresh();
@@ -151,7 +178,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
               <Label htmlFor="planType" className="text-right">
                 Plan Type
               </Label>
-              <Select value={formData.planType} onValueChange={(value) => setFormData({ ...formData, planType: value })}>
+              <Select value={formData.planType} onValueChange={handlePlanTypeChange}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue />
                 </SelectTrigger>
@@ -161,6 +188,34 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
                   <SelectItem value="premium">Premium - $29.99/month</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="nextPaymentDate" className="text-right">
+                Next Payment Date
+              </Label>
+              <Input
+                id="nextPaymentDate"
+                type="date"
+                value={formData.nextPaymentDate}
+                onChange={(e) => setFormData({ ...formData, nextPaymentDate: e.target.value })}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="nextPaymentAmount" className="text-right">
+                Payment Amount
+              </Label>
+              <Input
+                id="nextPaymentAmount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.nextPaymentAmount}
+                onChange={(e) => setFormData({ ...formData, nextPaymentAmount: parseFloat(e.target.value) || 0 })}
+                className="col-span-3"
+                required
+              />
             </div>
           </div>
           <DialogFooter>

@@ -23,6 +23,8 @@ export type Database = {
           id: string
           invite_token: string
           invited_by: string | null
+          next_payment_amount: number | null
+          next_payment_date: string | null
           plan_type: string
           site_id: string | null
           status: string | null
@@ -38,6 +40,8 @@ export type Database = {
           id?: string
           invite_token: string
           invited_by?: string | null
+          next_payment_amount?: number | null
+          next_payment_date?: string | null
           plan_type: string
           site_id?: string | null
           status?: string | null
@@ -53,6 +57,8 @@ export type Database = {
           id?: string
           invite_token?: string
           invited_by?: string | null
+          next_payment_amount?: number | null
+          next_payment_date?: string | null
           plan_type?: string
           site_id?: string | null
           status?: string | null
