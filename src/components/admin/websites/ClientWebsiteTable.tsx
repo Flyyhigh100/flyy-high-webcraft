@@ -3,11 +3,12 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Link as LinkIcon, Mail, AlertTriangle } from "lucide-react";
+import { ExternalLink, Link as LinkIcon, Mail, AlertTriangle, Trash2 } from "lucide-react";
 import { ClientWebsite } from "@/types/admin";
 import { getPlanBadgeColor } from './clientWebsiteUtils';
 import { getPaymentStatusColor, getPaymentStatusLabel, sendPaymentReminder } from '@/utils/paymentReminderUtils';
 import { useToast } from "@/components/ui/use-toast";
+import { deleteWebsite } from "@/lib/api-services";
 
 interface ClientWebsiteTableProps {
   clients: ClientWebsite[];
@@ -47,6 +48,28 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
       toast({
         title: "Error",
         description: "Failed to send payment reminder",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteWebsite = async (client: ClientWebsite) => {
+    try {
+      await deleteWebsite(client.id);
+      
+      toast({
+        title: "Website Deleted",
+        description: `${client.name} has been removed from the system`,
+      });
+
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error deleting website:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete website",
         variant: "destructive",
       });
     }
@@ -142,6 +165,15 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
                       <span>Send Reminder</span>
                     </Button>
                   )}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteWebsite(client)}
+                    className="flex items-center gap-1 border-red-300 text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Delete</span>
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
