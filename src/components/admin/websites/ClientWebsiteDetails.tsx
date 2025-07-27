@@ -28,7 +28,13 @@ export function ClientWebsiteDetails({ client, isOpen, onClose }: ClientWebsiteD
             <h4 className="text-sm font-medium mb-2">Website URL</h4>
             <div className="flex items-center">
               <a 
-                href={client.url} 
+                href={(() => {
+                  let url = client.url.trim();
+                  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                  }
+                  return url;
+                })()} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline flex items-center"
@@ -96,7 +102,13 @@ export function ClientWebsiteDetails({ client, isOpen, onClose }: ClientWebsiteD
               Close
             </Button>
             <Button 
-              onClick={() => window.open(client.url, '_blank')}
+              onClick={() => {
+                let url = client.url.trim();
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                  url = 'https://' + url;
+                }
+                window.open(url, '_blank', 'noopener,noreferrer');
+              }}
               className="flex items-center"
             >
               <ExternalLink className="mr-2 h-4 w-4" />
