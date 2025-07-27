@@ -148,7 +148,13 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => window.open(client.url, '_blank')}
+                    onClick={() => {
+                      let url = client.url;
+                      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://' + url;
+                      }
+                      window.open(url, '_blank');
+                    }}
                     className="flex items-center gap-1"
                   >
                     <ExternalLink className="h-4 w-4" />
