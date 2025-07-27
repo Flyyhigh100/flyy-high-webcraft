@@ -365,6 +365,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_client_data: {
+        Args: { website_id_param?: string; client_email_param?: string }
+        Returns: Json
+      }
       get_monthly_payment_totals: {
         Args: Record<PropertyKey, never>
         Returns: {

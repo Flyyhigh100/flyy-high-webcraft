@@ -8,7 +8,7 @@ import { ClientWebsite } from "@/types/admin";
 import { getPlanBadgeColor } from './clientWebsiteUtils';
 import { getPaymentStatusColor, getPaymentStatusLabel, sendPaymentReminder } from '@/utils/paymentReminderUtils';
 import { useToast } from "@/components/ui/use-toast";
-import { deleteWebsite } from "@/lib/api-services";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientWebsiteTableProps {
   clients: ClientWebsite[];
@@ -54,22 +54,39 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
   };
 
   const handleDeleteWebsite = async (client: ClientWebsite) => {
+    const confirmDelete = window.confirm(`Are you sure you want to completely remove ${client.name}? This will delete all associated data including user accounts and cannot be undone.`);
+    
+    if (!confirmDelete) return;
+
     try {
-      await deleteWebsite(client.id);
-      
+      // Use the comprehensive cleanup function
+      const { data, error } = await supabase.functions.invoke('cleanup-client', {
+        body: {
+          websiteId: client.id
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.success) {
+        throw new Error(data.message || 'Cleanup failed');
+      }
+
       toast({
-        title: "Website Deleted",
-        description: `${client.name} has been removed from the system`,
+        title: "Client Completely Removed",
+        description: `${client.name} and all associated data has been permanently deleted`,
       });
 
       if (onRefresh) {
         onRefresh();
       }
     } catch (error) {
-      console.error('Error deleting website:', error);
+      console.error('Error during complete cleanup:', error);
       toast({
         title: "Error",
-        description: "Failed to delete website",
+        description: "Failed to completely remove client data",
         variant: "destructive",
       });
     }
