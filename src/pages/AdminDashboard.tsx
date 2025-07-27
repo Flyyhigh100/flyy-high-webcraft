@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe } from "lucide-react";
+import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { useAdminData } from "@/hooks/useAdminData";
@@ -11,6 +11,7 @@ import { UpcomingPaymentsTable } from "@/components/admin/UpcomingPaymentsTable"
 import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { ClientWebsiteList } from "@/components/admin/ClientWebsiteList";
 import { AdminSummaryCards } from "@/components/admin/AdminSummaryCards";
+import { ClientInvitationsTable } from "@/components/admin/ClientInvitationsTable";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -47,6 +48,10 @@ export default function AdminDashboard() {
                 <Globe className="mr-2 h-4 w-4" />
                 Client Websites
               </TabsTrigger>
+              <TabsTrigger value="invitations">
+                <Mail className="mr-2 h-4 w-4" />
+                Invitations
+              </TabsTrigger>
               <TabsTrigger value="accounts">
                 <User className="mr-2 h-4 w-4" />
                 User Accounts
@@ -78,6 +83,11 @@ export default function AdminDashboard() {
                   <ClientWebsiteList />
                 </CardContent>
               </Card>
+            </TabsContent>
+            
+            {/* Client Invitations Tab */}
+            <TabsContent value="invitations">
+              <ClientInvitationsTable />
             </TabsContent>
             
             {/* User Accounts Tab */}

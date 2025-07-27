@@ -124,7 +124,7 @@ export default function ClientOnboarding() {
         const { error: inviteError } = await supabase
           .from('client_invitations')
           .update({ 
-            status: 'accepted',
+            status: 'used',
             used_at: new Date().toISOString()
           })
           .eq('id', invitation.id);
