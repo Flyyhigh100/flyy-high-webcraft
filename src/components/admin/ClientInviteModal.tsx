@@ -20,7 +20,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
   const [formData, setFormData] = useState({
     email: '',
     clientName: '',
-    websiteName: '',
     websiteUrl: '',
     planType: 'basic',
     nextPaymentDate: new Date().toISOString().split('T')[0], // Today's date as default
@@ -49,11 +48,14 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     setLoading(true);
 
     try {
+      // Extract site name from URL for database storage
+      const websiteName = formData.websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+      
       // Create the website record with payment details
       const { data: websiteData, error: websiteError } = await supabase
         .from('websites')
         .insert({
-          name: formData.websiteName,
+          name: websiteName,
           url: formData.websiteUrl,
           plan_type: formData.planType,
           next_payment_date: formData.nextPaymentDate,
@@ -69,7 +71,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         body: {
           email: formData.email,
           clientName: formData.clientName,
-          websiteName: formData.websiteName,
+          websiteName,
           websiteUrl: formData.websiteUrl,
           planType: formData.planType,
           nextPaymentDate: formData.nextPaymentDate,
@@ -88,7 +90,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
       setFormData({
         email: '',
         clientName: '',
-        websiteName: '',
         websiteUrl: '',
         planType: 'basic',
         nextPaymentDate: new Date().toISOString().split('T')[0],
@@ -147,19 +148,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
                 placeholder="Jane Smith"
                 value={formData.clientName}
                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-                className="col-span-3"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="websiteName" className="text-right">
-                Website Name
-              </Label>
-              <Input
-                id="websiteName"
-                placeholder="examplesite.com"
-                value={formData.websiteName}
-                onChange={(e) => setFormData({ ...formData, websiteName: e.target.value })}
                 className="col-span-3"
                 required
               />
