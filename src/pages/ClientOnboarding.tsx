@@ -100,13 +100,15 @@ export default function ClientOnboarding() {
 
     setSignupLoading(true);
     try {
-      // Sign up the user
+      // Sign up the user with email confirmation bypassed for invited users
       const { data: authData, error: signupError } = await supabase.auth.signUp({
         email: invitation.email,
         password: password,
         options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             client_name: invitation.client_name,
+            invited_user: true // Mark as invited user
           }
         }
       });
@@ -114,6 +116,19 @@ export default function ClientOnboarding() {
       if (signupError) throw signupError;
 
       if (authData.user) {
+        // Confirm the invited user's email automatically
+        try {
+          const { data: functionData, error: functionError } = await supabase.functions.invoke('confirm-invited-user', {
+            body: { userId: authData.user.id }
+          });
+
+          if (functionError) {
+            console.error('Failed to confirm user email:', functionError);
+          }
+        } catch (confirmError) {
+          console.error('Error confirming user email:', confirmError);
+        }
+
         // Update the website to link to this user
         const { error: websiteError } = await supabase
           .from('websites')
@@ -135,7 +150,7 @@ export default function ClientOnboarding() {
 
         toast({
           title: "Account Created!",
-          description: "Your account has been created successfully. Please check your email to verify your account.",
+          description: "Your account has been created successfully and you can now log in.",
         });
 
         navigate('/dashboard');
