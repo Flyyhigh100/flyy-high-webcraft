@@ -94,28 +94,34 @@ serve(async (req) => {
       .eq('name', 'Client Invitation')
       .single();
 
-    let emailSubject = `You're invited to join our hosting platform - ${websiteName}`;
+    // Format plan with pricing
+    const getPlanDisplayText = (plan: string, amount: number) => {
+      const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+      return `${planName} - $${amount}/month`;
+    };
+
+    let emailSubject = `You're invited to join SydeVault - ${websiteName}`;
     let emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #DAA520; text-align: center;">Welcome to Our Hosting Platform</h1>
+        <h1 style="color: #DAA520; text-align: center;">Welcome to SydeVault</h1>
         
         <p>Dear ${clientName},</p>
         
-        <p>You've been invited to join our hosting platform to manage your website:</p>
+        <p>You've been invited to join SydeVault's hosting platform to manage your website:</p>
         
         <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin: 0; color: #333;">Website Details:</h3>
           <p style="margin: 5px 0;"><strong>Name:</strong> ${websiteName}</p>
           <p style="margin: 5px 0;"><strong>URL:</strong> <a href="${websiteUrl}" target="_blank">${websiteUrl}</a></p>
-          <p style="margin: 5px 0;"><strong>Plan:</strong> ${planType}</p>
+          <p style="margin: 5px 0;"><strong>Plan:</strong> ${getPlanDisplayText(planType, nextPaymentAmount || 0)}</p>
         </div>
         
         <p>By creating your account, you'll be able to:</p>
         <ul>
           <li>View and pay your monthly hosting bills</li>
           <li>Access your website analytics and performance data</li>
-          <li>Submit support tickets</li>
-          <li>Manage your account settings</li>
+          <li>Submit support tickets and get personalized support</li>
+          <li>Manage your account settings and billing information</li>
         </ul>
         
         <div style="text-align: center; margin: 30px 0;">
@@ -126,12 +132,12 @@ serve(async (req) => {
         </div>
         
         <p style="font-size: 14px; color: #666;">
-          This invitation will expire in 7 days. If you have any questions, please don't hesitate to contact us.
+          This invitation will expire in 7 days. If you have any questions, please don't hesitate to contact us at SydeVault.
         </p>
         
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         <p style="font-size: 12px; color: #999; text-align: center;">
-          This email was sent by our hosting platform. If you didn't expect this invitation, you can safely ignore this email.
+          This email was sent by SydeVault. If you didn't expect this invitation, you can safely ignore this email.
         </p>
       </div>
     `;
@@ -153,7 +159,7 @@ serve(async (req) => {
     const resend = new Resend(resendKey);
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "Hosting Platform <no-reply@notifications.sydevault.com>",
+      from: "SydeVault <no-reply@notifications.sydevault.com>",
       to: [email],
       subject: emailSubject,
       html: emailHtml,
