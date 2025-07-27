@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('[CONFIRM-USER] Function started');
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -25,8 +27,10 @@ serve(async (req) => {
     )
 
     const { userId } = await req.json()
+    console.log('[CONFIRM-USER] Processing user ID:', userId);
 
     if (!userId) {
+      console.log('[CONFIRM-USER] Error: No user ID provided');
       return new Response(
         JSON.stringify({ error: 'User ID is required' }),
         { 
@@ -37,13 +41,17 @@ serve(async (req) => {
     }
 
     // Confirm the user's email using the service role
+    console.log('[CONFIRM-USER] Attempting to confirm email for user:', userId);
     const { data, error } = await supabaseClient.auth.admin.updateUserById(
       userId,
-      { email_confirmed_at: new Date().toISOString() }
+      { 
+        email_confirmed_at: new Date().toISOString(),
+        email_confirm: true
+      }
     )
 
     if (error) {
-      console.error('Error confirming user:', error)
+      console.error('[CONFIRM-USER] Error confirming user:', error)
       return new Response(
         JSON.stringify({ error: error.message }),
         { 
@@ -53,6 +61,7 @@ serve(async (req) => {
       )
     }
 
+    console.log('[CONFIRM-USER] Successfully confirmed user email');
     return new Response(
       JSON.stringify({ success: true, user: data.user }),
       { 
@@ -62,7 +71,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Function error:', error)
+    console.error('[CONFIRM-USER] Function error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

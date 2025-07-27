@@ -91,13 +91,13 @@ serve(async (req) => {
     const { data: template, error: templateError } = await supabaseClient
       .from('email_templates')
       .select('subject, html_content')
-      .eq('name', 'Client Invitation')
+      .eq('name', 'client_invitation')
       .single();
 
     // Format plan with pricing
     const getPlanDisplayText = (plan: string, amount: number) => {
       const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-      return `${planName} - $${amount}/month`;
+      return `${planName} - $${amount?.toFixed(2) || '0.00'}/month`;
     };
 
     let emailSubject = `You're invited to join SydeVault - ${websiteName}`;
@@ -151,6 +151,7 @@ serve(async (req) => {
         .replace(/\{\{websiteName\}\}/g, websiteName)
         .replace(/\{\{websiteUrl\}\}/g, websiteUrl)
         .replace(/\{\{planType\}\}/g, planType)
+        .replace(/\{\{planDisplay\}\}/g, getPlanDisplayText(planType, nextPaymentAmount || 0))
         .replace(/\{\{inviteUrl\}\}/g, inviteUrl);
     } else {
       logStep("Using fallback email template", { templateError: templateError?.message });
