@@ -131,6 +131,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
               <Input
                 id="email"
                 type="email"
+                placeholder="jane.smith@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="col-span-3"
@@ -143,6 +144,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
               </Label>
               <Input
                 id="clientName"
+                placeholder="Jane Smith"
                 value={formData.clientName}
                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
                 className="col-span-3"
@@ -155,6 +157,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
               </Label>
               <Input
                 id="websiteName"
+                placeholder="examplesite.com"
                 value={formData.websiteName}
                 onChange={(e) => setFormData({ ...formData, websiteName: e.target.value })}
                 className="col-span-3"
