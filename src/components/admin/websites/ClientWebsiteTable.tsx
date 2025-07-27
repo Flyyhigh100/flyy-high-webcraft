@@ -149,11 +149,11 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
                     variant="outline" 
                     size="sm"
                     onClick={() => {
-                      let url = client.url;
+                      let url = client.url.trim();
                       if (!url.startsWith('http://') && !url.startsWith('https://')) {
                         url = 'https://' + url;
                       }
-                      window.open(url, '_blank');
+                      window.open(url, '_blank', 'noopener,noreferrer');
                     }}
                     className="flex items-center gap-1"
                   >
