@@ -241,110 +241,130 @@ export default function ClientOnboarding() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-md">
-      <Card>
-        <CardHeader className="text-center">
-          <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <CardTitle>Welcome to Our Platform!</CardTitle>
-          <CardDescription>
-            You've been invited to manage your website: <strong>{invitation.website_name}</strong>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6 p-4 bg-muted rounded-lg">
-            <h3 className="font-semibold mb-2">Website Details:</h3>
-            <p><strong>Name:</strong> {invitation.website_name}</p>
-            <p><strong>URL:</strong> {invitation.website_url}</p>
-            <p><strong>Plan:</strong> {invitation.plan_type}</p>
-            {(invitation as any).created_at && (
-              <p className="text-xs text-muted-foreground mt-2">
-                <strong>Invitation sent:</strong> {new Date((invitation as any).created_at).toLocaleString()}
-                {(invitation as any).invitation_version && ` (v${(invitation as any).invitation_version})`}
-              </p>
-            )}
-          </div>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto">
+        {/* Header with logo */}
+        <div className="text-center mb-8">
+          <img 
+            src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
+            alt="Syde Vault" 
+            className="h-20 w-auto mx-auto mb-4"
+          />
+          <h1 className="text-2xl font-bold text-gray-900">Client Onboarding</h1>
+        </div>
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={invitation.email}
-                disabled
-                className="bg-muted"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            <Button type="submit" className="w-full" disabled={signupLoading}>
-              {signupLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                "Create Account"
+        <Card>
+          <CardHeader className="text-center">
+            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <CardTitle>Welcome to Our Platform!</CardTitle>
+            <CardDescription>
+              You've been invited to manage your website: <strong>{invitation.website_name}</strong>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-6 p-4 bg-muted rounded-lg">
+              <h3 className="font-semibold mb-2">Website Details:</h3>
+              <p><strong>Name:</strong> {invitation.website_name}</p>
+              <p><strong>URL:</strong> {invitation.website_url}</p>
+              <p><strong>Plan:</strong> {invitation.plan_type}</p>
+              {(invitation as any).created_at && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  <strong>Invitation sent:</strong> {new Date((invitation as any).created_at).toLocaleString()}
+                  {(invitation as any).invitation_version && ` (v${(invitation as any).invitation_version})`}
+                </p>
               )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            </div>
+
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={invitation.email}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <Button type="submit" className="w-full" disabled={signupLoading}>
+                {signupLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+        
+        {/* Debug information */}
+        <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <h4 className="font-semibold text-yellow-800 mb-2">Debug Info:</h4>
+          <p className="text-sm text-yellow-700">Current URL: {window.location.href}</p>
+          <p className="text-sm text-yellow-700">Token: {token}</p>
+          <p className="text-sm text-yellow-700">Site: {site}</p>
+        </div>
+      </div>
     </div>
   );
 }
