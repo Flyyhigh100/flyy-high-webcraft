@@ -40,7 +40,7 @@ export default function Invite() {
         .select('*')
         .eq('invite_token', token)
         .eq('status', 'pending')
-        .single();
+        .maybeSingle();
 
       console.log('Invitation query result:', { data, error });
 
