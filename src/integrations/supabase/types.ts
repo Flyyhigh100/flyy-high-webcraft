@@ -18,9 +18,11 @@ export type Database = {
         Row: {
           client_name: string
           created_at: string
+          created_by_name: string | null
           email: string
           expires_at: string
           id: string
+          invitation_version: number | null
           invite_token: string
           invited_by: string | null
           next_payment_amount: number | null
@@ -28,6 +30,8 @@ export type Database = {
           plan_type: string
           site_id: string | null
           status: string | null
+          superseded_at: string | null
+          superseded_by: string | null
           used_at: string | null
           website_name: string
           website_url: string
@@ -35,9 +39,11 @@ export type Database = {
         Insert: {
           client_name: string
           created_at?: string
+          created_by_name?: string | null
           email: string
           expires_at: string
           id?: string
+          invitation_version?: number | null
           invite_token: string
           invited_by?: string | null
           next_payment_amount?: number | null
@@ -45,6 +51,8 @@ export type Database = {
           plan_type: string
           site_id?: string | null
           status?: string | null
+          superseded_at?: string | null
+          superseded_by?: string | null
           used_at?: string | null
           website_name: string
           website_url: string
@@ -52,9 +60,11 @@ export type Database = {
         Update: {
           client_name?: string
           created_at?: string
+          created_by_name?: string | null
           email?: string
           expires_at?: string
           id?: string
+          invitation_version?: number | null
           invite_token?: string
           invited_by?: string | null
           next_payment_amount?: number | null
@@ -62,6 +72,8 @@ export type Database = {
           plan_type?: string
           site_id?: string | null
           status?: string | null
+          superseded_at?: string | null
+          superseded_by?: string | null
           used_at?: string | null
           website_name?: string
           website_url?: string

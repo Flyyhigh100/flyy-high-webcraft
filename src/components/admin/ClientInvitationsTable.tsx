@@ -21,6 +21,9 @@ interface ClientInvitation {
   expires_at: string;
   next_payment_amount: number;
   site_id: string;
+  superseded_at?: string | null;
+  invitation_version?: number;
+  created_by_name?: string;
 }
 
 export function ClientInvitationsTable() {
@@ -58,6 +61,10 @@ export function ClientInvitationsTable() {
     
     if (invitation.status === 'used') {
       return <Badge variant="default" className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Accepted</Badge>;
+    }
+    
+    if (invitation.status === 'superseded') {
+      return <Badge variant="outline" className="text-orange-600 border-orange-200"><XCircle className="w-3 h-3 mr-1" />Superseded</Badge>;
     }
     
     if (now > expiresAt) {
@@ -210,7 +217,13 @@ export function ClientInvitationsTable() {
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {format(new Date(invitation.created_at), 'h:mm a')}
+                        {invitation.invitation_version && ` (v${invitation.invitation_version})`}
                       </div>
+                      {invitation.created_by_name && (
+                        <div className="text-xs text-muted-foreground">
+                          by {invitation.created_by_name}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       {invitation.used_at ? (
@@ -231,14 +244,14 @@ export function ClientInvitationsTable() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        {invitation.status === 'pending' && new Date() < new Date(invitation.expires_at) && (
+                        {(invitation.status === 'pending' || invitation.status === 'superseded' || new Date() > new Date(invitation.expires_at)) && invitation.status !== 'used' && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => resendInvitation(invitation)}
                           >
                             <Mail className="h-3 w-3 mr-1" />
-                            Resend
+                            {invitation.status === 'pending' && new Date() < new Date(invitation.expires_at) ? 'Resend' : 'Send New'}
                           </Button>
                         )}
                         <Button

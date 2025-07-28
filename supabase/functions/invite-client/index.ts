@@ -68,31 +68,47 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://wutyryaqlmgsbllnyoop.supabase.co";
     const inviteUrl = `${origin}/client-onboarding?token=${inviteToken}&site=${siteId}`;
 
-    // Check for existing pending invitations and clean them up
+    // Check for existing pending invitations and supersede them
     logStep("Checking for existing invitations", { email, websiteName, websiteUrl });
     const { data: existingInvitations, error: checkError } = await supabaseClient
       .from('client_invitations')
-      .select('id')
+      .select('id, invitation_version')
       .eq('email', email)
       .in('status', ['pending'])
       .or(`website_name.eq.${websiteName},website_url.eq.${websiteUrl}`);
 
+    let newVersion = 1;
     if (checkError) {
       console.error('Error checking existing invitations:', checkError);
     } else if (existingInvitations && existingInvitations.length > 0) {
-      // Delete existing pending invitations for this email/website combination
-      logStep("Deleting existing pending invitations", { count: existingInvitations.length });
-      const { error: deleteError } = await supabaseClient
+      // Calculate next version number
+      const maxVersion = Math.max(...existingInvitations.map(inv => inv.invitation_version || 1));
+      newVersion = maxVersion + 1;
+      
+      // Mark existing pending invitations as superseded instead of deleting them
+      logStep("Superseding existing pending invitations", { count: existingInvitations.length, newVersion });
+      const { error: supersededError } = await supabaseClient
         .from('client_invitations')
-        .delete()
+        .update({
+          status: 'superseded',
+          superseded_at: new Date().toISOString(),
+          superseded_by: user.id
+        })
         .in('id', existingInvitations.map(inv => inv.id));
       
-      if (deleteError) {
-        console.error('Error deleting existing invitations:', deleteError);
+      if (supersededError) {
+        console.error('Error superseding existing invitations:', supersededError);
       }
     }
 
-    // Store invitation in database with payment details
+    // Get admin profile name for tracking
+    const { data: adminProfile } = await supabaseClient
+      .from('profiles')
+      .select('email')
+      .eq('user_id', user.id)
+      .single();
+
+    // Store invitation in database with payment details and tracking info
     const { error: inviteError } = await supabaseClient
       .from('client_invitations')
       .insert({
@@ -106,6 +122,8 @@ serve(async (req) => {
         site_id: siteId,
         invite_token: inviteToken,
         invited_by: user.id,
+        invitation_version: newVersion,
+        created_by_name: adminProfile?.email || 'Admin',
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
       });
 
@@ -158,6 +176,12 @@ serve(async (req) => {
         <p style="font-size: 14px; color: #666;">
           This invitation will expire in 7 days. If you have any questions, please don't hesitate to contact us at SydeVault.
         </p>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; font-size: 12px; color: #6c757d;">
+          <p style="margin: 5px 0;"><strong>Latest Invitation</strong> - Version ${newVersion}</p>
+          <p style="margin: 5px 0;">Sent: ${new Date().toLocaleString()}</p>
+          <p style="margin: 5px 0;">Please use this invitation link instead of any previous ones.</p>
+        </div>
         
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         <p style="font-size: 12px; color: #999; text-align: center;">

@@ -60,27 +60,75 @@ export default function ClientOnboarding() {
 
   const verifyInvitation = async (inviteToken: string) => {
     try {
-      const { data, error } = await supabase
+      console.log('Verifying invitation token:', inviteToken);
+      
+      // First check if the token exists at all (any status)
+      const { data: tokenCheck, error: tokenError } = await supabase
         .from('client_invitations')
         .select('*')
         .eq('invite_token', inviteToken)
-        .eq('status', 'pending')
         .single();
 
-      if (error || !data) {
-        throw new Error('Invalid or expired invitation');
+      console.log('Token check result:', { tokenCheck, tokenError });
+
+      if (tokenError || !tokenCheck) {
+        // Token doesn't exist - could be deleted or invalid
+        throw new Error('INVALID_TOKEN');
+      }
+
+      // Check invitation status and provide specific error messages
+      if (tokenCheck.status === 'used') {
+        throw new Error('ALREADY_USED');
+      }
+
+      if (tokenCheck.superseded_at) {
+        throw new Error('SUPERSEDED');
+      }
+
+      if (tokenCheck.status !== 'pending') {
+        throw new Error('NOT_PENDING');
       }
 
       // Check if invitation is expired
-      if (new Date(data.expires_at) < new Date()) {
-        throw new Error('This invitation has expired');
+      if (new Date(tokenCheck.expires_at) < new Date()) {
+        throw new Error('EXPIRED');
       }
 
-      setInvitation(data);
+      setInvitation(tokenCheck);
     } catch (error: any) {
+      console.error('Invitation verification error:', error);
+      
+      let title = "Invalid Invitation";
+      let description = "This invitation link is not valid.";
+
+      switch (error.message) {
+        case 'INVALID_TOKEN':
+          title = "Invalid Invitation Link";
+          description = "This invitation link is no longer valid. The invitation may have been deleted or the link is incorrect. Please ask for a new invitation to be sent.";
+          break;
+        case 'ALREADY_USED':
+          title = "Invitation Already Used";
+          description = "This invitation has already been used to create an account. If you need access, please try logging in or ask for a new invitation.";
+          break;
+        case 'SUPERSEDED':
+          title = "Outdated Invitation";
+          description = "This invitation link has been replaced by a newer one. Please use the latest email invite or ask for a new invitation to be sent.";
+          break;
+        case 'EXPIRED':
+          title = "Invitation Expired";
+          description = "This invitation has expired. Please ask for a new invitation to be sent.";
+          break;
+        case 'NOT_PENDING':
+          title = "Invitation Not Available";
+          description = "This invitation is no longer available for use. Please ask for a new invitation to be sent.";
+          break;
+        default:
+          description = error.message || "Please ask for a new invitation to be sent.";
+      }
+
       toast({
-        title: "Invalid Invitation",
-        description: error.message,
+        title,
+        description,
         variant: "destructive",
       });
       navigate('/login');
@@ -207,6 +255,12 @@ export default function ClientOnboarding() {
             <p><strong>Name:</strong> {invitation.website_name}</p>
             <p><strong>URL:</strong> {invitation.website_url}</p>
             <p><strong>Plan:</strong> {invitation.plan_type}</p>
+            {(invitation as any).created_at && (
+              <p className="text-xs text-muted-foreground mt-2">
+                <strong>Invitation sent:</strong> {new Date((invitation as any).created_at).toLocaleString()}
+                {(invitation as any).invitation_version && ` (v${(invitation as any).invitation_version})`}
+              </p>
+            )}
           </div>
 
           <form onSubmit={handleSignup} className="space-y-4">
