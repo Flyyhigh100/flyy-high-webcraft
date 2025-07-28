@@ -14,6 +14,7 @@ import Terms from "./pages/Terms";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ClientOnboarding from "./pages/ClientOnboarding";
+import Invite from "./pages/Invite";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -34,7 +35,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Client onboarding - completely independent, no Layout wrapper */}
+            {/* COMPLETELY STANDALONE INVITATION PAGE - NO AUTH, NO LAYOUT */}
+            <Route path="/invite" element={<Invite />} />
             <Route path="/client-onboarding" element={<ClientOnboarding />} />
             
             {/* Public routes */}

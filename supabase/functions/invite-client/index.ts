@@ -65,7 +65,7 @@ serve(async (req) => {
 
     // Generate invitation token
     const inviteToken = crypto.randomUUID();
-    const inviteUrl = `https://sydevault.com/client-onboarding?token=${inviteToken}&site=${siteId}`;
+    const inviteUrl = `https://sydevault.com/invite?token=${inviteToken}&site=${siteId}`;
 
     // Check for existing pending invitations and supersede them
     logStep("Checking for existing invitations", { email, websiteName, websiteUrl });
