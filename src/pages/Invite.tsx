@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Link } from 'react-router-dom';
 
 // Completely standalone invite page - NO auth context, NO layout, NO dependencies
 export default function Invite() {
@@ -11,6 +18,7 @@ export default function Invite() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const token = searchParams.get('token');
   const site = searchParams.get('site');
@@ -62,6 +70,11 @@ export default function Invite() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!termsAccepted) {
+      setError('Please accept the Terms of Service to continue');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -98,13 +111,17 @@ export default function Invite() {
           .eq('id', invitation.site_id);
 
         // Mark invitation as used
-        await supabase
+        const { error: updateError } = await supabase
           .from('client_invitations')
           .update({ 
             status: 'used',
             used_at: new Date().toISOString()
           })
           .eq('id', invitation.id);
+
+        if (updateError) {
+          console.error('Failed to update invitation status:', updateError);
+        }
 
         // Confirm user email via edge function
         try {
@@ -126,14 +143,18 @@ export default function Invite() {
     }
   };
 
-  // Simple loading state
+  // Loading state
   if (status === 'loading') {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-        <h1>Loading invitation...</h1>
-        <p>URL: {window.location.href}</p>
-        <p>Token: {token}</p>
-        <p>Site: {site}</p>
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <h1 className="text-xl font-semibold">Loading invitation...</h1>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -141,12 +162,20 @@ export default function Invite() {
   // Error state
   if (status === 'error') {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-        <h1 style={{ color: 'red' }}>Invitation Error</h1>
-        <p>{error}</p>
-        <p>URL: {window.location.href}</p>
-        <p>Token: {token}</p>
-        <button onClick={() => window.location.href = '/login'}>Go to Login</button>
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center text-destructive">Invitation Error</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            <Button onClick={() => window.location.href = '/login'} className="w-full">
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -154,88 +183,124 @@ export default function Invite() {
   // Success state
   if (status === 'success') {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-        <h1 style={{ color: 'green' }}>Account Created Successfully!</h1>
-        <p>Redirecting to dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h1 className="text-xl font-semibold text-primary">Account Created Successfully!</h1>
+              <p className="text-muted-foreground">Redirecting to dashboard...</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   // Main form
   return (
-    <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-      <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <img 
-          src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
-          alt="Syde Vault" 
-          style={{ height: '80px', margin: '0 auto 20px' }}
-        />
-        <h1>Welcome to SydeVault!</h1>
-        <p>Complete your account setup for: <strong>{invitation?.website_name}</strong></p>
-      </div>
-
-      <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
-        <h3>Website Details:</h3>
-        <p><strong>Name:</strong> {invitation?.website_name}</p>
-        <p><strong>URL:</strong> {invitation?.website_url}</p>
-        <p><strong>Plan:</strong> {invitation?.plan_type}</p>
-        <p><strong>Email:</strong> {invitation?.email}</p>
-      </div>
-
-      <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-          />
-        </div>
-
-        <div>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Confirm Password:</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            minLength={8}
-            style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-          />
-        </div>
-
-        {error && (
-          <div style={{ color: 'red', padding: '10px', backgroundColor: '#ffebee', borderRadius: '4px' }}>
-            {error}
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <img 
+              src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
+              alt="SydeVault" 
+              className="h-32 w-auto"
+            />
           </div>
-        )}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold syde-vault-logo">Welcome to SydeVault!</h1>
+            <p className="text-muted-foreground">Complete your account setup for: <strong className="text-foreground">{invitation?.website_name}</strong></p>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <Card className="bg-muted/50">
+            <CardHeader>
+              <CardTitle className="text-lg">Website Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="font-medium">Name:</span>
+                <span>{invitation?.website_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">URL:</span>
+                <span className="text-primary">{invitation?.website_url}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Plan:</span>
+                <span className="text-accent font-medium">{invitation?.plan_type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Email:</span>
+                <span>{invitation?.email}</span>
+              </div>
+            </CardContent>
+          </Card>
 
-        <button 
-          type="submit"
-          style={{ 
-            padding: '12px', 
-            backgroundColor: '#007bff', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          Create Account
-        </button>
-      </form>
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                placeholder="Enter your password (min. 8 characters)"
+              />
+            </div>
 
-      <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '8px' }}>
-        <h4>Debug Info:</h4>
-        <p><strong>URL:</strong> {window.location.href}</p>
-        <p><strong>Token:</strong> {token}</p>
-        <p><strong>Site:</strong> {site}</p>
-        <p><strong>Status:</strong> {status}</p>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+                placeholder="Confirm your password"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+              />
+              <Label htmlFor="terms" className="text-sm">
+                I agree to the{' '}
+                <Link to="/terms" className="text-primary hover:underline" target="_blank">
+                  Terms of Service
+                </Link>
+              </Label>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button 
+              type="submit"
+              className="w-full"
+              disabled={!termsAccepted}
+            >
+              Create Account
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
