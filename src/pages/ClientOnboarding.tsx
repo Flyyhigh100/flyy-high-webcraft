@@ -33,12 +33,14 @@ export default function ClientOnboarding() {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('ClientOnboarding - URL params:', { token, site, fullURL: window.location.href });
     if (token) {
       verifyInvitation(token);
     } else {
+      console.log('No token found in URL parameters');
       toast({
         title: "Invalid Link",
-        description: "This invitation link is invalid or expired.",
+        description: "This invitation link is missing the required token.",
         variant: "destructive",
       });
       navigate('/login');
