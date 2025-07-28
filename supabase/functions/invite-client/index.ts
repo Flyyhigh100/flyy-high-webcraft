@@ -68,6 +68,30 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://wutyryaqlmgsbllnyoop.supabase.co";
     const inviteUrl = `${origin}/client-onboarding?token=${inviteToken}&site=${siteId}`;
 
+    // Check for existing pending invitations and clean them up
+    logStep("Checking for existing invitations", { email, websiteName, websiteUrl });
+    const { data: existingInvitations, error: checkError } = await supabaseClient
+      .from('client_invitations')
+      .select('id')
+      .eq('email', email)
+      .in('status', ['pending'])
+      .or(`website_name.eq.${websiteName},website_url.eq.${websiteUrl}`);
+
+    if (checkError) {
+      console.error('Error checking existing invitations:', checkError);
+    } else if (existingInvitations && existingInvitations.length > 0) {
+      // Delete existing pending invitations for this email/website combination
+      logStep("Deleting existing pending invitations", { count: existingInvitations.length });
+      const { error: deleteError } = await supabaseClient
+        .from('client_invitations')
+        .delete()
+        .in('id', existingInvitations.map(inv => inv.id));
+      
+      if (deleteError) {
+        console.error('Error deleting existing invitations:', deleteError);
+      }
+    }
+
     // Store invitation in database with payment details
     const { error: inviteError } = await supabaseClient
       .from('client_invitations')

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, RefreshCw, Mail, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Loader2, RefreshCw, Mail, CheckCircle, Clock, XCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface ClientInvitation {
@@ -93,6 +93,34 @@ export function ClientInvitationsTable() {
       toast({
         title: "Error",
         description: "Failed to resend invitation",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteInvitation = async (invitation: ClientInvitation) => {
+    if (!confirm(`Delete invitation for ${invitation.client_name} (${invitation.email})?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('client_invitations')
+        .delete()
+        .eq('id', invitation.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Invitation Deleted",
+        description: `Invitation for ${invitation.client_name} has been deleted`,
+      });
+      
+      fetchInvitations();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to delete invitation",
         variant: "destructive",
       });
     }
@@ -202,16 +230,27 @@ export function ClientInvitationsTable() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {invitation.status === 'pending' && new Date() < new Date(invitation.expires_at) && (
+                      <div className="flex gap-2">
+                        {invitation.status === 'pending' && new Date() < new Date(invitation.expires_at) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => resendInvitation(invitation)}
+                          >
+                            <Mail className="h-3 w-3 mr-1" />
+                            Resend
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => resendInvitation(invitation)}
+                          onClick={() => deleteInvitation(invitation)}
+                          className="text-destructive hover:text-destructive"
                         >
-                          <Mail className="h-3 w-3 mr-1" />
-                          Resend
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
                         </Button>
-                      )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
