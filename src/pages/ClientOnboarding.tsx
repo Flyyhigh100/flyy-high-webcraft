@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,8 +21,10 @@ interface ClientInvitation {
 }
 
 export default function ClientOnboarding() {
-  const { token, site } = Object.fromEntries(new URLSearchParams(window.location.search));
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const token = searchParams.get('token');
+  const site = searchParams.get('site');
   const [invitation, setInvitation] = useState<ClientInvitation | null>(null);
   const [loading, setLoading] = useState(true);
   const [signupLoading, setSignupLoading] = useState(false);
@@ -33,11 +35,20 @@ export default function ClientOnboarding() {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log('ClientOnboarding - URL params:', { token, site, fullURL: window.location.href });
+    console.log('ClientOnboarding - URL params:', { 
+      token, 
+      site, 
+      fullURL: window.location.href,
+      search: window.location.search,
+      searchParams: Object.fromEntries(searchParams.entries())
+    });
+    
     if (token) {
+      console.log('Token found, verifying invitation:', token);
       verifyInvitation(token);
     } else {
       console.log('No token found in URL parameters');
+      console.log('Available search params:', Object.fromEntries(searchParams.entries()));
       toast({
         title: "Invalid Link",
         description: "This invitation link is missing the required token.",
@@ -45,7 +56,7 @@ export default function ClientOnboarding() {
       });
       navigate('/login');
     }
-  }, [token, navigate]);
+  }, [token, navigate, searchParams]);
 
   const verifyInvitation = async (inviteToken: string) => {
     try {
