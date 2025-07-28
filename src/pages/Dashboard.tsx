@@ -6,16 +6,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, Key } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import DomainManager from "@/components/dashboard/DomainManager";
 import { SubscriptionManager } from "@/components/dashboard/SubscriptionManager";
+import { EmailChangeForm } from "@/components/dashboard/EmailChangeForm";
 
 export default function Dashboard() {
   const { user, isLoading, isAdmin, checkAdminStatus } = useAuth();
   const [saveLoading, setSaveLoading] = useState(false);
+  const [showEmailChange, setShowEmailChange] = useState(false);
   const { toast } = useToast();
   
   // Recheck admin status on mount
@@ -117,7 +120,23 @@ export default function Dashboard() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" value={user?.email || ''} disabled />
+                  <div className="flex space-x-2">
+                    <Input id="email" value={user?.email || ''} disabled className="flex-1" />
+                    <Dialog open={showEmailChange} onOpenChange={setShowEmailChange}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Mail className="h-4 w-4 mr-1" />
+                          Change
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <EmailChangeForm 
+                          currentEmail={user?.email || ''} 
+                          onClose={() => setShowEmailChange(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
@@ -150,9 +169,12 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button variant="outline" className="w-full">
-                  Change Password
-                </Button>
+                <Link to="/forgot-password" className="w-full">
+                  <Button variant="outline" className="w-full">
+                    <Key className="h-4 w-4 mr-2" />
+                    Change Password
+                  </Button>
+                </Link>
                 
                 <div className="space-y-2 pt-4">
                   <div className="flex items-center justify-between">
