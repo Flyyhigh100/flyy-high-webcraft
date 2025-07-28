@@ -34,6 +34,9 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Client onboarding - completely independent, no Layout wrapper */}
+            <Route path="/client-onboarding" element={<ClientOnboarding />} />
+            
             {/* Public routes */}
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
@@ -45,14 +48,11 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               
-            {/* Auth routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            
-            {/* Client onboarding - must be accessible before authentication */}
-            <Route path="/client-onboarding" element={<ClientOnboarding />} />
+              {/* Auth routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
             
             {/* Protected routes */}

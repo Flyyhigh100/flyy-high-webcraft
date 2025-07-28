@@ -35,6 +35,7 @@ export default function ClientOnboarding() {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('=== ClientOnboarding Component Mounted ===');
     console.log('ClientOnboarding - URL params:', { 
       token, 
       site, 
