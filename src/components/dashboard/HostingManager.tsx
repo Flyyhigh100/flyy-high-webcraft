@@ -7,11 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ExternalLink, Globe, CreditCard, Calendar, Shield, HelpCircle, AlertTriangle } from 'lucide-react';
 import { useUserWebsites } from '@/hooks/useUserWebsites';
+import { useInvitationStatus } from '@/hooks/useInvitationStatus';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { InvitationPaymentCard } from './InvitationPaymentCard';
 
 const HostingManager = () => {
   const { websites, isLoading, updateAutoRenewal } = useUserWebsites();
+  const { invitationStatus, loading: invitationLoading, refetch: refetchInvitation } = useInvitationStatus();
   const { toast } = useToast();
 
   const handleManualPayment = async () => {
@@ -45,6 +48,16 @@ const HostingManager = () => {
 
   const handleUpdatePaymentMethod = async () => {
     try {
+      // Check if user has invitation but hasn't paid yet
+      if (invitationStatus.hasActiveInvitation && !invitationStatus.isPaid) {
+        toast({
+          title: "Payment Required",
+          description: "Please complete payment for your invited plan first using the 'Pay for Your Plan' button above.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke('customer-portal', {
         headers: {
@@ -124,7 +137,7 @@ const HostingManager = () => {
     return `$${amount.toFixed(2)}`;
   };
 
-  if (isLoading) {
+  if (isLoading || invitationLoading) {
     return (
       <div className="space-y-4">
         <div className="animate-pulse">
@@ -169,6 +182,16 @@ const HostingManager = () => {
             </a>
           </Button>
         </div>
+
+        {/* Invitation Payment Card - Prominent Display */}
+        {invitationStatus.hasActiveInvitation && (
+          <InvitationPaymentCard
+            plan={invitationStatus.invitationPlan!}
+            amount={invitationStatus.invitationAmount!}
+            isPaid={invitationStatus.isPaid}
+            onPaymentSuccess={refetchInvitation}
+          />
+        )}
 
       {/* Website Overview */}
       <Card>

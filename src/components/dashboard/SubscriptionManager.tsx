@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CreditCard, Loader2, ExternalLink } from "lucide-react";
+import { useInvitationStatus } from '@/hooks/useInvitationStatus';
+import { InvitationPaymentCard } from './InvitationPaymentCard';
 
 interface Subscription {
   id: string;
@@ -22,6 +24,7 @@ interface Subscription {
 export function SubscriptionManager() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const { invitationStatus, loading: invitationLoading, refetch: refetchInvitation } = useInvitationStatus();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,7 +106,7 @@ export function SubscriptionManager() {
     }
   };
 
-  if (loading) {
+  if (loading || invitationLoading) {
     return (
       <div className="flex justify-center items-center h-32">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -123,19 +126,37 @@ export function SubscriptionManager() {
         )}
       </div>
 
+      {/* Show invitation card if user has one */}
+      {invitationStatus.hasActiveInvitation && (
+        <InvitationPaymentCard
+          plan={invitationStatus.invitationPlan!}
+          amount={invitationStatus.invitationAmount!}
+          isPaid={invitationStatus.isPaid}
+          onPaymentSuccess={refetchInvitation}
+        />
+      )}
+
       {subscriptions.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>No Active Subscriptions</CardTitle>
             <CardDescription>
-              Choose a hosting plan to get started with your website.
+              {invitationStatus.hasActiveInvitation ? 
+                "Other available plans (upgrade or downgrade from your invited plan):" : 
+                "Choose a hosting plan to get started with your website."
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
-              <Card>
+              <Card className={invitationStatus.invitationPlan === 'basic' ? 'border-primary bg-primary/5' : ''}>
                 <CardHeader>
-                  <CardTitle>Basic Plan</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    Basic Plan
+                    {invitationStatus.invitationPlan === 'basic' && (
+                      <Badge variant="outline">Your Plan</Badge>
+                    )}
+                  </CardTitle>
                   <CardDescription>Perfect for small websites</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -143,16 +164,22 @@ export function SubscriptionManager() {
                   <Button 
                     onClick={() => handleCreateCheckout('basic')}
                     className="w-full"
+                    variant={invitationStatus.invitationPlan === 'basic' ? 'outline' : 'default'}
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Subscribe to Basic
+                    {invitationStatus.invitationPlan === 'basic' ? 'Switch to Basic' : 'Subscribe to Basic'}
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className={invitationStatus.invitationPlan === 'standard' ? 'border-primary bg-primary/5' : ''}>
                 <CardHeader>
-                  <CardTitle>Standard Plan</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    Standard Plan
+                    {invitationStatus.invitationPlan === 'standard' && (
+                      <Badge variant="outline">Your Plan</Badge>
+                    )}
+                  </CardTitle>
                   <CardDescription>Great for growing businesses</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -160,16 +187,22 @@ export function SubscriptionManager() {
                   <Button 
                     onClick={() => handleCreateCheckout('standard')}
                     className="w-full"
+                    variant={invitationStatus.invitationPlan === 'standard' ? 'outline' : 'default'}
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Subscribe to Standard
+                    {invitationStatus.invitationPlan === 'standard' ? 'Switch to Standard' : 'Subscribe to Standard'}
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className={invitationStatus.invitationPlan === 'premium' ? 'border-primary bg-primary/5' : ''}>
                 <CardHeader>
-                  <CardTitle>Premium Plan</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    Premium Plan
+                    {invitationStatus.invitationPlan === 'premium' && (
+                      <Badge variant="outline">Your Plan</Badge>
+                    )}
+                  </CardTitle>
                   <CardDescription>For high-traffic websites</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -177,9 +210,10 @@ export function SubscriptionManager() {
                   <Button 
                     onClick={() => handleCreateCheckout('premium')}
                     className="w-full"
+                    variant={invitationStatus.invitationPlan === 'premium' ? 'outline' : 'default'}
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Subscribe to Premium
+                    {invitationStatus.invitationPlan === 'premium' ? 'Switch to Premium' : 'Subscribe to Premium'}
                   </Button>
                 </CardContent>
               </Card>

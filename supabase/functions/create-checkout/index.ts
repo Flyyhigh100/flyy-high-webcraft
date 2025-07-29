@@ -15,6 +15,8 @@ const logStep = (step: string, details?: any) => {
 interface CheckoutRequest {
   plan: 'basic' | 'standard' | 'premium';
   siteId?: string;
+  invitation_payment?: boolean;
+  amount?: number; // Custom amount from invitation
 }
 
 serve(async (req) => {
@@ -44,7 +46,7 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { plan, siteId }: CheckoutRequest = await req.json();
+    const { plan, siteId, invitation_payment, amount }: CheckoutRequest = await req.json();
     
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
@@ -66,15 +68,24 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
-    // Define pricing based on plan
-    const pricing = {
-      basic: { amount: 1500, name: "Basic Hosting Plan" }, // $15.00
-      standard: { amount: 1999, name: "Standard Hosting Plan" }, // $19.99
-      premium: { amount: 2999, name: "Premium Hosting Plan" } // $29.99
-    };
-
-    const selectedPlan = pricing[plan];
-    if (!selectedPlan) throw new Error("Invalid plan selected");
+    // Use custom amount if this is an invitation payment, otherwise use default pricing
+    let planAmount, planName;
+    if (invitation_payment && amount) {
+      planAmount = amount; // Amount already in cents from frontend
+      planName = `${plan.charAt(0).toUpperCase() + plan.slice(1)} Hosting Plan (Invited)`;
+      logStep("Using invitation amount", { amount, plan });
+    } else {
+      // Define pricing based on plan
+      const pricing = {
+        basic: { amount: 1500, name: "Basic Hosting Plan" }, // $15.00
+        standard: { amount: 1999, name: "Standard Hosting Plan" }, // $19.99
+        premium: { amount: 2999, name: "Premium Hosting Plan" } // $29.99
+      };
+      const selectedPlan = pricing[plan];
+      if (!selectedPlan) throw new Error("Invalid plan selected");
+      planAmount = selectedPlan.amount;
+      planName = selectedPlan.name;
+    }
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
     
@@ -85,10 +96,10 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: { 
-              name: selectedPlan.name,
+              name: planName,
               description: `Monthly hosting for your website`
             },
-            unit_amount: selectedPlan.amount,
+            unit_amount: planAmount,
             recurring: { interval: "month" },
           },
           quantity: 1,
