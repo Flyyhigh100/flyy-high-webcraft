@@ -10,17 +10,48 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ShieldCheck, Mail, Key } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import HostingManager from "@/components/dashboard/HostingManager";
 import { SubscriptionManager } from "@/components/dashboard/SubscriptionManager";
 import { EmailChangeForm } from "@/components/dashboard/EmailChangeForm";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
   const { user, isLoading, isAdmin, checkAdminStatus } = useAuth();
   const [saveLoading, setSaveLoading] = useState(false);
   const [showEmailChange, setShowEmailChange] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const { toast } = useToast();
   
+  // Load user settings
+  useEffect(() => {
+    const loadUserSettings = async () => {
+      if (user) {
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('marketing_opt_in')
+            .eq('id', user.id)
+            .single();
+
+          if (error) {
+            console.error('Error loading user settings:', error);
+          } else if (profile) {
+            setMarketingOptIn(profile.marketing_opt_in ?? true);
+          }
+          setSettingsLoaded(true);
+        } catch (error) {
+          console.error('Error loading user settings:', error);
+          setSettingsLoaded(true);
+        }
+      }
+    };
+
+    loadUserSettings();
+  }, [user]);
+
   // Recheck admin status on mount
   useEffect(() => {
     const verifyAdminStatus = async () => {
@@ -48,12 +79,39 @@ export default function Dashboard() {
     );
   }
   
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
     setSaveLoading(true);
-    // Simulate saving settings
-    setTimeout(() => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          marketing_opt_in: marketingOptIn,
+          marketing_updated_at: new Date().toISOString()
+        })
+        .eq('id', user?.id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to save settings. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Settings Saved",
+          description: "Your preferences have been updated successfully.",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save settings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setSaveLoading(false);
-    }, 1500);
+    }
   };
   
   return (
@@ -217,17 +275,24 @@ export default function Dashboard() {
                       Receive updates and alerts via email
                     </p>
                   </div>
-                  <Switch defaultChecked={true} />
+                  <Switch 
+                    checked={emailNotifications} 
+                    onCheckedChange={setEmailNotifications}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Marketing Updates</Label>
                     <p className="text-sm text-gray-500">
-                      Receive tips, special offers, and updates
+                      Receive tips, special offers, and product updates from SydeVault
                     </p>
                   </div>
-                  <Switch defaultChecked={false} />
+                  <Switch 
+                    checked={marketingOptIn} 
+                    onCheckedChange={setMarketingOptIn}
+                    disabled={!settingsLoaded}
+                  />
                 </div>
               </div>
             </CardContent>

@@ -1,8 +1,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail, Megaphone } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useAdminData } from "@/hooks/useAdminData";
 import { UserAccountsTable } from "@/components/admin/UserAccountsTable";
@@ -12,6 +12,7 @@ import { RevenueAnalytics } from "@/components/admin/RevenueAnalytics";
 import { ClientWebsiteList } from "@/components/admin/ClientWebsiteList";
 import { AdminSummaryCards } from "@/components/admin/AdminSummaryCards";
 import { ClientInvitationsTable } from "@/components/admin/ClientInvitationsTable";
+import { MarketingEmailManager } from "@/components/admin/MarketingEmailManager";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -48,6 +49,10 @@ export default function AdminDashboard() {
                 <Globe className="mr-2 h-4 w-4" />
                 Client Websites
               </TabsTrigger>
+              <TabsTrigger value="marketing">
+                <Megaphone className="mr-2 h-4 w-4" />
+                Marketing Emails
+              </TabsTrigger>
               <TabsTrigger value="invitations">
                 <Mail className="mr-2 h-4 w-4" />
                 Invitations
@@ -81,6 +86,21 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <ClientWebsiteList />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            {/* Marketing Emails Tab */}
+            <TabsContent value="marketing">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Marketing Email Management</CardTitle>
+                  <CardDescription>
+                    Send marketing emails to subscribers and manage your mailing list
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <MarketingEmailManager />
                 </CardContent>
               </Card>
             </TabsContent>
