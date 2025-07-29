@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ShieldCheck, Mail, Key } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import DomainManager from "@/components/dashboard/DomainManager";
+import HostingManager from "@/components/dashboard/HostingManager";
 import { SubscriptionManager } from "@/components/dashboard/SubscriptionManager";
 import { EmailChangeForm } from "@/components/dashboard/EmailChangeForm";
 
@@ -103,7 +103,7 @@ export default function Dashboard() {
       <Tabs defaultValue="account" className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="websites">My Websites</TabsTrigger>
+          <TabsTrigger value="websites">Your Website</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
@@ -193,17 +193,7 @@ export default function Dashboard() {
         </TabsContent>
         
         <TabsContent value="websites">
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Your Websites</CardTitle>
-              <CardDescription>
-                Manage your websites and domains
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DomainManager />
-            </CardContent>
-          </Card>
+          <HostingManager />
         </TabsContent>
         
         <TabsContent value="billing">
