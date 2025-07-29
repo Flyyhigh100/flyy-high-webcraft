@@ -326,6 +326,7 @@ export type Database = {
       }
       websites: {
         Row: {
+          auto_renew: boolean | null
           created_at: string | null
           grace_period_end_date: string | null
           id: string
@@ -341,6 +342,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          auto_renew?: boolean | null
           created_at?: string | null
           grace_period_end_date?: string | null
           id?: string
@@ -356,6 +358,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          auto_renew?: boolean | null
           created_at?: string | null
           grace_period_end_date?: string | null
           id?: string

@@ -156,7 +156,7 @@ const HostingManager = () => {
                 </p>
               </div>
               <Switch
-                checked={true} // For now, defaulting to true
+                checked={primaryWebsite.auto_renew}
                 onCheckedChange={(checked) => updateAutoRenewal(primaryWebsite.id, checked)}
               />
             </div>

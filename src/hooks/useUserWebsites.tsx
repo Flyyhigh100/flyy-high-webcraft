@@ -10,6 +10,7 @@ export interface UserWebsite {
   next_payment_date: string | null;
   next_payment_amount: number | null;
   payment_status: string;
+  auto_renew: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -57,8 +58,13 @@ export function useUserWebsites() {
 
   const updateAutoRenewal = async (websiteId: string, autoRenew: boolean) => {
     try {
-      // For now, we'll just update the local state
-      // In a real implementation, you'd update the database
+      const { error } = await supabase
+        .from('websites')
+        .update({ auto_renew: autoRenew })
+        .eq('id', websiteId);
+
+      if (error) throw error;
+
       setWebsites(prev => 
         prev.map(site => 
           site.id === websiteId 
