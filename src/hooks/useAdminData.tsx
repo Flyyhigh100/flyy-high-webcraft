@@ -38,77 +38,61 @@ export function useAdminData() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log("Fetching admin data...");
+      console.log("Fetching admin data via edge function...");
       
-      // Force a fresh authentication check and refresh session if needed
-      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Get current session for authorization header
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (!session || !session.user) {
-        console.log("No session found, attempting to refresh...");
-        const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
-        
-        if (refreshError || !refreshedSession?.session) {
-          console.error("Session refresh failed:", refreshError);
-          throw new Error('Authentication expired. Please log in again.');
-        }
-        
-        session = refreshedSession.session;
+      if (sessionError || !session?.access_token) {
+        console.error("Session error:", sessionError);
+        throw new Error('Authentication required. Please log in again.');
       }
       
-      console.log("Authentication verified for admin dashboard:", session.user.email);
+      console.log("Calling admin service for user:", session.user.email);
       
-      // Additional check for admin status
-      if (session.user.email !== 'flyyhigh824@gmail.com') {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (!profile || profile.role !== 'admin') {
-          throw new Error('Admin access required');
-        }
+      // Call the admin service edge function
+      const { data, error } = await supabase.functions.invoke('admin-service', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
+      if (error) {
+        console.error('Admin service error:', error);
+        throw new Error(error.message || 'Failed to fetch admin data');
       }
       
-      // Fetch profiles
-      const profilesData = await fetchProfiles();
-      setUsers(profilesData);
-      
-      // Check if payments table exists and fetch payment data
-      const paymentsTableExists = await checkPaymentsTableExists();
-      
-      if (paymentsTableExists) {
-        // Fetch completed payments
-        const completedPayments = await fetchCompletedPayments();
-        setPayments(completedPayments);
-        
-        // Calculate revenue data
-        const calculatedRevenueData = calculateRevenueData(completedPayments);
-        setRevenueData(calculatedRevenueData);
-        
-        // Fetch upcoming payments
-        const upcoming = await fetchUpcomingPayments();
-        setUpcomingPayments(upcoming);
-      } else {
-        console.log("Payments table does not exist yet or function failed");
-        setPayments([]);
-        setUpcomingPayments([]);
+      if (!data) {
+        throw new Error('No data returned from admin service');
       }
       
-      // Check if websites table exists and fetch website data
-      const websitesTableExists = await checkWebsitesTableExists();
+      console.log("Admin data received:", {
+        profilesCount: data.profiles?.length || 0,
+        paymentsCount: data.payments?.length || 0,
+        upcomingPaymentsCount: data.upcomingPayments?.length || 0,
+        websitesCount: data.clientWebsites?.length || 0
+      });
       
-      if (websitesTableExists) {
-        // Fetch client websites
-        const websites = await fetchClientWebsites();
-        setClientWebsites(websites);
-      } else {
-        console.log("Websites table does not exist yet or function failed");
-        setClientWebsites([]);
-      }
+      // Set all the data from the edge function response
+      setUsers(data.profiles || []);
+      setPayments(data.payments || []);
+      setUpcomingPayments(data.upcomingPayments || []);
+      setClientWebsites(data.clientWebsites || []);
+      setRevenueData(data.revenueData || {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [
+          {
+            label: 'Monthly Revenue',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            borderColor: 'rgb(99, 102, 241)',
+            backgroundColor: 'rgba(99, 102, 241, 0.5)',
+            tension: 0.3,
+          },
+        ],
+      });
       
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching admin data:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to load dashboard data",
