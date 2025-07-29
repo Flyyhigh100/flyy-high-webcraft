@@ -53,8 +53,14 @@ serve(async (req) => {
       });
       logStep("Created new Stripe customer", { customerId: newCustomer.id });
       
-      // For new customers, we need to redirect them to add a payment method first
-      throw new Error("Please set up a payment method first by making a payment or subscribing to a plan");
+      // For new customers, return a specific error that frontend can handle
+      return new Response(JSON.stringify({ 
+        error: "NO_PAYMENT_METHOD",
+        message: "Please set up a payment method first by making a payment or subscribing to a plan" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
     }
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });

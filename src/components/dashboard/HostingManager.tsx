@@ -54,8 +54,22 @@ const HostingManager = () => {
       
       if (error) throw error;
       
+      // Handle specific case where user needs to set up payment method first
+      if (data?.error === "NO_PAYMENT_METHOD") {
+        toast({
+          title: "Payment Method Required",
+          description: "Please make a payment first to access payment management. Use the 'Pay Now' button above.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Open Stripe Customer Portal in a new tab
-      window.open(data.url, '_blank');
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No portal URL received');
+      }
     } catch (error) {
       console.error('Error creating customer portal session:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to open payment management portal';
