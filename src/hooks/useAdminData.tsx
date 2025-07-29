@@ -40,15 +40,23 @@ export function useAdminData() {
     try {
       console.log("Fetching admin data...");
       
-      // Wait for authentication to be ready
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log("Current session:", session?.user?.email);
+      // Force a fresh authentication check and refresh session if needed
+      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError || !session?.user) {
-        console.error("Authentication error:", sessionError);
-        throw new Error(`Authentication required: ${sessionError?.message || 'No session found'}`);
+      if (!session || !session.user) {
+        console.log("No session found, attempting to refresh...");
+        const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
+        
+        if (refreshError || !refreshedSession?.session) {
+          console.error("Session refresh failed:", refreshError);
+          throw new Error('Authentication expired. Please log in again.');
+        }
+        
+        session = refreshedSession.session;
       }
-
+      
+      console.log("Authentication verified for admin dashboard:", session.user.email);
+      
       // Additional check for admin status
       if (session.user.email !== 'flyyhigh824@gmail.com') {
         const { data: profile } = await supabase

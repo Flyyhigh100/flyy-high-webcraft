@@ -2,14 +2,22 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin";
 
-export const fetchProfiles = async (): Promise<UserProfile[]> => {
-  // Check authentication first
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log('fetchProfiles: Current user:', user?.email);
+// Ensure authentication is properly set before making database calls
+const ensureAuthenticated = async () => {
+  const { data: { session }, error } = await supabase.auth.getSession();
   
-  if (!user) {
-    throw new Error('User not authenticated');
+  if (error || !session?.user) {
+    console.error('Authentication check failed:', error);
+    throw new Error('Authentication required');
   }
+  
+  console.log('Authentication verified for user:', session.user.email);
+  return session;
+};
+
+export const fetchProfiles = async (): Promise<UserProfile[]> => {
+  // Ensure proper authentication before proceeding
+  const session = await ensureAuthenticated();
 
   const { data, error } = await supabase
     .from('profiles')
@@ -59,6 +67,9 @@ export const checkWebsitesTableExists = async (): Promise<boolean> => {
 };
 
 export const fetchCompletedPayments = async (): Promise<Payment[]> => {
+  // Ensure proper authentication before proceeding
+  const session = await ensureAuthenticated();
+  
   // First fetch payments
   const { data: paymentsData, error: paymentsError } = await supabase
     .from('payments')
@@ -97,13 +108,8 @@ export const fetchCompletedPayments = async (): Promise<Payment[]> => {
 };
 
 export const fetchUpcomingPayments = async (): Promise<Payment[]> => {
-  // Check authentication first
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log('fetchUpcomingPayments: Current user:', user?.email);
-  
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
+  // Ensure proper authentication before proceeding
+  const session = await ensureAuthenticated();
 
   // First fetch websites with upcoming payments
   const { data: websitesData, error: websitesError } = await supabase
@@ -145,13 +151,8 @@ export const fetchUpcomingPayments = async (): Promise<Payment[]> => {
 };
 
 export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
-  // Check authentication first
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log('fetchClientWebsites: Current user:', user?.email);
-  
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
+  // Ensure proper authentication before proceeding
+  const session = await ensureAuthenticated();
 
   const { data, error } = await supabase
     .from('websites')
