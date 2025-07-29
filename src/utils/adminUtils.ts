@@ -3,6 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin";
 
 export const fetchProfiles = async (): Promise<UserProfile[]> => {
+  // Check authentication first
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('fetchProfiles: Current user:', user?.email);
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
   const { data, error } = await supabase
     .from('profiles')
     .select(`
@@ -13,6 +21,7 @@ export const fetchProfiles = async (): Promise<UserProfile[]> => {
   
   if (error) {
     console.error('Error fetching profiles:', error);
+    console.error('Auth state during error:', await supabase.auth.getUser());
     throw error;
   }
   
@@ -88,6 +97,14 @@ export const fetchCompletedPayments = async (): Promise<Payment[]> => {
 };
 
 export const fetchUpcomingPayments = async (): Promise<Payment[]> => {
+  // Check authentication first
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('fetchUpcomingPayments: Current user:', user?.email);
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
   // First fetch websites with upcoming payments
   const { data: websitesData, error: websitesError } = await supabase
     .from('websites')
@@ -98,6 +115,7 @@ export const fetchUpcomingPayments = async (): Promise<Payment[]> => {
   
   if (websitesError) {
     console.error('Error fetching upcoming payments:', websitesError);
+    console.error('Auth state during error:', await supabase.auth.getUser());
     throw websitesError;
   }
 
@@ -127,6 +145,14 @@ export const fetchUpcomingPayments = async (): Promise<Payment[]> => {
 };
 
 export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
+  // Check authentication first
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('fetchClientWebsites: Current user:', user?.email);
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
   const { data, error } = await supabase
     .from('websites')
     .select('*')
@@ -134,6 +160,7 @@ export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
   
   if (error) {
     console.error('Error fetching client websites:', error);
+    console.error('Auth state during error:', await supabase.auth.getUser());
     throw error;
   }
   

@@ -12,6 +12,7 @@ import {
   calculateRevenueData 
 } from "@/utils/adminUtils";
 import { useAdminRoleManagement } from "@/hooks/useAdminRoleManagement";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useAdminData() {
   const { toast } = useToast();
@@ -38,6 +39,14 @@ export function useAdminData() {
     setIsLoading(true);
     try {
       console.log("Fetching admin data...");
+      
+      // Check authentication state first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      console.log("Current authenticated user:", user?.email);
+      
+      if (authError || !user) {
+        throw new Error(`Authentication required: ${authError?.message || 'No user found'}`);
+      }
       
       // Fetch profiles
       const profilesData = await fetchProfiles();

@@ -45,6 +45,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
           }
           
           // Method 2: Query the profile directly
+          console.log('AdminRoute: Querying profile for user:', user.id);
           const { data, error } = await supabase
             .from('profiles')
             .select('role')
@@ -53,7 +54,10 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
             
           if (error) {
             console.error('Error checking profile:', error);
+            console.error('Auth session during error:', await supabase.auth.getSession());
             // Don't fail here, try other methods
+          } else {
+            console.log('AdminRoute: Profile query result:', data);
           }
           
           if (data && data.role === 'admin') {
