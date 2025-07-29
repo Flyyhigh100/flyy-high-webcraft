@@ -40,12 +40,26 @@ export function useAdminData() {
     try {
       console.log("Fetching admin data...");
       
-      // Check authentication state first
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log("Current authenticated user:", user?.email);
+      // Wait for authentication to be ready
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log("Current session:", session?.user?.email);
       
-      if (authError || !user) {
-        throw new Error(`Authentication required: ${authError?.message || 'No user found'}`);
+      if (sessionError || !session?.user) {
+        console.error("Authentication error:", sessionError);
+        throw new Error(`Authentication required: ${sessionError?.message || 'No session found'}`);
+      }
+
+      // Additional check for admin status
+      if (session.user.email !== 'flyyhigh824@gmail.com') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (!profile || profile.role !== 'admin') {
+          throw new Error('Admin access required');
+        }
       }
       
       // Fetch profiles
@@ -89,7 +103,7 @@ export function useAdminData() {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Failed to load dashboard data",
+        description: error instanceof Error ? error.message : "Failed to load dashboard data",
         variant: "destructive",
       });
       
@@ -104,7 +118,13 @@ export function useAdminData() {
   }, [toast]);
   
   useEffect(() => {
-    fetchData();
+    // Only fetch data if authentication is loaded
+    const initializeFetch = async () => {
+      // Wait a bit for auth context to initialize
+      setTimeout(fetchData, 100);
+    };
+    
+    initializeFetch();
   }, [fetchData]);
   
   const makeUserAdmin = async (userId: string) => {
