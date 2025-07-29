@@ -58,9 +58,10 @@ const HostingManager = () => {
       window.open(data.url, '_blank');
     } catch (error) {
       console.error('Error creating customer portal session:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to open payment management portal';
       toast({
         title: "Error",
-        description: "Failed to open payment management portal",
+        description: errorMessage,
         variant: "destructive",
       });
     }

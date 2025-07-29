@@ -42,8 +42,19 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    logStep("Stripe customer search completed", { email: user.email, found: customers.data.length });
+    
     if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
+      logStep("No Stripe customer found, creating one");
+      // Create a new customer if one doesn't exist
+      const newCustomer = await stripe.customers.create({
+        email: user.email,
+        name: user.user_metadata?.full_name || user.email,
+      });
+      logStep("Created new Stripe customer", { customerId: newCustomer.id });
+      
+      // For new customers, we need to redirect them to add a payment method first
+      throw new Error("Please set up a payment method first by making a payment or subscribing to a plan");
     }
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
