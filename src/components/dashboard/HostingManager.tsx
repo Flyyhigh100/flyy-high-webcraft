@@ -344,7 +344,7 @@ const HostingManager = () => {
             <div className="space-y-2">
               <h4 className="font-medium">Support & Security</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 24/7 Technical Support</li>
+                <li>• Dedicated Technical Support</li>
                 <li>• Security Updates</li>
                 <li>• Performance Monitoring</li>
                 <li>• Content Updates Available</li>
