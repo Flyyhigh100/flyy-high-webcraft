@@ -396,7 +396,7 @@ export type Database = {
         Returns: boolean
       }
       table_exists: {
-        Args: { table_name: string; schema_name?: string }
+        Args: { table_name_param: string; schema_name_param?: string }
         Returns: boolean
       }
       update_payment_statuses: {
