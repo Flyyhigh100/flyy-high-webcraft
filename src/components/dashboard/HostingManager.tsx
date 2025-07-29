@@ -43,6 +43,29 @@ const HostingManager = () => {
     }
   };
 
+  const handleUpdatePaymentMethod = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+      
+      if (error) throw error;
+      
+      // Open Stripe Customer Portal in a new tab
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error creating customer portal session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open payment management portal",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'current':
@@ -236,13 +259,18 @@ const HostingManager = () => {
 
           {/* Payment Method Display */}
           <div className="border-t pt-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">Payment Method</Label>
-              <div className="flex items-center gap-2 text-sm">
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span>•••• •••• •••• 1234</span>
-                <Badge variant="outline" className="text-xs">Visa</Badge>
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Payment Method</Label>
+                <div className="flex items-center gap-2 text-sm">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <span>•••• •••• •••• 1234</span>
+                  <Badge variant="outline" className="text-xs">Visa</Badge>
+                </div>
               </div>
+              <Button onClick={handleUpdatePaymentMethod} variant="outline" size="sm">
+                Update Payment Method
+              </Button>
             </div>
           </div>
           

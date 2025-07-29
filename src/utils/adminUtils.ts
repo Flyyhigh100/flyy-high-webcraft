@@ -5,7 +5,10 @@ import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin"
 export const fetchProfiles = async (): Promise<UserProfile[]> => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select(`
+      *,
+      user_sessions(last_sign_in)
+    `)
     .order('created_at', { ascending: false });
   
   if (error) {
@@ -13,7 +16,13 @@ export const fetchProfiles = async (): Promise<UserProfile[]> => {
     throw error;
   }
   
-  return data || [];
+  // Transform the data to include last_sign_in from user_sessions
+  const profiles = (data || []).map((profile: any) => ({
+    ...profile,
+    last_sign_in: profile.user_sessions?.[0]?.last_sign_in || null
+  }));
+  
+  return profiles;
 };
 
 export const checkPaymentsTableExists = async (): Promise<boolean> => {
