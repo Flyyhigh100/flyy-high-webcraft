@@ -72,13 +72,10 @@ Deno.serve(async (req) => {
 
     // Fetch all admin data using service role (bypasses RLS)
     const [profilesResult, paymentsResult, websitesResult] = await Promise.all([
-      // Fetch all profiles with session data
+      // Fetch all profiles
       supabaseAdmin
         .from('profiles')
-        .select(`
-          *,
-          user_sessions(last_sign_in)
-        `)
+        .select('*')
         .order('created_at', { ascending: false }),
 
       // Fetch completed payments with user emails
@@ -128,7 +125,7 @@ Deno.serve(async (req) => {
       created_at: profile.created_at,
       updated_at: profile.updated_at,
       user_id: profile.user_id || profile.id,
-      last_sign_in: profile.user_sessions?.[0]?.last_sign_in || null
+      last_sign_in: null // Removed user_sessions join to fix relationship error
     }));
 
     // Transform payments data
