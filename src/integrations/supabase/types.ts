@@ -195,6 +195,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_payments_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payments_site_id_fkey"
             columns: ["site_id"]
             isOneToOne: false
@@ -406,7 +413,15 @@ export type Database = {
           url?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_websites_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
