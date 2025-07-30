@@ -43,9 +43,8 @@ export function ClientWebsiteList() {
   return (
     <Tabs defaultValue="websites" className="w-full">
       <TabsList className="mb-6">
-        <TabsTrigger value="websites">Client Websites</TabsTrigger>
-        <TabsTrigger value="import">Bulk Import</TabsTrigger>
-        <TabsTrigger value="reminders">Payment Reminders</TabsTrigger>
+        <TabsTrigger value="websites">Website Overview</TabsTrigger>
+        <TabsTrigger value="tools">Management Tools</TabsTrigger>
         <TabsTrigger value="templates">Email Templates</TabsTrigger>
       </TabsList>
 
@@ -59,8 +58,6 @@ export function ClientWebsiteList() {
             <ClientInviteModal onRefresh={refreshData} />
           </div>
           
-          <PaymentCollectionTools onRefresh={refreshData} />
-          
           <ClientWebsiteTable 
             clients={sortedClients}
             onViewDetails={handleViewDetails}
@@ -69,12 +66,12 @@ export function ClientWebsiteList() {
         </div>
       </TabsContent>
 
-      <TabsContent value="import">
-        <BulkClientImport onRefresh={refreshData} />
-      </TabsContent>
-
-      <TabsContent value="reminders">
-        <EnhancedPaymentReminders />
+      <TabsContent value="tools">
+        <div className="space-y-6">
+          <PaymentCollectionTools onRefresh={refreshData} />
+          <BulkClientImport onRefresh={refreshData} />
+          <EnhancedPaymentReminders />
+        </div>
       </TabsContent>
 
       <TabsContent value="templates">

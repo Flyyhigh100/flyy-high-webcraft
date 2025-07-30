@@ -30,6 +30,8 @@ export interface ClientWebsite {
   lastPaymentReminderSent?: string;
   gracePeriodEndDate?: string;
   suspensionDate?: string;
+  clientEmail?: string;
+  clientRole?: string;
 }
 
 export interface RevenueData {

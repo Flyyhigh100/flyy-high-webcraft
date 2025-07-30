@@ -88,10 +88,13 @@ Deno.serve(async (req) => {
         .eq('status', 'completed')
         .order('payment_date', { ascending: false }),
 
-      // Fetch all websites
+      // Fetch all websites with their user profile information
       supabaseAdmin
         .from('websites')
-        .select('*')
+        .select(`
+          *,
+          profiles(email, role)
+        `)
         .order('name', { ascending: true })
     ]);
 
@@ -157,7 +160,7 @@ Deno.serve(async (req) => {
         plan: website.plan_type
       }));
 
-    // Transform websites data
+    // Transform websites data with client information
     const clientWebsites = (websitesResult.data || []).map(website => ({
       id: website.id,
       name: website.name,
@@ -168,7 +171,9 @@ Deno.serve(async (req) => {
       paymentStatus: website.payment_status,
       lastPaymentReminderSent: website.last_payment_reminder_sent,
       gracePeriodEndDate: website.grace_period_end_date,
-      suspensionDate: website.suspension_date
+      suspensionDate: website.suspension_date,
+      clientEmail: website.profiles?.email || 'Unknown',
+      clientRole: website.profiles?.role || 'user'
     }));
 
     // Calculate revenue data

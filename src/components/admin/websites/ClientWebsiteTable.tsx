@@ -113,7 +113,8 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Client/Project Name</TableHead>
+          <TableHead>Website/Project</TableHead>
+          <TableHead>Client Email</TableHead>
           <TableHead className="w-[120px]">Plan Type</TableHead>
           <TableHead className="w-[140px]">Payment Status</TableHead>
           <TableHead className="w-[120px]">Next Payment</TableHead>
@@ -132,6 +133,15 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
                   {client.name}
                   {isOverdue && (
                     <AlertTriangle className="ml-2 h-4 w-4 text-red-500" />
+                  )}
+                </div>
+                <div className="text-sm text-gray-500">{client.url}</div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center">
+                  <span className="text-sm">{client.clientEmail || 'Unknown'}</span>
+                  {client.clientRole === 'admin' && (
+                    <Badge variant="secondary" className="ml-2 text-xs">Admin</Badge>
                   )}
                 </div>
               </TableCell>

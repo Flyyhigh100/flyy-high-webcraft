@@ -45,126 +45,141 @@ export default function AdminDashboard() {
           
           <Tabs defaultValue="websites" className="w-full">
             <TabsList className="mb-8">
+              <TabsTrigger value="clients">
+                <UserCircle className="mr-2 h-4 w-4" />
+                Clients
+              </TabsTrigger>
               <TabsTrigger value="websites">
                 <Globe className="mr-2 h-4 w-4" />
                 Client Websites
-              </TabsTrigger>
-              <TabsTrigger value="marketing">
-                <Megaphone className="mr-2 h-4 w-4" />
-                Marketing Emails
-              </TabsTrigger>
-              <TabsTrigger value="invitations">
-                <Mail className="mr-2 h-4 w-4" />
-                Invitations
-              </TabsTrigger>
-              <TabsTrigger value="accounts">
-                <User className="mr-2 h-4 w-4" />
-                User Accounts
               </TabsTrigger>
               <TabsTrigger value="payments">
                 <DollarSign className="mr-2 h-4 w-4" />
                 Payments
               </TabsTrigger>
-              <TabsTrigger value="upcoming">
-                <CalendarClock className="mr-2 h-4 w-4" />
-                Upcoming Payments
-              </TabsTrigger>
               <TabsTrigger value="analytics">
                 <BarChart4 className="mr-2 h-4 w-4" />
                 Analytics
               </TabsTrigger>
+              <TabsTrigger value="admin-users">
+                <User className="mr-2 h-4 w-4" />
+                Admin Users
+              </TabsTrigger>
+              <TabsTrigger value="marketing">
+                <Megaphone className="mr-2 h-4 w-4" />
+                Marketing
+              </TabsTrigger>
             </TabsList>
             
+            {/* Clients Tab */}
+            <TabsContent value="clients">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Client Users</CardTitle>
+                  <CardDescription>
+                    Manage client accounts and their website access
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UserAccountsTable 
+                    users={users.filter(user => user.role !== 'admin')} 
+                    setUsers={setUsers} 
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             {/* Client Websites Tab */}
             <TabsContent value="websites">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Client Websites</CardTitle>
-                  <CardDescription>
-                    Manage and monitor all client websites and projects
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ClientWebsiteList />
-                </CardContent>
-              </Card>
+              <ClientWebsiteList />
             </TabsContent>
             
-            {/* Marketing Emails Tab */}
-            <TabsContent value="marketing">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Marketing Email Management</CardTitle>
-                  <CardDescription>
-                    Send marketing emails to subscribers and manage your mailing list
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <MarketingEmailManager />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Client Invitations Tab */}
-            <TabsContent value="invitations">
-              <ClientInvitationsTable />
-            </TabsContent>
-            
-            {/* User Accounts Tab */}
-            <TabsContent value="accounts">
-              <Card>
-                <CardHeader>
-                  <CardTitle>All User Accounts</CardTitle>
-                  <CardDescription>
-                    Manage user accounts and roles
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <UserAccountsTable users={users} setUsers={setUsers} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Payments Tab */}
+            {/* Consolidated Payments Tab */}
             <TabsContent value="payments">
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Upcoming Payments</CardTitle>
+                    <CardDescription>
+                      Payment reminders and overdue charges
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {upcomingPayments.length > 0 ? (
+                      <UpcomingPaymentsTable upcomingPayments={upcomingPayments} />
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No upcoming payments
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Payment History</CardTitle>
+                    <CardDescription>
+                      View completed payment transactions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {payments.length > 0 ? (
+                      <PaymentsTable payments={payments} />
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No payment data available
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            {/* Admin Users Tab */}
+            <TabsContent value="admin-users">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Payments</CardTitle>
+                  <CardTitle>Admin Users</CardTitle>
                   <CardDescription>
-                    View and manage payment history
+                    Manage administrator accounts and permissions
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {payments.length > 0 ? (
-                    <PaymentsTable payments={payments} />
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No payment data available
-                    </div>
-                  )}
+                  <UserAccountsTable 
+                    users={users.filter(user => user.role === 'admin')} 
+                    setUsers={setUsers} 
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
-            
-            {/* Upcoming Payments Tab */}
-            <TabsContent value="upcoming">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upcoming Payments</CardTitle>
-                  <CardDescription>
-                    Payment reminders and upcoming charges
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {upcomingPayments.length > 0 ? (
-                    <UpcomingPaymentsTable upcomingPayments={upcomingPayments} />
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No upcoming payments
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+
+            {/* Marketing Tab */}
+            <TabsContent value="marketing">
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Client Invitations</CardTitle>
+                    <CardDescription>
+                      Send and manage client invitations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ClientInvitationsTable />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Marketing Email Management</CardTitle>
+                    <CardDescription>
+                      Send marketing emails to subscribers and manage your mailing list
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <MarketingEmailManager />
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
             
             {/* Analytics Tab */}
