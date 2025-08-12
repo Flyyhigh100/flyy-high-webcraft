@@ -27,6 +27,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
+  // Track last sign-in via Edge Function
+  const trackSignIn = async () => {
+    try {
+      await supabase.functions.invoke('track-signin', {
+        body: { userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown' }
+      });
+    } catch (err) {
+      console.error('track-signin failed', err);
+    }
+  };
+
   // Improved admin check that queries the database directly
   const checkAdminStatus = async (): Promise<boolean> => {
     if (!user) return false;
@@ -93,35 +104,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        console.log("Checking admin status during initial session");
-        await checkAdminStatus();
-      }
-      
-      setIsLoading(false);
+if (session?.user) {
+  console.log("Checking admin status during initial session");
+  await checkAdminStatus();
+  setTimeout(() => { trackSignIn(); }, 0);
+}
+
+setIsLoading(false);
     }
     
     getInitialSession();
     
-    // Set up listener for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        console.log("Auth state change detected:", _event);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          console.log("User authenticated, checking admin status");
-          await checkAdminStatus();
-        } else {
-          console.log("No user or session, setting isAdmin to false");
-          setIsAdmin(false);
-          localStorage.removeItem('flyy_high_admin');
-        }
-        
-        setIsLoading(false);
-      }
-    );
+// Set up listener for auth state changes
+const { data: { subscription } } = supabase.auth.onAuthStateChange(
+  async (_event, session) => {
+    console.log("Auth state change detected:", _event);
+    setSession(session);
+    setUser(session?.user ?? null);
+    
+    if (session?.user) {
+      console.log("User authenticated, checking admin status");
+      await checkAdminStatus();
+      setTimeout(() => { trackSignIn(); }, 0);
+    } else {
+      console.log("No user or session, setting isAdmin to false");
+      setIsAdmin(false);
+      localStorage.removeItem('flyy_high_admin');
+    }
+    
+    setIsLoading(false);
+  }
+);
     
     // Cleanup subscription on unmount
     return () => {
@@ -142,9 +155,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   // Sign in function
-  const signIn = async (email: string, password: string) => {
-    return await supabase.auth.signInWithPassword({ email, password });
-  };
+const signIn = async (email: string, password: string) => {
+  const res = await supabase.auth.signInWithPassword({ email, password });
+  if (!res.error) {
+    setTimeout(() => { trackSignIn(); }, 0);
+  }
+  return res;
+};
   
   // Sign out function
   const signOut = async () => {

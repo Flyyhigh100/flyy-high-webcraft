@@ -1,4 +1,3 @@
-
 project_id = "wutyryaqlmgsbllnyoop"
 
 [api]
@@ -51,6 +50,9 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.cleanup-client]
+verify_jwt = true
+
+[functions.track-signin]
 verify_jwt = true
 
 [storage]
