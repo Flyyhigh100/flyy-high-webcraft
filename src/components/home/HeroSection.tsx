@@ -16,32 +16,21 @@ const HeroSection = () => {
         <div className="flex flex-col lg:flex-row items-center">
           <div className="w-full lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-              <span>Elevate Your Business With </span>
-              <span className="gradient-text">AI-Powered Websites</span>
+              <span>Build a Website That </span>
+              <span className="gradient-text">Wins Customers</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-lg mx-auto lg:mx-0">
-              We build stunning, intelligent websites that help your business grow. 
-              Powered by AI, designed by experts.
+              Modern, fast, and conversion-focused sites crafted to grow your business.
             </p>
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
               <Button className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
                 Get Started
               </Button>
-              <Button variant="outline" className="border-primary text-primary hover:bg-secondary px-8 py-6 text-lg">
-                View Portfolio
+              <Button asChild variant="outline" className="border-primary text-primary hover:bg-secondary px-8 py-6 text-lg">
+                <a href="#portfolio">View Portfolio</a>
               </Button>
             </div>
             
-            <div className="mt-8 flex items-center justify-center lg:justify-start">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-200"></div>
-                ))}
-              </div>
-              <p className="ml-4 text-sm text-gray-600">
-                <span className="font-medium">50+ clients</span> trust our services
-              </p>
-            </div>
           </div>
           
           <div className="w-full lg:w-1/2 relative">
@@ -76,14 +65,6 @@ const HeroSection = () => {
             
             {/* Floating CageChain website */}
             <div className="absolute -top-4 -right-4 md:top-8 md:right-8 bg-white rounded-lg shadow-lg animate-float overflow-hidden border border-primary/20 w-48">
-              <div className="bg-gradient-to-r from-primary/10 to-accent/10 flex items-center justify-between p-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-primary/30 rounded-full"></div>
-                  <div className="w-2 h-2 bg-accent/30 rounded-full"></div>
-                  <div className="w-2 h-2 bg-primary/50 rounded-full"></div>
-                </div>
-                <div className="text-xs text-muted-foreground opacity-75">Live</div>
-              </div>
               <div className="aspect-[4/3] bg-white flex items-center justify-center p-1">
                 <img 
                   src="/lovable-uploads/008c757f-a996-4036-b788-f7dbf9fce7c7.png" 
@@ -95,14 +76,6 @@ const HeroSection = () => {
             
             {/* Floating Precision Fabricated website */}
             <div className="absolute -bottom-4 -left-4 md:bottom-8 md:left-8 bg-white rounded-lg shadow-lg animate-float overflow-hidden border border-primary/20 w-48" style={{ animationDelay: '1s' }}>
-              <div className="bg-gradient-to-r from-accent/10 to-primary/10 flex items-center justify-between p-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-accent/30 rounded-full"></div>
-                  <div className="w-2 h-2 bg-primary/30 rounded-full"></div>
-                  <div className="w-2 h-2 bg-accent/50 rounded-full"></div>
-                </div>
-                <div className="text-xs text-muted-foreground opacity-75">Active</div>
-              </div>
               <div className="aspect-[4/3] bg-white flex items-center justify-center p-1">
                 <img 
                   src="/lovable-uploads/da2a20ea-3bc6-448d-a5c5-ff2b68b40cd3.png" 
