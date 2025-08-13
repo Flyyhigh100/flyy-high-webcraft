@@ -14,10 +14,7 @@ const CTASection = () => {
             Let's create a website that works as hard as you do. Get in touch today for a free consultation.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button className="bg-background text-foreground hover:bg-muted px-8 py-6 text-lg font-semibold shadow-lg">
-              Get Started
-            </Button>
-            <Button variant="outline" className="border-2 border-background text-background hover:bg-background hover:text-foreground px-8 py-6 text-lg font-semibold">
+            <Button asChild className="bg-background text-foreground hover:bg-muted px-8 py-6 text-lg font-semibold shadow-lg">
               <Link to="/contact">Contact Us</Link>
             </Button>
           </div>
