@@ -37,28 +37,12 @@ const HeroSection = () => {
             {/* Main browser window with 1 Million Strong website */}
             <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-primary/20 p-2 mx-auto w-full max-w-lg">
               <div className="rounded-lg overflow-hidden">
-                <div className="bg-gradient-to-r from-primary/10 to-accent/10 flex items-center justify-between p-3">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 bg-primary/30 rounded-full"></div>
-                    <div className="w-3 h-3 bg-accent/30 rounded-full"></div>
-                    <div className="w-3 h-3 bg-primary/50 rounded-full"></div>
-                  </div>
-                  <div className="text-xs text-muted-foreground">sydevault.com</div>
-                </div>
                 <div className="aspect-[16/9] bg-white flex items-center justify-center p-2">
                   <img 
                     src="/lovable-uploads/f78b96dc-5cfb-4143-a508-fec500284300.png" 
                     alt="1 Million Strong Fight Club" 
                     className="w-full h-full object-contain"
                   />
-                </div>
-              </div>
-              <div className="p-4 text-center bg-white">
-                <div className="h-2 w-64 bg-gray-200 rounded-full mx-auto mb-3"></div>
-                <div className="h-2 w-44 bg-gray-200 rounded-full mx-auto mb-3"></div>
-                <div className="flex justify-center space-x-2 mt-4">
-                  <div className="h-6 w-24 bg-primary rounded"></div>
-                  <div className="h-6 w-24 bg-secondary rounded"></div>
                 </div>
               </div>
             </div>
