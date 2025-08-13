@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -23,6 +24,37 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log("Marketing email function invoked");
 
+    // Authenticate and authorize requester (must be admin)
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabaseUser = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    const { data: { user }, error: userError } = await supabaseUser.auth.getUser(token);
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const { data: isAdmin, error: adminCheckError } = await supabaseUser.rpc('is_admin', { _user_id: user.id });
+    if (adminCheckError || !isAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Admin access required' }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const { subject, content, recipients }: MarketingEmailRequest = await req.json();
 
     if (!subject || !content || !recipients || recipients.length === 0) {
@@ -36,6 +68,14 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`Sending marketing email to ${recipients.length} recipients`);
+
+    // Basic content length guardrails
+    if (subject.length > 200 || content.length > 20000) {
+      return new Response(
+        JSON.stringify({ error: "Payload too large" }),
+        { status: 413, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     // Create HTML email content
     const htmlContent = `
@@ -72,12 +112,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send emails in batches to avoid rate limits
     const batchSize = 50;
-    const batches = [];
+    const batches: string[][] = [];
     for (let i = 0; i < recipients.length; i += batchSize) {
       batches.push(recipients.slice(i, i + batchSize));
     }
 
-    const results = [];
+    const results: any[] = [];
     let successCount = 0;
     let errorCount = 0;
 
@@ -93,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
         console.log(`Batch sent successfully:`, emailResponse);
         results.push({ batch: batch.length, status: 'success', data: emailResponse });
         successCount += batch.length;
-      } catch (batchError) {
+      } catch (batchError: any) {
         console.error(`Error sending batch:`, batchError);
         results.push({ batch: batch.length, status: 'error', error: batchError.message });
         errorCount += batch.length;
