@@ -7,7 +7,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 const testimonials = [
   {
     id: 1,
-    text: "Flyy High A.I. transformed our outdated website into a modern, conversion-focused platform. Sales have increased by 45% since the redesign!",
+    text: "Syde Vault transformed our outdated website into a modern, conversion-focused platform. Sales have increased since the redesign!",
     name: "Sarah Johnson",
     role: "CEO, Retail Solutions Inc.",
     // These would be real images from your project in production
@@ -24,7 +24,7 @@ const testimonials = [
   },
   {
     id: 3,
-    text: "We've worked with several web development agencies before, but Flyy High A.I. truly stands out. Their attention to detail and commitment to our success has made them our go-to digital partner.",
+    text: "We've worked with several web development agencies before, but Syde Vault truly stands out. Their attention to detail and commitment to our success has made them our go-to digital partner.",
     name: "Emily Chang",
     role: "Founder, Wellness Collective",
     avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg",
