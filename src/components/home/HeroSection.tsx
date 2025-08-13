@@ -16,8 +16,7 @@ const HeroSection = () => {
         <div className="flex flex-col items-center">
           <div className="w-full max-w-3xl text-center mb-8">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-              <span>Build a Website That </span>
-              <span className="gradient-text">Wins Customers</span>
+              Modern Sites for Any Use—Fast, Secure, Scalable
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 mx-auto max-w-2xl">
               Modern, fast, and conversion-focused sites crafted to grow your business.
