@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Rocket, Search, ShieldCheck } from 'lucide-react';
 
 const HeroSection = () => {
   return (
@@ -13,16 +13,16 @@ const HeroSection = () => {
       </div>
       
       <div className="container mx-auto px-4 pt-20 pb-24 md:pt-32 md:pb-32 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center">
-          <div className="w-full lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
+        <div className="flex flex-col items-center">
+          <div className="w-full max-w-3xl text-center mb-8">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
               <span>Build a Website That </span>
               <span className="gradient-text">Wins Customers</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-lg mx-auto lg:mx-0">
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 mx-auto max-w-2xl">
               Modern, fast, and conversion-focused sites crafted to grow your business.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Button className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
                 Get Started
               </Button>
@@ -30,45 +30,23 @@ const HeroSection = () => {
                 <a href="#portfolio">View Portfolio</a>
               </Button>
             </div>
-            
           </div>
-          
-          <div className="w-full lg:w-1/2 relative">
-            {/* Main browser window with 1 Million Strong website */}
-            <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-primary/20 p-2 mx-auto w-full max-w-lg">
-              <div className="rounded-lg overflow-hidden">
-                <div className="aspect-[16/9] bg-white flex items-center justify-center p-2">
-                  <img 
-                    src="/lovable-uploads/f78b96dc-5cfb-4143-a508-fec500284300.png" 
-                    alt="1 Million Strong Fight Club" 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {/* Floating CageChain website */}
-            <div className="absolute -top-4 -right-4 md:top-8 md:right-8 bg-white rounded-lg shadow-lg animate-float overflow-hidden border border-primary/20 w-48">
-              <div className="aspect-[4/3] bg-white flex items-center justify-center p-1">
-                <img 
-                  src="/lovable-uploads/008c757f-a996-4036-b788-f7dbf9fce7c7.png" 
-                  alt="CageChain" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-            
-            {/* Floating Precision Fabricated website */}
-            <div className="absolute -bottom-4 -left-4 md:bottom-8 md:left-8 bg-white rounded-lg shadow-lg animate-float overflow-hidden border border-primary/20 w-48" style={{ animationDelay: '1s' }}>
-              <div className="aspect-[4/3] bg-white flex items-center justify-center p-1">
-                <img 
-                  src="/lovable-uploads/da2a20ea-3bc6-448d-a5c5-ff2b68b40cd3.png" 
-                  alt="Precision Fabricated" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-          </div>
+
+          {/* Benefit chips */}
+          <ul className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-3xl">
+            <li className="flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-background/50 px-4 py-2 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <Rocket className="h-4 w-4 text-primary" aria-hidden="true" />
+              Lightning-fast performance
+            </li>
+            <li className="flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-background/50 px-4 py-2 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <Search className="h-4 w-4 text-primary" aria-hidden="true" />
+              SEO-ready foundation
+            </li>
+            <li className="flex items-center justify-center gap-2 rounded-full border border-primary/20 bg-background/50 px-4 py-2 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
+              Reliable and secure
+            </li>
+          </ul>
         </div>
       </div>
     </section>
