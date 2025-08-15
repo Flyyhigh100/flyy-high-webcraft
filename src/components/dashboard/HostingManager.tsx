@@ -20,10 +20,9 @@ const HostingManager = () => {
   const handleManualPayment = async () => {
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { 
-          amount: primaryWebsite.next_payment_amount * 100, // Convert to cents
-          plan_type: primaryWebsite.plan_type,
-          website_id: primaryWebsite.id
+        body: {
+          plan: (primaryWebsite.plan_type || 'standard').toLowerCase() as 'basic' | 'standard' | 'premium',
+          siteId: primaryWebsite.id
         }
       });
 
@@ -306,9 +305,14 @@ const HostingManager = () => {
                   <Badge variant="outline" className="text-xs">Visa</Badge>
                 </div>
               </div>
-              <Button onClick={handleUpdatePaymentMethod} variant="outline" size="sm">
-                Update Payment Method
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button onClick={handleManualPayment} size="sm" disabled={!primaryWebsite.next_payment_amount}>
+                  Make Payment Now
+                </Button>
+                <Button onClick={handleUpdatePaymentMethod} variant="outline" size="sm">
+                  Update Payment Method
+                </Button>
+              </div>
             </div>
           </div>
           
