@@ -310,7 +310,7 @@ const HostingManager = () => {
                   Make Payment Now
                 </Button>
                 <Button onClick={handleUpdatePaymentMethod} variant="outline" size="sm">
-                  Update Payment Method
+                  Manage Billing (Advanced)
                 </Button>
               </div>
             </div>

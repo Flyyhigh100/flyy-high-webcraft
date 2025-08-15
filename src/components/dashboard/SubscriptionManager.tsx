@@ -121,7 +121,7 @@ export function SubscriptionManager() {
         {subscriptions.length > 0 && (
           <Button onClick={handleManageSubscription} variant="outline">
             <ExternalLink className="mr-2 h-4 w-4" />
-            Manage Billing
+            Manage Billing (Advanced)
           </Button>
         )}
       </div>
