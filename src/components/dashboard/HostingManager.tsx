@@ -64,7 +64,18 @@ const HostingManager = () => {
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        const msg = error.message || '';
+        if (msg.includes('PORTAL_NOT_CONFIGURED') || msg.includes('No configuration provided')) {
+          toast({
+            title: "Billing Portal Unavailable",
+            description: "Use Make Payment Now to manage cards or change plans. The advanced portal isn't configured yet.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
       
       // Handle specific case where user needs to set up payment method first
       if (data?.error === "NO_PAYMENT_METHOD") {

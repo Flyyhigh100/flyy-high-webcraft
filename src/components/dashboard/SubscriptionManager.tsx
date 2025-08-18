@@ -80,10 +80,24 @@ export function SubscriptionManager() {
     try {
       const { data, error } = await supabase.functions.invoke('customer-portal');
 
-      if (error) throw error;
+      if (error) {
+        const msg = error.message || '';
+        if (msg.includes('PORTAL_NOT_CONFIGURED') || msg.includes('No configuration provided')) {
+          toast({
+            title: "Billing Portal Unavailable",
+            description: "Use Make Payment Now to manage cards or change plans. The advanced portal isn't configured yet.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
-      // Open customer portal in a new tab
-      window.open(data.url, '_blank');
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No portal URL received');
+      }
     } catch (error: any) {
       toast({
         title: "Error",
