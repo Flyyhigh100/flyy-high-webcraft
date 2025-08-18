@@ -25,6 +25,9 @@ interface Subscription {
 export function ImprovedSubscriptionManager() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBillingCycle, setSelectedBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [prorationPreview, setProrationPreview] = useState<any>(null);
+  const [showProrationModal, setShowProrationModal] = useState(false);
   const { invitationStatus, loading: invitationLoading, refetch: refetchInvitation } = useInvitationStatus();
   const { websites } = useUserWebsites();
   const { toast } = useToast();
@@ -59,10 +62,46 @@ export function ImprovedSubscriptionManager() {
     }
   };
 
+  const calculateProration = async (currentPlan: string, newPlan: 'basic' | 'standard' | 'premium') => {
+    try {
+      const currentSubscription = subscriptions.find(sub => sub.status === 'active');
+      const { data, error } = await supabase.functions.invoke('calculate-proration', {
+        body: { 
+          currentPlan,
+          newPlan,
+          newBillingCycle: selectedBillingCycle,
+          subscriptionId: currentSubscription?.id
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error calculating proration:', error);
+      return null;
+    }
+  };
+
   const handleCreateCheckout = async (plan: 'basic' | 'standard' | 'premium', siteId?: string) => {
     try {
+      // If user has active subscription and changing plans, show proration preview
+      const currentSubscription = subscriptions.find(sub => sub.status === 'active');
+      if (currentSubscription && currentSubscription.plan_type !== plan) {
+        const proration = await calculateProration(currentSubscription.plan_type, plan);
+        if (proration) {
+          setProrationPreview({ ...proration, targetPlan: plan, siteId });
+          setShowProrationModal(true);
+          return;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { plan, siteId }
+        body: { 
+          plan, 
+          siteId,
+          billingCycle: selectedBillingCycle,
+          ...(prorationPreview?.immediateCharge && { prorationAmount: prorationPreview.immediateCharge })
+        }
       });
 
       if (error) throw error;
@@ -76,6 +115,32 @@ export function ImprovedSubscriptionManager() {
         variant: "destructive",
       });
     }
+  };
+
+  const confirmProrationChange = async () => {
+    if (!prorationPreview) return;
+    
+    const { data, error } = await supabase.functions.invoke('create-checkout', {
+      body: { 
+        plan: prorationPreview.targetPlan,
+        siteId: prorationPreview.siteId || websites[0]?.id,
+        billingCycle: selectedBillingCycle,
+        prorationAmount: prorationPreview.immediateCharge
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create checkout session",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowProrationModal(false);
+    setProrationPreview(null);
+    window.open(data.url, '_blank');
   };
 
   const handleManageSubscription = async () => {
@@ -120,6 +185,26 @@ export function ImprovedSubscriptionManager() {
       default:
         return 'bg-gray-500';
     }
+  };
+
+  const getPlanPrice = (plan: 'basic' | 'standard' | 'premium') => {
+    const pricing = {
+      basic: { monthly: 15, yearly: 10 },
+      standard: { monthly: 30, yearly: 20 },
+      premium: { monthly: 29.99, yearly: 24 }
+    };
+    return pricing[plan][selectedBillingCycle];
+  };
+
+  const getYearlySavings = (plan: 'basic' | 'standard' | 'premium') => {
+    const pricing = {
+      basic: { monthly: 15, yearly: 10 },
+      standard: { monthly: 30, yearly: 20 },
+      premium: { monthly: 29.99, yearly: 24 }
+    };
+    const monthlyTotal = pricing[plan].monthly * 12;
+    const yearlyTotal = pricing[plan].yearly * 12;
+    return Math.round(monthlyTotal - yearlyTotal);
   };
 
   // Get current plan from websites table
@@ -211,6 +296,30 @@ export function ImprovedSubscriptionManager() {
           <CardDescription>
             Upgrade or downgrade your hosting plan at any time
           </CardDescription>
+          
+          <div className="flex items-center justify-center mt-4">
+            <span className={`mr-3 ${selectedBillingCycle === 'monthly' ? "font-medium text-primary" : "text-gray-500"}`}>
+              Monthly
+            </span>
+            <div className="relative inline-flex">
+              <div className="w-12 h-6 transition duration-200 ease-linear rounded-full bg-gray-300">
+                <label 
+                  htmlFor="billing-toggle"
+                  className={`absolute left-0 w-6 h-6 transition-transform duration-200 ease-linear transform bg-white border-2 rounded-full cursor-pointer ${selectedBillingCycle === 'yearly' ? "translate-x-full border-primary" : "border-gray-300"}`}
+                ></label>
+                <input 
+                  type="checkbox"
+                  id="billing-toggle"
+                  className="w-full h-full appearance-none focus:outline-none cursor-pointer"
+                  checked={selectedBillingCycle === 'yearly'}
+                  onChange={() => setSelectedBillingCycle(selectedBillingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                />
+              </div>
+            </div>
+            <span className={`ml-3 ${selectedBillingCycle === 'yearly' ? "font-medium text-primary" : "text-gray-500"}`}>
+              Yearly <span className="text-green-600 font-medium">(Save up to $120/year)</span>
+            </span>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
@@ -225,7 +334,14 @@ export function ImprovedSubscriptionManager() {
                 <CardDescription>Perfect for small websites</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold mb-4">$15/month</div>
+                <div className="text-2xl font-bold mb-2">
+                  ${getPlanPrice('basic')}/month
+                </div>
+                {selectedBillingCycle === 'yearly' && (
+                  <p className="text-green-600 text-sm font-medium mb-4">
+                    Save ${getYearlySavings('basic')}/year • Billed annually
+                  </p>
+                )}
                 <Button 
                   onClick={() => handleCreateCheckout('basic', websites[0]?.id)}
                   className="w-full"
@@ -249,7 +365,14 @@ export function ImprovedSubscriptionManager() {
                 <CardDescription>Great for growing businesses</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold mb-4">$19.99/month</div>
+                <div className="text-2xl font-bold mb-2">
+                  ${getPlanPrice('standard')}/month
+                </div>
+                {selectedBillingCycle === 'yearly' && (
+                  <p className="text-green-600 text-sm font-medium mb-4">
+                    Save ${getYearlySavings('standard')}/year • Billed annually
+                  </p>
+                )}
                 <Button 
                   onClick={() => handleCreateCheckout('standard', websites[0]?.id)}
                   className="w-full"
@@ -273,7 +396,14 @@ export function ImprovedSubscriptionManager() {
                 <CardDescription>For high-traffic websites</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold mb-4">$29.99/month</div>
+                <div className="text-2xl font-bold mb-2">
+                  ${getPlanPrice('premium')}/month
+                </div>
+                {selectedBillingCycle === 'yearly' && (
+                  <p className="text-green-600 text-sm font-medium mb-4">
+                    Save ${getYearlySavings('premium')}/year • Billed annually
+                  </p>
+                )}
                 <Button 
                   onClick={() => handleCreateCheckout('premium', websites[0]?.id)}
                   className="w-full"
@@ -338,6 +468,61 @@ export function ImprovedSubscriptionManager() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Proration Preview Modal */}
+      {showProrationModal && prorationPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4">Plan Change Preview</h3>
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between">
+                <span>Current Plan:</span>
+                <span className="font-medium capitalize">{prorationPreview.currentPlan}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>New Plan:</span>
+                <span className="font-medium capitalize">{prorationPreview.newPlan}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Billing Cycle:</span>
+                <span className="font-medium capitalize">{prorationPreview.newBillingCycle}</span>
+              </div>
+              {prorationPreview.immediateCharge > 0 && (
+                <div className="flex justify-between border-t pt-3">
+                  <span>Immediate Charge:</span>
+                  <span className="font-medium">${(prorationPreview.immediateCharge / 100).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span>Next Billing Amount:</span>
+                <span className="font-medium">${(prorationPreview.nextBillingAmount / 100).toFixed(2)}</span>
+              </div>
+              {prorationPreview.savings > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Annual Savings:</span>
+                  <span className="font-medium">${(prorationPreview.savings / 100).toFixed(2)}</span>
+                </div>
+              )}
+              <p className="text-sm text-gray-600 mt-3">{prorationPreview.description}</p>
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowProrationModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmProrationChange}
+                className="flex-1 bg-primary hover:bg-primary/90"
+              >
+                Confirm Change
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

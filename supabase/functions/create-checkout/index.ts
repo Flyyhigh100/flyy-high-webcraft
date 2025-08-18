@@ -17,6 +17,8 @@ interface CheckoutRequest {
   siteId?: string;
   invitation_payment?: boolean;
   amount?: number; // Custom amount from invitation
+  billingCycle?: 'monthly' | 'yearly'; // New billing cycle option
+  prorationAmount?: number; // For mid-cycle plan changes
 }
 
 serve(async (req) => {
@@ -46,7 +48,7 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { plan, siteId, invitation_payment, amount }: CheckoutRequest = await req.json();
+    const { plan, siteId, invitation_payment, amount, billingCycle = 'monthly', prorationAmount }: CheckoutRequest = await req.json();
     
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
@@ -69,22 +71,38 @@ serve(async (req) => {
     }
 
     // Use custom amount if this is an invitation payment, otherwise use default pricing
-    let planAmount, planName;
+    let planAmount, planName, interval;
     if (invitation_payment && amount) {
       planAmount = amount; // Amount already in cents from frontend
       planName = `${plan.charAt(0).toUpperCase() + plan.slice(1)} Hosting Plan (Invited)`;
+      interval = "month";
       logStep("Using invitation amount", { amount, plan });
     } else {
-      // Define pricing based on plan
+      // Define pricing based on plan and billing cycle
       const pricing = {
-        basic: { amount: 1500, name: "Basic Hosting Plan" }, // $15.00
-        standard: { amount: 1999, name: "Standard Hosting Plan" }, // $19.99
-        premium: { amount: 2999, name: "Premium Hosting Plan" } // $29.99
+        basic: { 
+          monthly: { amount: 1500, name: "Basic Hosting Plan" }, // $15.00/month
+          yearly: { amount: 1000, name: "Basic Hosting Plan (Annual)" } // $10.00/month when billed yearly
+        },
+        standard: { 
+          monthly: { amount: 3000, name: "Pro Hosting Plan" }, // $30.00/month  
+          yearly: { amount: 2000, name: "Pro Hosting Plan (Annual)" } // $20.00/month when billed yearly
+        },
+        premium: { 
+          monthly: { amount: 2999, name: "Premium Hosting Plan" }, // $29.99/month
+          yearly: { amount: 2400, name: "Premium Hosting Plan (Annual)" } // $24.00/month when billed yearly
+        }
       };
-      const selectedPlan = pricing[plan];
-      if (!selectedPlan) throw new Error("Invalid plan selected");
-      planAmount = selectedPlan.amount;
+      
+      const selectedPlan = pricing[plan]?.[billingCycle];
+      if (!selectedPlan) throw new Error("Invalid plan or billing cycle selected");
+      
+      // Apply proration if provided
+      planAmount = prorationAmount || selectedPlan.amount;
       planName = selectedPlan.name;
+      interval = billingCycle === 'yearly' ? 'year' : 'month';
+      
+      logStep("Using plan pricing", { plan, billingCycle, amount: planAmount, interval });
     }
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
@@ -97,10 +115,10 @@ serve(async (req) => {
             currency: "usd",
             product_data: { 
               name: planName,
-              description: `Monthly hosting for your website`
+              description: `${interval === 'year' ? 'Annual' : 'Monthly'} hosting for your website`
             },
             unit_amount: planAmount,
-            recurring: { interval: "month" },
+            recurring: { interval: interval as 'month' | 'year' },
           },
           quantity: 1,
         },
@@ -111,7 +129,9 @@ serve(async (req) => {
       metadata: {
         user_id: user.id,
         plan: plan,
-        site_id: siteId || ''
+        site_id: siteId || '',
+        billing_cycle: billingCycle,
+        ...(prorationAmount && { proration_amount: prorationAmount.toString() })
       }
     });
 
