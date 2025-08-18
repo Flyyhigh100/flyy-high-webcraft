@@ -7,13 +7,43 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
+      cancellation_feedback: {
+        Row: {
+          cancellation_reason: string | null
+          cancelled_at: string
+          comment: string | null
+          created_at: string
+          id: string
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          cancelled_at: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_invitations: {
         Row: {
           client_name: string
@@ -429,7 +459,7 @@ export type Database = {
     }
     Functions: {
       cleanup_client_data: {
-        Args: { website_id_param?: string; client_email_param?: string }
+        Args: { client_email_param?: string; website_id_param?: string }
         Returns: Json
       }
       get_monthly_payment_totals: {
@@ -444,7 +474,7 @@ export type Database = {
         Returns: boolean
       }
       table_exists: {
-        Args: { table_name_param: string; schema_name_param?: string }
+        Args: { schema_name_param?: string; table_name_param: string }
         Returns: boolean
       }
       update_payment_statuses: {

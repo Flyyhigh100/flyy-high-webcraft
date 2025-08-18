@@ -8,6 +8,7 @@ import { CreditCard, Loader2, ExternalLink, ArrowUpDown } from "lucide-react";
 import { useInvitationStatus } from '@/hooks/useInvitationStatus';
 import { InvitationPaymentCard } from './InvitationPaymentCard';
 import { useUserWebsites } from '@/hooks/useUserWebsites';
+import { SubscriptionManagementModal } from './SubscriptionManagementModal';
 
 interface Subscription {
   id: string;
@@ -16,6 +17,7 @@ interface Subscription {
   amount: number;
   current_period_end: string;
   site_id: string;
+  stripe_subscription_id: string;
   websites?: {
     name: string;
     url: string;
@@ -28,6 +30,8 @@ export function ImprovedSubscriptionManager() {
   const [selectedBillingCycle, setSelectedBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [prorationPreview, setProrationPreview] = useState<any>(null);
   const [showProrationModal, setShowProrationModal] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
+  const [showManagementModal, setShowManagementModal] = useState(false);
   const { invitationStatus, loading: invitationLoading, refetch: refetchInvitation } = useInvitationStatus();
   const { websites } = useUserWebsites();
   const { toast } = useToast();
@@ -457,7 +461,13 @@ export function ImprovedSubscriptionManager() {
                           Next billing: {new Date(subscription.current_period_end).toLocaleDateString()}
                         </p>
                       </div>
-                      <Button onClick={handleManageSubscription} variant="outline">
+                      <Button 
+                        onClick={() => {
+                          setSelectedSubscription(subscription);
+                          setShowManagementModal(true);
+                        }} 
+                        variant="outline"
+                      >
                         <ExternalLink className="mr-2 h-4 w-4" />
                         Manage
                       </Button>
@@ -523,6 +533,19 @@ export function ImprovedSubscriptionManager() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Subscription Management Modal */}
+      {selectedSubscription && (
+        <SubscriptionManagementModal
+          isOpen={showManagementModal}
+          onClose={() => {
+            setShowManagementModal(false);
+            setSelectedSubscription(null);
+          }}
+          subscription={selectedSubscription}
+          onSubscriptionUpdated={fetchSubscriptions}
+        />
       )}
     </div>
   );
