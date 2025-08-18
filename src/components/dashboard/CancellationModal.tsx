@@ -212,7 +212,7 @@ export function CancellationModal({
             <>
               <div>
                 <Label className="text-base font-medium">When should we cancel your subscription?</Label>
-                <RadioGroup value={cancelTiming} onValueChange={setCancelTiming} className="mt-3">
+                <RadioGroup value={cancelTiming} onValueChange={(value) => setCancelTiming(value as "period_end" | "now")} className="mt-3">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="period_end" id="period_end" />
                     <Label htmlFor="period_end">At the end of current billing period (recommended)</Label>
