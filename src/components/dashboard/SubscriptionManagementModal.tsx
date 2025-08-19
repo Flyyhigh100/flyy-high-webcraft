@@ -34,32 +34,33 @@ export const SubscriptionManagementModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleManageBilling = async () => {
+  const handleUpdatePaymentMethod = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-      
-      if (error) {
-        // If customer portal fails (common in test mode), show alternative options
-        if (error.message?.includes('billing portal')) {
-          toast({
-            title: "Billing Portal Unavailable",
-            description: "Use the options below to manage your subscription.",
-            variant: "default",
-          });
-          return;
+      // Create a $0 setup session to update payment method
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { 
+          plan: subscription.plan_type,
+          setupMode: true, // This will be handled in the edge function
+          amount: 0
         }
-        throw error;
-      }
+      });
+
+      if (error) throw error;
 
       if (data?.url) {
         window.open(data.url, '_blank');
+        toast({
+          title: "Payment Method Update",
+          description: "Redirecting to secure payment method update page.",
+          variant: "default",
+        });
       }
     } catch (error) {
-      console.error('Error opening customer portal:', error);
+      console.error('Error updating payment method:', error);
       toast({
-        title: "Error",
-        description: "Unable to open billing portal. Please use the options below.",
+        title: "Update Not Available",
+        description: "Payment method updates are currently limited in test mode. Please contact support for assistance.",
         variant: "destructive",
       });
     } finally {
@@ -146,13 +147,13 @@ export const SubscriptionManagementModal = ({
               <h3 className="font-medium">Manage Your Subscription</h3>
               <div className="space-y-2">
                 <Button 
-                  onClick={handleManageBilling} 
+                  onClick={handleUpdatePaymentMethod} 
                   className="w-full" 
                   variant="outline"
                   disabled={isLoading}
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
-                  {isLoading ? "Opening..." : "Update Payment Method"}
+                  {isLoading ? "Processing..." : "Update Payment Method"}
                 </Button>
                 
                 <Button 
@@ -166,11 +167,11 @@ export const SubscriptionManagementModal = ({
               </div>
             </div>
 
-            {/* Note about billing portal */}
+            {/* Enhanced Test Mode Information */}
             <div className="text-xs text-muted-foreground p-3 bg-muted rounded-lg">
               <p>
-                <strong>Note:</strong> Some billing features may be limited in test mode. 
-                For full billing management, please contact support.
+                <strong>Test Mode:</strong> Payment method updates and some billing features are limited. 
+                Use the cancellation option to manage your subscription, or contact support for assistance with billing changes.
               </p>
             </div>
           </div>

@@ -147,36 +147,6 @@ export function ImprovedSubscriptionManager() {
     window.open(data.url, '_blank');
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-
-      if (error) {
-        const msg = error.message || '';
-        if (msg.includes('PORTAL_NOT_CONFIGURED') || msg.includes('No configuration provided')) {
-          toast({
-            title: "Billing Portal Unavailable",
-            description: "Use Make Payment Now to manage cards or change plans. The advanced portal isn't configured yet.",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw error;
-      }
-
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      } else {
-        throw new Error('No portal URL received');
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to open customer portal",
-        variant: "destructive",
-      });
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -227,12 +197,6 @@ export function ImprovedSubscriptionManager() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Plan Management</h2>
-        {hasActiveSubscription && (
-          <Button onClick={handleManageSubscription} variant="outline">
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Manage Billing (Advanced)
-          </Button>
-        )}
       </div>
 
       {/* Show invitation card if user has one */}
@@ -280,8 +244,18 @@ export function ImprovedSubscriptionManager() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Button onClick={handleManageSubscription} variant="outline" size="sm">
-                  <ExternalLink className="mr-2 h-4 w-4" />
+                <Button 
+                  onClick={() => {
+                    const activeSubscription = subscriptions.find(sub => sub.status === 'active');
+                    if (activeSubscription) {
+                      setSelectedSubscription(activeSubscription);
+                      setShowManagementModal(true);
+                    }
+                  }} 
+                  variant="outline" 
+                  size="sm"
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
                   Manage
                 </Button>
               </div>
