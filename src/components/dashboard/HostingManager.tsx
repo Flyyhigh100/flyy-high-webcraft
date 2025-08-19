@@ -45,64 +45,6 @@ const HostingManager = () => {
     }
   };
 
-  const handleUpdatePaymentMethod = async () => {
-    try {
-      // Check if user has invitation but hasn't paid yet
-      if (invitationStatus.hasActiveInvitation && !invitationStatus.isPaid) {
-        toast({
-          title: "Payment Required",
-          description: "Please complete payment for your invited plan first using the 'Pay for Your Plan' button above.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      });
-      
-      if (error) {
-        const msg = error.message || '';
-        if (msg.includes('PORTAL_NOT_CONFIGURED') || msg.includes('No configuration provided')) {
-          toast({
-            title: "Billing Portal Unavailable",
-            description: "Use Make Payment Now to manage cards or change plans. The advanced portal isn't configured yet.",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw error;
-      }
-      
-      // Handle specific case where user needs to set up payment method first
-      if (data?.error === "NO_PAYMENT_METHOD") {
-        toast({
-          title: "Payment Method Required",
-          description: "Please make a payment first to access payment management. Use the 'Pay Now' button above.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Open Stripe Customer Portal in a new tab
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      } else {
-        throw new Error('No portal URL received');
-      }
-    } catch (error) {
-      console.error('Error creating customer portal session:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to open payment management portal';
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -316,14 +258,9 @@ const HostingManager = () => {
                   <Badge variant="outline" className="text-xs">Visa</Badge>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button onClick={handleManualPayment} size="sm" disabled={!primaryWebsite.next_payment_amount}>
-                  Make Payment Now
-                </Button>
-                <Button onClick={handleUpdatePaymentMethod} variant="outline" size="sm">
-                  Manage Billing (Advanced)
-                </Button>
-              </div>
+              <Button onClick={handleManualPayment} size="sm" disabled={!primaryWebsite.next_payment_amount}>
+                Make Payment Now
+              </Button>
             </div>
           </div>
           

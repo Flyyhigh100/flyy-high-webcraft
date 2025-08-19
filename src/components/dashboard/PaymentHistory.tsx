@@ -77,10 +77,7 @@ const PaymentHistory = () => {
               <CardDescription>View and download your past invoices</CardDescription>
             </div>
             <div className="mt-4 md:mt-0">
-              <div className="flex items-center justify-end">
-                <Button variant="outline" className="mr-2">Manage Billing (Advanced)</Button>
-                <Button className="bg-flyy-600 hover:bg-flyy-700">Make Payment</Button>
-              </div>
+              <Button className="bg-flyy-600 hover:bg-flyy-700">Make Payment</Button>
             </div>
           </div>
         </CardHeader>

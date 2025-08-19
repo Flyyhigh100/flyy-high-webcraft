@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Loader2, ExternalLink } from "lucide-react";
+import { CreditCard, Loader2, Settings } from "lucide-react";
 import { useInvitationStatus } from '@/hooks/useInvitationStatus';
 import { InvitationPaymentCard } from './InvitationPaymentCard';
+import { SubscriptionManagementModal } from './SubscriptionManagementModal';
 
 interface Subscription {
   id: string;
@@ -14,6 +15,7 @@ interface Subscription {
   status: string;
   amount: number;
   current_period_end: string;
+  stripe_subscription_id: string;
   site_id: string;
   websites?: {
     name: string;
@@ -21,9 +23,22 @@ interface Subscription {
   };
 }
 
+interface SubscriptionForModal {
+  id: string;
+  plan_type: string;
+  status: string;
+  amount: number;
+  current_period_end: string;
+  stripe_subscription_id: string;
+  websiteName?: string;
+  websiteUrl?: string;
+}
+
 export function SubscriptionManager() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { invitationStatus, loading: invitationLoading, refetch: refetchInvitation } = useInvitationStatus();
   const { toast } = useToast();
 
@@ -76,35 +91,20 @@ export function SubscriptionManager() {
     }
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
 
-      if (error) {
-        const msg = error.message || '';
-        if (msg.includes('PORTAL_NOT_CONFIGURED') || msg.includes('No configuration provided')) {
-          toast({
-            title: "Billing Portal Unavailable",
-            description: "Use Make Payment Now to manage cards or change plans. The advanced portal isn't configured yet.",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw error;
-      }
+  const handleManageSubscription = (subscription: Subscription) => {
+    setSelectedSubscription(subscription);
+    setIsModalOpen(true);
+  };
 
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      } else {
-        throw new Error('No portal URL received');
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to open customer portal",
-        variant: "destructive",
-      });
-    }
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedSubscription(null);
+  };
+
+  const handleSubscriptionUpdate = () => {
+    fetchSubscriptions(); // Refresh subscriptions after update
+    handleModalClose();
   };
 
   const getStatusColor = (status: string) => {
@@ -132,12 +132,6 @@ export function SubscriptionManager() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Subscription Management</h2>
-        {subscriptions.length > 0 && (
-          <Button onClick={handleManageSubscription} variant="outline">
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Manage Billing (Advanced)
-          </Button>
-        )}
       </div>
 
       {/* Show invitation card if user has one */}
@@ -263,8 +257,8 @@ export function SubscriptionManager() {
                       Next billing: {new Date(subscription.current_period_end).toLocaleDateString()}
                     </p>
                   </div>
-                  <Button onClick={handleManageSubscription} variant="outline">
-                    <ExternalLink className="mr-2 h-4 w-4" />
+                  <Button onClick={() => handleManageSubscription(subscription)} variant="outline">
+                    <Settings className="mr-2 h-4 w-4" />
                     Manage
                   </Button>
                 </div>
@@ -272,6 +266,25 @@ export function SubscriptionManager() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Subscription Management Modal */}
+      {selectedSubscription && (
+        <SubscriptionManagementModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          subscription={{
+            id: selectedSubscription.id,
+            plan_type: selectedSubscription.plan_type,
+            status: selectedSubscription.status,
+            amount: selectedSubscription.amount / 100, // Convert from cents
+            current_period_end: selectedSubscription.current_period_end,
+            stripe_subscription_id: selectedSubscription.stripe_subscription_id,
+            websiteName: selectedSubscription.websites?.name || 'Website',
+            websiteUrl: selectedSubscription.websites?.url || '',
+          } as SubscriptionForModal}
+          onSubscriptionUpdated={handleSubscriptionUpdate}
+        />
       )}
     </div>
   );
