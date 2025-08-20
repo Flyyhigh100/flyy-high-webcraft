@@ -1,0 +1,130 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@14.21.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[VERIFY-PAYMENT] ${step}${detailsStr}`);
+};
+
+interface VerifyBody { session_id?: string }
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    logStep('Function started');
+
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is not set');
+    logStep('Stripe key verified');
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) throw new Error('No authorization header provided');
+    const token = authHeader.replace('Bearer ', '');
+
+    // Authenticate the user (used for attribution if metadata missing)
+    const { data: userData, error: userError } = await db.auth.getUser(token);
+    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    const user = userData.user;
+    if (!user?.email) throw new Error('User not authenticated or email not available');
+    logStep('User authenticated', { userId: user.id, email: user.email });
+
+    const body: VerifyBody = await req.json();
+    const sessionId = body.session_id;
+    if (!sessionId) throw new Error('Missing session_id');
+
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+
+    // Retrieve checkout session
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription', 'line_items']
+    });
+    logStep('Retrieved checkout session', { id: session.id, status: session.payment_status, mode: session.mode });
+
+    if (session.payment_status !== 'paid') {
+      throw new Error(`Payment not completed. Status: ${session.payment_status}`);
+    }
+
+    if (session.mode !== 'subscription') {
+      throw new Error('This verification function only handles subscription checkouts');
+    }
+
+    // Extract metadata and subscription details
+    const meta = (session.metadata || {}) as Record<string, string>;
+    const siteId = meta.site_id && meta.site_id !== '' ? meta.site_id : null;
+    const plan = meta.plan || null;
+    const stripeCustomerId = typeof session.customer === 'string' ? session.customer : (session.customer?.id ?? null);
+
+    // Ensure we have a Stripe subscription
+    const sub = typeof session.subscription === 'string'
+      ? await stripe.subscriptions.retrieve(session.subscription)
+      : session.subscription;
+
+    if (!sub) throw new Error('Stripe subscription not found on session');
+
+    const currentPeriodStart = new Date(sub.current_period_start * 1000).toISOString();
+    const currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+    const unitAmount = sub.items.data[0]?.price?.unit_amount ?? 0;
+
+    // Avoid duplicates: check if we already stored this subscription
+    const { data: existing, error: existingErr } = await db
+      .from('subscriptions')
+      .select('id')
+      .eq('stripe_subscription_id', sub.id)
+      .maybeSingle();
+
+    if (existingErr) throw existingErr;
+
+    if (!existing) {
+      const { error: insertErr } = await db.from('subscriptions').insert({
+        user_id: user.id,
+        site_id: siteId,
+        amount: unitAmount,
+        currency: 'usd',
+        status: 'active',
+        plan_type: plan,
+        stripe_customer_id: stripeCustomerId,
+        stripe_subscription_id: sub.id,
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd,
+      });
+      if (insertErr) throw insertErr;
+      logStep('Inserted subscription record', { stripe_subscription_id: sub.id });
+    } else {
+      // Update status/periods if needed
+      const { error: updateErr } = await db.from('subscriptions').update({
+        status: 'active',
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd,
+      }).eq('id', existing.id);
+      if (updateErr) throw updateErr;
+      logStep('Updated existing subscription record', { id: existing.id });
+    }
+
+    // Optional: we could also update websites/payment_status here if needed.
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logStep('ERROR in verify-payment', { message });
+    return new Response(JSON.stringify({ error: message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
+  }
+});

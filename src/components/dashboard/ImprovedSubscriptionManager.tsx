@@ -49,6 +49,35 @@ export function ImprovedSubscriptionManager() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [refetchInvitation]);
 
+  // When returning from Stripe checkout, verify the session and sync DB
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentSuccess = params.get('payment') === 'success';
+    const sessionId = params.get('session_id');
+
+    if (paymentSuccess && sessionId) {
+      (async () => {
+        try {
+          const { error } = await supabase.functions.invoke('verify-payment', {
+            body: { session_id: sessionId },
+          });
+          if (error) throw error;
+          toast({ title: 'Payment confirmed', description: 'Your subscription has been activated.' });
+          await fetchSubscriptions();
+          await refetchInvitation();
+        } catch (err: any) {
+          console.error('Verification error:', err);
+          toast({ title: 'Verification failed', description: err?.message || 'Please contact support.', variant: 'destructive' });
+        } finally {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('payment');
+          url.searchParams.delete('session_id');
+          window.history.replaceState({}, '', url.toString());
+        }
+      })();
+    }
+  }, []);
+
   const fetchSubscriptions = async () => {
     try {
       const { data, error } = await supabase
