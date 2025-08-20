@@ -11,7 +11,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ShieldCheck, Mail, Key } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import HostingManager from "@/components/dashboard/HostingManager";
 import { ImprovedSubscriptionManager } from "@/components/dashboard/ImprovedSubscriptionManager";
 import { EmailChangeForm } from "@/components/dashboard/EmailChangeForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -250,10 +249,7 @@ export default function Dashboard() {
         </TabsContent>
         
         <TabsContent value="websites">
-          <div className="space-y-8">
-            <HostingManager />
-            <ImprovedSubscriptionManager />
-          </div>
+          <ImprovedSubscriptionManager />
         </TabsContent>
         
         <TabsContent value="settings">

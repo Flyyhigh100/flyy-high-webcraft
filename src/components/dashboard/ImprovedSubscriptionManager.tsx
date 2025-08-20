@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Loader2, ExternalLink, ArrowUpDown } from "lucide-react";
+import { CreditCard, Loader2, ExternalLink, ArrowUpDown, Globe, Calendar, AlertTriangle } from "lucide-react";
 import { useInvitationStatus } from '@/hooks/useInvitationStatus';
 import { InvitationPaymentCard } from './InvitationPaymentCard';
 import { useUserWebsites } from '@/hooks/useUserWebsites';
@@ -121,6 +121,35 @@ export function ImprovedSubscriptionManager() {
     }
   };
 
+  const handleManualPayment = async () => {
+    if (!websites[0]) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          plan: (websites[0].plan_type || 'standard').toLowerCase() as 'basic' | 'standard' | 'premium',
+          siteId: websites[0].id
+        }
+      });
+
+      if (error) throw error;
+
+      window.open(data.url, '_blank');
+      
+      toast({
+        title: "Payment Processing",
+        description: "Redirecting to secure payment page...",
+      });
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: "Unable to process payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const confirmProrationChange = async () => {
     if (!prorationPreview) return;
     
@@ -193,10 +222,45 @@ export function ImprovedSubscriptionManager() {
     );
   }
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Not set';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatAmount = (amount: number | null) => {
+    if (!amount) return 'Not set';
+    return `$${amount.toFixed(2)}`;
+  };
+
+  const getPaymentUrgency = (website: any) => {
+    if (!website.next_payment_date) return null;
+    
+    const nextPayment = new Date(website.next_payment_date);
+    const today = new Date();
+    const diffTime = nextPayment.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 0) return 'overdue';
+    if (diffDays <= 3) return 'urgent';
+    if (diffDays <= 7) return 'soon';
+    return null;
+  };
+
+  const primaryWebsite = websites.length > 0 ? websites[0] : null;
+  const paymentUrgency = primaryWebsite ? getPaymentUrgency(primaryWebsite) : null;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Plan Management</h2>
+        <h2 className="text-2xl font-bold">Website & Billing Management</h2>
+        {primaryWebsite && (
+          <Button variant="outline" asChild>
+            <a href={primaryWebsite.url} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Visit Site
+            </a>
+          </Button>
+        )}
       </div>
 
       {/* Show invitation card if user has one */}
@@ -207,6 +271,70 @@ export function ImprovedSubscriptionManager() {
           isPaid={invitationStatus.isPaid}
           onPaymentSuccess={refetchInvitation}
         />
+      )}
+
+      {/* Website Overview */}
+      {primaryWebsite && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              {primaryWebsite.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Website URL</p>
+                <a 
+                  href={primaryWebsite.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline text-sm flex items-center gap-1"
+                >
+                  {primaryWebsite.url}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Next Payment</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{formatDate(primaryWebsite.next_payment_date)}</span>
+                  {paymentUrgency === 'urgent' && (
+                    <Badge variant="destructive" className="text-xs">
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      Due Soon
+                    </Badge>
+                  )}
+                  {paymentUrgency === 'overdue' && (
+                    <Badge variant="destructive" className="text-xs">
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      Overdue
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Monthly Fee</p>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm">{formatAmount(primaryWebsite.next_payment_amount)}</span>
+                  {!primaryWebsite.auto_renew && (
+                    <Button 
+                      onClick={handleManualPayment}
+                      size="sm"
+                      className="text-xs"
+                      disabled={!primaryWebsite.next_payment_amount}
+                    >
+                      <CreditCard className="mr-1 h-3 w-3" />
+                      Pay Now
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Current Plan Display */}
