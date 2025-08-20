@@ -38,7 +38,16 @@ export function ImprovedSubscriptionManager() {
 
   useEffect(() => {
     fetchSubscriptions();
-  }, []);
+    
+    // Refresh data when returning from payment (detect URL parameter or focus)
+    const handleFocus = () => {
+      fetchSubscriptions();
+      refetchInvitation();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [refetchInvitation]);
 
   const fetchSubscriptions = async () => {
     try {
@@ -373,11 +382,20 @@ export function ImprovedSubscriptionManager() {
               </div>
               <div className="flex items-center gap-2">
                 <Button 
-                  onClick={() => {
-                    const activeSubscription = subscriptions.find(sub => sub.status === 'active');
-                    if (activeSubscription) {
-                      setSelectedSubscription(activeSubscription);
-                      setShowManagementModal(true);
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke('customer-portal');
+                      if (error) throw error;
+                      if (data?.url) {
+                        window.open(data.url, '_blank');
+                      }
+                    } catch (error) {
+                      console.error('Portal error:', error);
+                      toast({
+                        title: "Error",
+                        description: "Unable to open customer portal. Please try again or contact support.",
+                        variant: "destructive",
+                      });
                     }
                   }} 
                   variant="outline" 
