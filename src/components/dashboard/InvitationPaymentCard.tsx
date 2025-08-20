@@ -27,7 +27,7 @@ export const InvitationPaymentCard: React.FC<InvitationPaymentCardProps> = ({
         body: { 
           plan: plan.toLowerCase() as 'basic' | 'standard' | 'premium',
           invitation_payment: true,
-          amount: amount * 100 // Convert to cents
+          amount: Math.round(amount * 100) // Convert to cents and ensure integer
         }
       });
 
