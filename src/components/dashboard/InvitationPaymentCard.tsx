@@ -10,6 +10,7 @@ interface InvitationPaymentCardProps {
   plan: string;
   amount: number;
   isPaid: boolean;
+  siteId?: string;
   onPaymentSuccess?: () => void;
 }
 
@@ -17,6 +18,7 @@ export const InvitationPaymentCard: React.FC<InvitationPaymentCardProps> = ({
   plan,
   amount,
   isPaid,
+  siteId,
   onPaymentSuccess
 }) => {
   const { toast } = useToast();
@@ -26,6 +28,7 @@ export const InvitationPaymentCard: React.FC<InvitationPaymentCardProps> = ({
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
           plan: plan.toLowerCase() as 'basic' | 'standard' | 'premium',
+          siteId: siteId,
           invitation_payment: true,
           amount: Math.round(amount * 100) // Convert to cents and ensure integer
         }

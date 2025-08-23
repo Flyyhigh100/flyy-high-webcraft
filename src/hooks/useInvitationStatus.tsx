@@ -6,6 +6,7 @@ interface InvitationStatus {
   invitationPlan?: string;
   invitationAmount?: number;
   invitationId?: string;
+  siteId?: string;
   isPaid: boolean;
 }
 
@@ -31,7 +32,7 @@ export const useInvitationStatus = () => {
 
       if (invitation) {
         // Check if they have an active subscription for this invitation
-        const { data: subscription } = await supabase
+        let { data: subscription } = await supabase
           .from('subscriptions')
           .select('*')
           .eq('user_id', user.id)
@@ -39,11 +40,25 @@ export const useInvitationStatus = () => {
           .eq('status', 'active')
           .single();
 
+        // Fallback: if no subscription found with site_id, check for any active subscription for the user
+        if (!subscription && invitation.site_id) {
+          const { data: fallbackSubscription } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('status', 'active')
+            .is('site_id', null)
+            .single();
+          
+          subscription = fallbackSubscription;
+        }
+
         setInvitationStatus({
           hasActiveInvitation: true,
           invitationPlan: invitation.plan_type,
           invitationAmount: invitation.next_payment_amount,
           invitationId: invitation.id,
+          siteId: invitation.site_id,
           isPaid: !!subscription
         });
       } else {
