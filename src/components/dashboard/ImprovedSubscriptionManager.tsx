@@ -89,10 +89,22 @@ export function ImprovedSubscriptionManager() {
             url
           )
         `)
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubscriptions(data || []);
+      
+      // Remove duplicates - keep only the most recent subscription per site
+      const uniqueSubs = new Map<string, Subscription>();
+      (data || []).forEach((sub: Subscription) => {
+        const siteKey = sub.site_id || 'no-site';
+        const existing = uniqueSubs.get(siteKey);
+        if (!existing || new Date(sub.current_period_end) > new Date(existing.current_period_end)) {
+          uniqueSubs.set(siteKey, sub);
+        }
+      });
+      
+      setSubscriptions(Array.from(uniqueSubs.values()));
     } catch (error: any) {
       toast({
         title: "Error",
@@ -414,15 +426,39 @@ export function ImprovedSubscriptionManager() {
                   onClick={async () => {
                     try {
                       const { data, error } = await supabase.functions.invoke('customer-portal');
-                      if (error) throw error;
+                      if (error) {
+                        // Handle specific error types
+                        if (error.message?.includes('NO_CUSTOMER')) {
+                          toast({
+                            title: "No Payment History",
+                            description: "Please make a payment first to access billing management.",
+                            variant: "destructive",
+                          });
+                        } else if (error.message?.includes('NO_ACTIVE_SUBSCRIPTION')) {
+                          toast({
+                            title: "No Active Subscription",
+                            description: "Please subscribe to a plan first to manage billing.",
+                            variant: "destructive",
+                          });
+                        } else if (error.message?.includes('PORTAL_NOT_CONFIGURED')) {
+                          toast({
+                            title: "Portal Unavailable",
+                            description: "Stripe Customer Portal isn't configured in test mode. Payment method updates are limited in testing.",
+                            variant: "destructive",
+                          });
+                        } else {
+                          throw error;
+                        }
+                        return;
+                      }
                       if (data?.url) {
                         window.open(data.url, '_blank');
                       }
                     } catch (error) {
                       console.error('Portal error:', error);
                       toast({
-                        title: "Error",
-                        description: "Unable to open customer portal. Please try again or contact support.",
+                        title: "Portal Error",
+                        description: "Unable to open billing portal. Please contact support for assistance.",
                         variant: "destructive",
                       });
                     }
@@ -433,6 +469,37 @@ export function ImprovedSubscriptionManager() {
                   <CreditCard className="mr-2 h-4 w-4" />
                   Manage
                 </Button>
+                
+                {subscriptions.length > 1 && (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.functions.invoke('cleanup-duplicates');
+                        if (error) throw error;
+                        
+                        toast({
+                          title: "Cleanup Complete",
+                          description: data.message || "Duplicate subscriptions have been cleaned up.",
+                        });
+                        
+                        // Refresh subscriptions after cleanup
+                        await fetchSubscriptions();
+                      } catch (error) {
+                        console.error('Cleanup error:', error);
+                        toast({
+                          title: "Cleanup Error",
+                          description: "Failed to cleanup duplicates. Please contact support.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                  >
+                    Fix Duplicates
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

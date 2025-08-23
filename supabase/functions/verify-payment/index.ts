@@ -78,7 +78,7 @@ serve(async (req) => {
     const currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
     const unitAmount = sub.items.data[0]?.price?.unit_amount ?? 0;
 
-    // Avoid duplicates: check if we already stored this subscription
+    // Check for existing subscription with same Stripe subscription ID
     const { data: existing, error: existingErr } = await db
       .from('subscriptions')
       .select('id')
@@ -86,6 +86,42 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existingErr) throw existingErr;
+
+    // Check for other active subscriptions for same user/site to prevent duplicates
+    if (siteId) {
+      const { data: duplicates, error: dupErr } = await db
+        .from('subscriptions')
+        .select('id, stripe_subscription_id')
+        .eq('user_id', user.id)
+        .eq('site_id', siteId)
+        .eq('status', 'active')
+        .neq('stripe_subscription_id', sub.id);
+      
+      if (dupErr) throw dupErr;
+      
+      // Cancel old subscriptions for same site
+      if (duplicates && duplicates.length > 0) {
+        for (const dup of duplicates) {
+          try {
+            await stripe.subscriptions.cancel(dup.stripe_subscription_id);
+            logStep('Cancelled old Stripe subscription', { id: dup.stripe_subscription_id });
+          } catch (err) {
+            logStep('Failed to cancel old subscription', { id: dup.stripe_subscription_id, error: err });
+          }
+        }
+        
+        const { error: cancelErr } = await db
+          .from('subscriptions')
+          .update({ status: 'canceled' })
+          .eq('user_id', user.id)
+          .eq('site_id', siteId)
+          .eq('status', 'active')
+          .neq('stripe_subscription_id', sub.id);
+        
+        if (cancelErr) throw cancelErr;
+        logStep('Cancelled duplicate subscriptions in database', { count: duplicates.length });
+      }
+    }
 
     if (!existing) {
       const { error: insertErr } = await db.from('subscriptions').insert({

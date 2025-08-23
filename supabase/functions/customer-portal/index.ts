@@ -45,24 +45,33 @@ serve(async (req) => {
     logStep("Stripe customer search completed", { email: user.email, found: customers.data.length });
     
     if (customers.data.length === 0) {
-      logStep("No Stripe customer found, creating one");
-      // Create a new customer if one doesn't exist
-      const newCustomer = await stripe.customers.create({
-        email: user.email,
-        name: user.user_metadata?.full_name || user.email,
-      });
-      logStep("Created new Stripe customer", { customerId: newCustomer.id });
-      
-      // For new customers, return a specific error that frontend can handle
       return new Response(JSON.stringify({ 
-        error: "NO_PAYMENT_METHOD",
-        message: "Please set up a payment method first by making a payment or subscribing to a plan" 
+        error: "NO_CUSTOMER",
+        message: "No payment history found. Please make a payment first to access billing management." 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
+    
     const customerId = customers.data[0].id;
+    
+    // Check if customer has any active subscriptions
+    const subscriptions = await stripe.subscriptions.list({ 
+      customer: customerId,
+      status: 'active',
+      limit: 1 
+    });
+    
+    if (subscriptions.data.length === 0) {
+      return new Response(JSON.stringify({ 
+        error: "NO_ACTIVE_SUBSCRIPTION",
+        message: "No active subscriptions found. Please subscribe to a plan first to manage billing." 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
     logStep("Found Stripe customer", { customerId });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";

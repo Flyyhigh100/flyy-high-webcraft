@@ -52,6 +52,9 @@ verify_jwt = true
 [functions.cleanup-client]
 verify_jwt = true
 
+[functions.cleanup-duplicates]
+verify_jwt = true
+
 [functions.track-signin]
 verify_jwt = true
 
