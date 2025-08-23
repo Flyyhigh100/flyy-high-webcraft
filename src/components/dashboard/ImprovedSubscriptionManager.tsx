@@ -319,6 +319,7 @@ export function ImprovedSubscriptionManager() {
           plan={invitationStatus.invitationPlan!}
           amount={invitationStatus.invitationAmount!}
           isPaid={invitationStatus.isPaid}
+          siteId={invitationStatus.siteId}
           onPaymentSuccess={refetchInvitation}
         />
       )}

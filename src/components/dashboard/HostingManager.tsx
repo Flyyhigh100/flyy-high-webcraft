@@ -141,6 +141,7 @@ const HostingManager = () => {
             plan={invitationStatus.invitationPlan!}
             amount={invitationStatus.invitationAmount!}
             isPaid={invitationStatus.isPaid}
+            siteId={invitationStatus.siteId}
             onPaymentSuccess={refetchInvitation}
           />
         )}
