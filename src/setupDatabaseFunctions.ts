@@ -6,7 +6,7 @@ export async function setupDatabaseFunctions() {
   // Check if the payments table exists using properly typed RPC call
   try {
     const { data: paymentsExists, error } = await supabase
-      .rpc<boolean>('table_exists', { table_name: 'payments', schema_name: 'public' });
+      .rpc<boolean>('table_exists', { table_name_param: 'payments', schema_name_param: 'public' });
     
     if (error) {
       console.error("Error checking if payments table exists:", error);

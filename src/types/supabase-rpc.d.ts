@@ -8,7 +8,7 @@ declare module '@supabase/supabase-js' {
   interface SupabaseClient<Schema extends any = Database> {
     rpc<T = any>(
       fn: 'table_exists', 
-      params: { table_name: string; schema_name: string }
+      params: { table_name_param: string; schema_name_param?: string }
     ): Promise<PostgrestSingleResponse<boolean>>;
     
     rpc(

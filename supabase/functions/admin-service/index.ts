@@ -75,28 +75,17 @@ Deno.serve(async (req) => {
       // Fetch all profiles with last sign-in information
       supabaseAdmin
         .from('profiles')
-        .select(`
-          *,
-          user_sessions(last_sign_in)
-        `)
+        .select('*')
         .order('created_at', { ascending: false }),
 
-      // Fetch all payments with user emails (not just completed ones)
       supabaseAdmin
         .from('payments')
-        .select(`
-          *,
-          profiles(email)
-        `)
+        .select('*')
         .order('payment_date', { ascending: false }),
 
-      // Fetch all websites with their user profile information
       supabaseAdmin
         .from('websites')
-        .select(`
-          *,
-          profiles(email, role)
-        `)
+        .select('*')
         .order('name', { ascending: true }),
 
       // Fetch user sessions for last login tracking  
@@ -146,8 +135,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Build a profiles map for quick lookups
+    const profilesMap = new Map<string, any>();
+    (profilesResult.data || []).forEach((p: any) => {
+      profilesMap.set(p.id, p);
+    });
+
     // Transform profiles data
-    const profiles = (profilesResult.data || []).map(profile => ({
+    const profiles = (profilesResult.data || []).map((profile: any) => ({
       id: profile.id,
       email: profile.email || '',
       role: profile.role || 'user',
@@ -157,16 +152,19 @@ Deno.serve(async (req) => {
       last_sign_in: sessionsMap.get(profile.id) || null
     }));
 
-    // Transform payments data
-    const payments = (paymentsResult.data || []).map(payment => ({
-      id: payment.id,
-      user_id: payment.user_id,
-      user_email: payment.profiles?.email || 'Unknown',
-      amount: payment.amount,
-      status: payment.status,
-      payment_date: payment.payment_date,
-      plan: payment.plan_type
-    }));
+    const payments = (paymentsResult.data || []).map((payment: any) => {
+      const rawAmount = Number(payment.amount) || 0;
+      const amount = rawAmount > 200 ? rawAmount / 100 : rawAmount; // normalize cents to dollars
+      return {
+        id: payment.id,
+        user_id: payment.user_id,
+        user_email: profilesMap.get(payment.user_id)?.email || 'Unknown',
+        amount,
+        status: payment.status,
+        payment_date: payment.payment_date,
+        plan: payment.plan_type
+      };
+    });
 
     // Transform websites data for upcoming payments
     const upcomingPayments = (websitesResult.data || [])
@@ -176,10 +174,10 @@ Deno.serve(async (req) => {
         const today = new Date();
         return nextPaymentDate <= today;
       })
-      .map(website => ({
+      .map((website: any) => ({
         id: website.id,
         user_id: website.user_id || '',
-        user_email: 'Unknown', // We'd need to fetch this separately if needed
+        user_email: profilesMap.get(website.user_id || '')?.email || 'Unknown',
         amount: website.next_payment_amount || 0,
         status: website.payment_status || 'pending',
         payment_date: website.next_payment_date,
@@ -187,20 +185,23 @@ Deno.serve(async (req) => {
       }));
 
     // Transform websites data with client information
-    const clientWebsites = (websitesResult.data || []).map(website => ({
-      id: website.id,
-      name: website.name,
-      url: website.url,
-      planType: website.plan_type,
-      nextPaymentDate: website.next_payment_date || '',
-      nextPaymentAmount: website.next_payment_amount || 0,
-      paymentStatus: website.payment_status,
-      lastPaymentReminderSent: website.last_payment_reminder_sent,
-      gracePeriodEndDate: website.grace_period_end_date,
-      suspensionDate: website.suspension_date,
-      clientEmail: website.profiles?.email || 'Unknown',
-      clientRole: website.profiles?.role || 'user'
-    }));
+    const clientWebsites = (websitesResult.data || []).map((website: any) => {
+      const clientProfile = profilesMap.get(website.user_id || '');
+      return {
+        id: website.id,
+        name: website.name,
+        url: website.url,
+        planType: website.plan_type,
+        nextPaymentDate: website.next_payment_date || '',
+        nextPaymentAmount: website.next_payment_amount || 0,
+        paymentStatus: website.payment_status,
+        lastPaymentReminderSent: website.last_payment_reminder_sent,
+        gracePeriodEndDate: website.grace_period_end_date,
+        suspensionDate: website.suspension_date,
+        clientEmail: clientProfile?.email || 'Unknown',
+        clientRole: clientProfile?.role || 'user'
+      };
+    });
 
     // Calculate revenue data
     const revenueData = calculateRevenueData(payments);
