@@ -1,7 +1,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail, Megaphone } from "lucide-react";
+import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail, Megaphone, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useAdminData } from "@/hooks/useAdminData";
@@ -13,17 +14,59 @@ import { ClientWebsiteList } from "@/components/admin/ClientWebsiteList";
 import { AdminSummaryCards } from "@/components/admin/AdminSummaryCards";
 import { ClientInvitationsTable } from "@/components/admin/ClientInvitationsTable";
 import { MarketingEmailManager } from "@/components/admin/MarketingEmailManager";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
+  const [reconciliationLoading, setReconciliationLoading] = useState(false);
   const {
     users,
     setUsers,
     payments,
     upcomingPayments,
     isLoading,
-    revenueData
+    revenueData,
+    refreshData
   } = useAdminData();
+
+  const handleGlobalReconciliation = async () => {
+    setReconciliationLoading(true);
+    try {
+      console.log('AdminDashboard: Starting global payment reconciliation...');
+      
+      // For now, let's run reconciliation for the current admin user
+      // In a real system, you'd want a separate admin endpoint that handles all users
+      const { data, error } = await supabase.functions.invoke('reconcile-payments');
+      
+      if (error) {
+        console.error('Global reconciliation failed:', error);
+        toast({
+          title: "Reconciliation Failed",
+          description: "Unable to sync payment history. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        console.log('Global reconciliation result:', data);
+        toast({
+          title: "Payment History Synced",
+          description: `Global reconciliation completed. Found ${data.paymentsReconciled || 0} payments.`,
+        });
+        
+        // Refresh admin data
+        refreshData();
+      }
+    } catch (error) {
+      console.error('Error during global reconciliation:', error);
+      toast({
+        title: "Reconciliation Error", 
+        description: "An unexpected error occurred during reconciliation.",
+        variant: "destructive",
+      });
+    } finally {
+      setReconciliationLoading(false);
+    }
+  };
   
   return (
     <div className="container mx-auto px-4 py-12">
@@ -117,17 +160,41 @@ export default function AdminDashboard() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Payment History</CardTitle>
-                    <CardDescription>
-                      View completed payment transactions
-                    </CardDescription>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <CardTitle>Payment History</CardTitle>
+                        <CardDescription>
+                          View completed payment transactions
+                        </CardDescription>
+                      </div>
+                      <div className="mt-4 md:mt-0">
+                        <Button 
+                          onClick={handleGlobalReconciliation}
+                          disabled={reconciliationLoading}
+                          variant="outline"
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${reconciliationLoading ? 'animate-spin' : ''}`} />
+                          {reconciliationLoading ? 'Syncing...' : 'Sync All Payments'}
+                        </Button>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {payments.length > 0 ? (
                       <PaymentsTable payments={payments} />
                     ) : (
                       <div className="text-center py-8 text-gray-500">
-                        No payment data available
+                        <p className="mb-4">No payment data available</p>
+                        <p className="text-sm mb-4">Try syncing payments to load missing data.</p>
+                        <Button 
+                          onClick={handleGlobalReconciliation}
+                          disabled={reconciliationLoading}
+                          variant="outline"
+                        >
+                          <RefreshCw className={`h-4 w-4 mr-2 ${reconciliationLoading ? 'animate-spin' : ''}`} />
+                          {reconciliationLoading ? 'Syncing...' : 'Sync Payments'}
+                        </Button>
                       </div>
                     )}
                   </CardContent>
