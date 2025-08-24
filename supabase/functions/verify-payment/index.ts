@@ -151,6 +151,27 @@ serve(async (req) => {
 
     // Optional: we could also update websites/payment_status here if needed.
 
+    // Record successful payment in payments table
+    const paymentAmount = unitAmount;
+    const { error: paymentRecordError } = await db
+      .from('payments')
+      .insert({
+        user_id: user.id,
+        site_id: siteId,
+        amount: paymentAmount,
+        status: 'completed',
+        plan_type: plan,
+        method: 'stripe',
+        payment_date: new Date().toISOString()
+      });
+
+    if (paymentRecordError) {
+      logStep("Warning: Failed to record completed payment", { error: paymentRecordError });
+      // Don't fail the verification for this, but log it
+    } else {
+      logStep("Completed payment recorded in payments table");
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

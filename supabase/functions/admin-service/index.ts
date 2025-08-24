@@ -71,21 +71,23 @@ Deno.serve(async (req) => {
     }
 
     // Fetch all admin data using service role (bypasses RLS)
-    const [profilesResult, paymentsResult, websitesResult] = await Promise.all([
-      // Fetch all profiles
+    const [profilesResult, paymentsResult, websitesResult, sessionsResult] = await Promise.all([
+      // Fetch all profiles with last sign-in information
       supabaseAdmin
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          user_sessions(last_sign_in)
+        `)
         .order('created_at', { ascending: false }),
 
-      // Fetch completed payments with user emails
+      // Fetch all payments with user emails (not just completed ones)
       supabaseAdmin
         .from('payments')
         .select(`
           *,
           profiles(email)
         `)
-        .eq('status', 'completed')
         .order('payment_date', { ascending: false }),
 
       // Fetch all websites with their user profile information
@@ -95,13 +97,20 @@ Deno.serve(async (req) => {
           *,
           profiles(email, role)
         `)
-        .order('name', { ascending: true })
+        .order('name', { ascending: true }),
+
+      // Fetch user sessions for last login tracking  
+      supabaseAdmin
+        .from('user_sessions')
+        .select('*')
+        .order('last_sign_in', { ascending: false })
     ]);
 
     console.log('Data fetch results:', {
       profiles: profilesResult.error ? 'error' : `${profilesResult.data?.length} records`,
       payments: paymentsResult.error ? 'error' : `${paymentsResult.data?.length} records`,
-      websites: websitesResult.error ? 'error' : `${websitesResult.data?.length} records`
+      websites: websitesResult.error ? 'error' : `${websitesResult.data?.length} records`,
+      sessions: sessionsResult.error ? 'error' : `${sessionsResult.data?.length} records`
     });
 
     // Check for errors
@@ -120,6 +129,23 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch websites: ${websitesResult.error.message}`);
     }
 
+    if (sessionsResult.error) {
+      console.error('Sessions fetch error:', sessionsResult.error);
+      // Don't throw error for sessions - it's not critical
+      console.warn('Continuing without session data');
+    }
+
+    // Create a map of user sessions for quick lookup
+    const sessionsMap = new Map();
+    if (sessionsResult.data) {
+      sessionsResult.data.forEach(session => {
+        if (!sessionsMap.has(session.user_id) || 
+            new Date(session.last_sign_in) > new Date(sessionsMap.get(session.user_id))) {
+          sessionsMap.set(session.user_id, session.last_sign_in);
+        }
+      });
+    }
+
     // Transform profiles data
     const profiles = (profilesResult.data || []).map(profile => ({
       id: profile.id,
@@ -128,7 +154,7 @@ Deno.serve(async (req) => {
       created_at: profile.created_at,
       updated_at: profile.updated_at,
       user_id: profile.user_id || profile.id,
-      last_sign_in: null // Removed user_sessions join to fix relationship error
+      last_sign_in: sessionsMap.get(profile.id) || null
     }));
 
     // Transform payments data

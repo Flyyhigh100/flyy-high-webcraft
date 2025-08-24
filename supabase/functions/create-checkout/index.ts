@@ -135,7 +135,32 @@ serve(async (req) => {
       }
     });
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+    // Record the payment initiation in the payments table
+    const supabaseServiceClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    // Record payment initiation
+    const { error: paymentRecordError } = await supabaseServiceClient
+      .from('payments')
+      .insert({
+        user_id: user.id,
+        site_id: siteId,
+        amount: planAmount,
+        status: 'pending',
+        plan_type: plan,
+        method: 'stripe',
+        payment_date: new Date().toISOString()
+      });
+
+    if (paymentRecordError) {
+      logStep("Warning: Failed to record payment initiation", { error: paymentRecordError });
+      // Don't fail the checkout creation for this
+    } else {
+      logStep("Payment initiation recorded");
+    }
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

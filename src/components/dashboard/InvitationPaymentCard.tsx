@@ -62,7 +62,7 @@ export const InvitationPaymentCard: React.FC<InvitationPaymentCardProps> = ({
           ) : (
             <AlertCircle className="h-5 w-5 text-orange-500" />
           )}
-          Your Invited Plan
+          {isPaid ? "Your Plan" : "Your Invited Plan"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -3,61 +3,63 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DownloadCloud, FileText } from 'lucide-react';
+import { DownloadCloud, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { usePaymentHistory } from '@/hooks/usePaymentHistory';
 
 const PaymentHistory = () => {
   const { toast } = useToast();
+  const { payments, loading, error } = usePaymentHistory();
   
-  // Mock payment history data
-  const payments = [
-    {
-      id: 'INV-001',
-      date: '2025-05-01',
-      amount: 15.00,
-      status: 'paid',
-      description: 'Monthly Hosting Plan - Basic',
-      invoiceUrl: '#'
-    },
-    {
-      id: 'INV-002',
-      date: '2025-04-01',
-      amount: 15.00,
-      status: 'paid',
-      description: 'Monthly Hosting Plan - Basic',
-      invoiceUrl: '#'
-    },
-    {
-      id: 'INV-003',
-      date: '2025-03-01',
-      amount: 15.00,
-      status: 'paid',
-      description: 'Monthly Hosting Plan - Basic',
-      invoiceUrl: '#'
-    }
-  ];
-  
-  const handleDownloadInvoice = (invoiceId: string) => {
+  const handleDownloadInvoice = (paymentId: string) => {
     toast({
       title: "Invoice Download",
-      description: `Invoice ${invoiceId} is being prepared for download.`,
+      description: `Invoice for payment ${paymentId} is being prepared for download.`,
     });
   };
 
   const getStatusBadge = (status: string) => {
-    switch(status) {
+    switch(status.toLowerCase()) {
+      case 'completed':
       case 'paid': 
-        return <Badge className="bg-green-500">Paid</Badge>;
+        return <Badge className="bg-green-500 text-white">Paid</Badge>;
       case 'pending': 
-        return <Badge className="bg-yellow-500">Pending</Badge>;
+        return <Badge className="bg-yellow-500 text-white">Pending</Badge>;
       case 'failed': 
-        return <Badge className="bg-red-500">Failed</Badge>;
+        return <Badge className="bg-red-500 text-white">Failed</Badge>;
       case 'refunded': 
-        return <Badge className="bg-blue-500">Refunded</Badge>;
+        return <Badge className="bg-blue-500 text-white">Refunded</Badge>;
+      case 'cancelled':
+      case 'canceled':
+        return <Badge className="bg-gray-500 text-white">Cancelled</Badge>;
       default:
-        return <Badge className="bg-gray-500">{status}</Badge>;
+        return <Badge className="bg-gray-500 text-white">{status}</Badge>;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading payment history...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        <p>{error}</p>
+        <Button 
+          variant="outline" 
+          onClick={() => window.location.reload()} 
+          className="mt-4"
+        >
+          Try Again
+        </Button>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-8">
@@ -97,10 +99,10 @@ const PaymentHistory = () => {
               <tbody className="divide-y divide-gray-100">
                 {payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{payment.id}</td>
-                    <td className="py-3 px-4">{payment.date}</td>
-                    <td className="py-3 px-4">${payment.amount.toFixed(2)}</td>
-                    <td className="py-3 px-4">{payment.description}</td>
+                    <td className="py-3 px-4 font-medium">{payment.id.slice(0, 8)}...</td>
+                    <td className="py-3 px-4">{new Date(payment.payment_date).toLocaleDateString()}</td>
+                    <td className="py-3 px-4">${(payment.amount / 100).toFixed(2)}</td>
+                    <td className="py-3 px-4">{payment.plan_type} Plan - {payment.method || 'Card'}</td>
                     <td className="py-3 px-4">{getStatusBadge(payment.status)}</td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">

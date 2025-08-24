@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ImprovedSubscriptionManager } from "@/components/dashboard/ImprovedSubscriptionManager";
 import { EmailChangeForm } from "@/components/dashboard/EmailChangeForm";
+import PaymentHistory from "@/components/dashboard/PaymentHistory";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
@@ -249,7 +250,15 @@ export default function Dashboard() {
         </TabsContent>
         
         <TabsContent value="websites">
-          <ImprovedSubscriptionManager />
+          <div className="space-y-8">
+            <ImprovedSubscriptionManager />
+            
+            {/* Payment History Section */}
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold mb-4">Payment History</h2>
+              <PaymentHistory />
+            </div>
+          </div>
         </TabsContent>
         
         <TabsContent value="settings">
