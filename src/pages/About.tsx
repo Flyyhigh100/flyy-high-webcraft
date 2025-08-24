@@ -4,7 +4,7 @@ export default function About() {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center">About Flyy High WebCraft</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center">About Syde Vault</h1>
         
         <div className="prose prose-lg max-w-none">
           <p className="lead text-xl mb-8">
@@ -14,7 +14,7 @@ export default function About() {
           
           <h2 className="text-2xl font-bold mt-12 mb-4">Our Mission</h2>
           <p>
-            At Flyy High WebCraft, our mission is to empower businesses with exceptional 
+            At Syde Vault, our mission is to empower businesses with exceptional 
             web presence through innovative design, cutting-edge development, and strategic 
             digital solutions. We believe that every business deserves a website that not 
             only looks stunning but also delivers tangible results.

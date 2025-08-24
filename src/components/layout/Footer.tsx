@@ -8,7 +8,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">Flyy High</h3>
+            <h3 className="text-lg font-semibold mb-4">Syde Vault</h3>
             <p className="text-gray-600 text-sm">
               Professional web design and development services to help your business succeed online.
             </p>
@@ -84,7 +84,7 @@ export function Footer() {
         </div>
         
         <div className="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500 text-sm">
-          &copy; {currentYear} Flyy High WebCraft. All rights reserved.
+          &copy; {currentYear} Syde Vault. All rights reserved.
         </div>
       </div>
     </footer>

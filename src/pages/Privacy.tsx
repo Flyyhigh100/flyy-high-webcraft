@@ -8,7 +8,7 @@ export default function Privacy() {
         
         <div className="prose prose-lg max-w-none">
           <p className="lead text-xl mb-8">
-            This Privacy Policy describes how Flyy High WebCraft ("we", "our", or "us") 
+            This Privacy Policy describes how Syde Vault ("we", "our", or "us") 
             collects, uses, and shares your personal information when you visit our website 
             or use our services.
           </p>
