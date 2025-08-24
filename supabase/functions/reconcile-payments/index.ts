@@ -114,7 +114,10 @@ serve(async (req) => {
                 plan_type: subscription.metadata?.plan || 'standard',
                 method: 'stripe',
                 payment_date: new Date(invoice.created * 1000).toISOString(),
-                stripe_payment_intent_id: invoice.payment_intent?.toString()
+                stripe_payment_intent_id: invoice.payment_intent?.toString() || null,
+                stripe_session_id: null, // This will be updated when we get session info
+                invoice_url: invoice.hosted_invoice_url || null,
+                invoice_number: invoice.number || null
               });
 
             if (insertError) {

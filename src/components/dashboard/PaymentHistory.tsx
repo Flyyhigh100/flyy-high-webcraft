@@ -37,11 +37,53 @@ const PaymentHistory = () => {
     }
   };
   
-  const handleDownloadInvoice = (paymentId: string) => {
-    toast({
-      title: "Invoice Download",
-      description: `Invoice for payment ${paymentId} is being prepared for download.`,
-    });
+  const handleDownloadInvoice = async (paymentId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('download-receipt', {
+        body: { paymentId }
+      });
+
+      if (error) throw error;
+
+      if (data.type === 'redirect') {
+        // Open invoice URL in new tab
+        window.open(data.url, '_blank');
+        toast({
+          title: "Invoice Opened",
+          description: "Your invoice has been opened in a new tab.",
+        });
+      } else if (data.type === 'data') {
+        // Generate a simple receipt view
+        const receiptWindow = window.open('', '_blank');
+        if (receiptWindow) {
+          receiptWindow.document.write(`
+            <html>
+              <head><title>Payment Receipt</title></head>
+              <body style="font-family: Arial, sans-serif; padding: 20px;">
+                <h1>Payment Receipt</h1>
+                <p><strong>Receipt ID:</strong> ${data.receipt.receiptId}</p>
+                <p><strong>Date:</strong> ${new Date(data.receipt.date).toLocaleDateString()}</p>
+                <p><strong>Amount:</strong> $${data.receipt.amount}</p>
+                <p><strong>Plan:</strong> ${data.receipt.planType}</p>
+                <p><strong>Status:</strong> ${data.receipt.status}</p>
+                <p><strong>Email:</strong> ${data.receipt.userEmail}</p>
+              </body>
+            </html>
+          `);
+        }
+        toast({
+          title: "Receipt Generated",
+          description: "Your receipt has been opened in a new tab.",
+        });
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download invoice. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -92,7 +134,24 @@ const PaymentHistory = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Billing History</h2>
-        <Button variant="outline">
+        <Button variant="outline" onClick={async () => {
+          try {
+            const { data, error } = await supabase.functions.invoke('download-receipt', {
+              body: { downloadAll: true }
+            });
+            if (error) throw error;
+            toast({
+              title: "Download Started",
+              description: "All invoices download will be available soon.",
+            });
+          } catch (error) {
+            toast({
+              title: "Download Failed",
+              description: "No invoices available to download.",
+              variant: "destructive",
+            });
+          }
+        }}>
           <DownloadCloud className="mr-2 h-4 w-4" />
           Download All Invoices
         </Button>
@@ -151,12 +210,44 @@ const PaymentHistory = () => {
           </div>
           
           {payments.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p className="mb-4">No payment history found</p>
-              <p className="text-sm mb-4">If you've made payments recently, they might not be synced yet.</p>
-              <Button onClick={handleReconcilePayments} variant="outline">
-                Sync Payment History
-              </Button>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">No payment history found</p>
+              <div className="space-y-2">
+                <Button 
+                  onClick={handleReconcilePayments} 
+                  variant="outline"
+                  className="w-full"
+                >
+                  Sync Payment History
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke('download-receipt', {
+                        body: { downloadAll: true }
+                      });
+                      if (error) throw error;
+                      toast({
+                        title: "Download Started",
+                        description: "All invoices download will be available soon.",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Download Failed",
+                        description: "No invoices available to download.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  variant="ghost"
+                  className="w-full"
+                >
+                  Download All Invoices
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                If you've made payments recently, try syncing your payment history.
+              </p>
             </div>
           )}
         </CardContent>

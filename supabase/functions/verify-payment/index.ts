@@ -152,7 +152,32 @@ serve(async (req) => {
     // Optional: we could also update websites/payment_status here if needed.
 
     // Record successful payment in payments table
-    const paymentAmount = unitAmount;
+    const paymentAmount = unitAmount / 100; // Convert cents to dollars
+    
+    // Try to get invoice information from the session
+    let invoiceUrl = null;
+    let invoiceNumber = null;
+    let paymentIntentId = null;
+    
+    try {
+      // Get payment intent from session if available
+      if (session.payment_intent) {
+        const paymentIntent = typeof session.payment_intent === 'string' 
+          ? await stripe.paymentIntents.retrieve(session.payment_intent)
+          : session.payment_intent;
+        paymentIntentId = paymentIntent.id;
+        
+        // Try to get invoice from payment intent
+        if (paymentIntent.invoice) {
+          const invoice = await stripe.invoices.retrieve(paymentIntent.invoice.toString());
+          invoiceUrl = invoice.hosted_invoice_url;
+          invoiceNumber = invoice.number;
+        }
+      }
+    } catch (err) {
+      logStep("Warning: Could not retrieve invoice details", { error: err.message });
+    }
+    
     const { error: paymentRecordError } = await db
       .from('payments')
       .insert({
@@ -160,9 +185,13 @@ serve(async (req) => {
         site_id: siteId,
         amount: paymentAmount,
         status: 'completed',
-        plan_type: plan,
+        plan_type: plan || 'standard',
         method: 'stripe',
-        payment_date: new Date().toISOString()
+        payment_date: new Date().toISOString(),
+        stripe_payment_intent_id: paymentIntentId,
+        stripe_session_id: sessionId,
+        invoice_url: invoiceUrl,
+        invoice_number: invoiceNumber
       });
 
     if (paymentRecordError) {

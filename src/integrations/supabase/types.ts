@@ -191,11 +191,15 @@ export type Database = {
           amount: number
           created_at: string | null
           id: string
+          invoice_number: string | null
+          invoice_url: string | null
           method: string | null
           payment_date: string | null
           plan_type: string
           site_id: string | null
           status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -203,11 +207,15 @@ export type Database = {
           amount: number
           created_at?: string | null
           id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
           method?: string | null
           payment_date?: string | null
           plan_type: string
           site_id?: string | null
           status: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -215,11 +223,15 @@ export type Database = {
           amount?: number
           created_at?: string | null
           id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
           method?: string | null
           payment_date?: string | null
           plan_type?: string
           site_id?: string | null
           status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
