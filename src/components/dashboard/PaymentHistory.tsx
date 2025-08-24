@@ -6,10 +6,36 @@ import { Badge } from '@/components/ui/badge';
 import { DownloadCloud, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePaymentHistory } from '@/hooks/usePaymentHistory';
+import { supabase } from '@/integrations/supabase/client';
 
 const PaymentHistory = () => {
   const { toast } = useToast();
-  const { payments, loading, error } = usePaymentHistory();
+  const { payments, loading, error, refetch } = usePaymentHistory();
+  
+  const handleReconcilePayments = async () => {
+    try {
+      console.log('PaymentHistory: Starting payment reconciliation...');
+      const { data, error } = await supabase.functions.invoke('reconcile-payments');
+      
+      if (error) {
+        console.error('Payment reconciliation failed:', error);
+        toast({
+          title: "Reconciliation Failed",
+          description: "Unable to sync your payment history. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        console.log('Payment reconciliation result:', data);
+        toast({
+          title: "Payment History Synced",
+          description: `Found and synced ${data.paymentsReconciled || 0} missing payments.`,
+        });
+        refetch(); // Refresh the payment history
+      }
+    } catch (error) {
+      console.error('Error during reconciliation:', error);
+    }
+  };
   
   const handleDownloadInvoice = (paymentId: string) => {
     toast({
@@ -48,15 +74,16 @@ const PaymentHistory = () => {
 
   if (error) {
     return (
-      <div className="text-center py-8 text-red-500">
-        <p>{error}</p>
-        <Button 
-          variant="outline" 
-          onClick={() => window.location.reload()} 
-          className="mt-4"
-        >
-          Try Again
-        </Button>
+      <div className="text-center py-8">
+        <p className="text-red-600 mb-4">{error}</p>
+        <div className="space-x-2">
+          <Button onClick={refetch} variant="outline">
+            Try Again
+          </Button>
+          <Button onClick={handleReconcilePayments} variant="default">
+            Sync Payment History
+          </Button>
+        </div>
       </div>
     );
   }
@@ -101,7 +128,7 @@ const PaymentHistory = () => {
                   <tr key={payment.id} className="hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{payment.id.slice(0, 8)}...</td>
                     <td className="py-3 px-4">{new Date(payment.payment_date).toLocaleDateString()}</td>
-                    <td className="py-3 px-4">${(payment.amount / 100).toFixed(2)}</td>
+                    <td className="py-3 px-4">${Number(payment.amount).toFixed(2)}</td>
                     <td className="py-3 px-4">{payment.plan_type} Plan - {payment.method || 'Card'}</td>
                     <td className="py-3 px-4">{getStatusBadge(payment.status)}</td>
                     <td className="py-3 px-4">
@@ -125,7 +152,11 @@ const PaymentHistory = () => {
           
           {payments.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              No payment history found.
+              <p className="mb-4">No payment history found</p>
+              <p className="text-sm mb-4">If you've made payments recently, they might not be synced yet.</p>
+              <Button onClick={handleReconcilePayments} variant="outline">
+                Sync Payment History
+              </Button>
             </div>
           )}
         </CardContent>

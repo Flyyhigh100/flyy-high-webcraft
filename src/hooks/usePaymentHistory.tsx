@@ -27,6 +27,7 @@ export const usePaymentHistory = () => {
     try {
       setLoading(true);
       setError(null);
+      console.log('PaymentHistory: Fetching payments for user:', user.id);
 
       const { data, error: fetchError } = await supabase
         .from('payments')
@@ -40,7 +41,13 @@ export const usePaymentHistory = () => {
         return;
       }
 
+      console.log('PaymentHistory: Fetched payments:', data?.length || 0, 'payments');
       setPayments(data || []);
+      
+      // If no payments found, suggest reconciliation
+      if (!data || data.length === 0) {
+        console.log('PaymentHistory: No payments found, user may need reconciliation');
+      }
     } catch (err) {
       console.error('Error in fetchPayments:', err);
       setError('Failed to load payment history');

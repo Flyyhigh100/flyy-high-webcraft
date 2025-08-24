@@ -52,6 +52,54 @@ export default function Dashboard() {
     loadUserSettings();
   }, [user]);
 
+  // Handle payment verification on return from checkout
+  useEffect(() => {
+    const handlePaymentReturn = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('payment');
+      const sessionId = urlParams.get('session_id');
+      
+      if (paymentStatus === 'success' && sessionId && user) {
+        console.log("Dashboard: Payment success detected, verifying payment...", { sessionId });
+        
+        try {
+          const { data, error } = await supabase.functions.invoke('verify-payment', {
+            body: { session_id: sessionId }
+          });
+          
+          if (error) {
+            console.error("Payment verification failed:", error);
+            toast({
+              title: "Payment Verification Issue",
+              description: "Your payment was processed, but verification failed. Please contact support if needed.",
+              variant: "destructive",
+            });
+          } else {
+            console.log("Payment verification successful:", data);
+            toast({
+              title: "Payment Successful!",
+              description: "Your subscription has been activated successfully.",
+            });
+            
+            // Clean up URL parameters
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        } catch (error) {
+          console.error("Error during payment verification:", error);
+        }
+      } else if (paymentStatus === 'cancelled') {
+        toast({
+          title: "Payment Cancelled",
+          description: "Your payment was cancelled. You can try again anytime.",
+        });
+        // Clean up URL parameters
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    handlePaymentReturn();
+  }, [user, toast]);
+
   // Recheck admin status on mount
   useEffect(() => {
     const verifyAdminStatus = async () => {
