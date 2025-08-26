@@ -12,6 +12,17 @@ const logStep = (step: string, details?: any) => {
   console.log(`[RECONCILE-PAYMENTS] ${step}${detailsStr}`);
 };
 
+const cleanPlanName = (planType: string): string => {
+  if (!planType) return 'Standard';
+  
+  // Remove common suffixes like "(Invited)", "(Trial)", etc.
+  return planType
+    .replace(/\s*\(invited\)/gi, '')
+    .replace(/\s*\(trial\)/gi, '')
+    .replace(/\s*\(promo\)/gi, '')
+    .trim() || 'Standard';
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -111,7 +122,7 @@ serve(async (req) => {
                 user_id: user.id,
                 amount: invoice.amount_paid / 100, // Convert cents to dollars
                 status: 'completed',
-                plan_type: subscription.metadata?.plan || 'standard',
+                plan_type: cleanPlanName(subscription.metadata?.plan || 'Standard'),
                 method: 'stripe',
                 payment_date: new Date(invoice.created * 1000).toISOString(),
                 stripe_payment_intent_id: invoice.payment_intent?.toString() || null,

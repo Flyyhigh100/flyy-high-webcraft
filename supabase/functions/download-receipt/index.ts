@@ -12,6 +12,17 @@ const logStep = (step: string, details?: any) => {
   console.log(`[DOWNLOAD-RECEIPT] ${step}${detailsStr}`);
 };
 
+const cleanPlanName = (planType: string): string => {
+  if (!planType) return 'Standard';
+  
+  // Remove common suffixes like "(Invited)", "(Trial)", etc.
+  return planType
+    .replace(/\s*\(invited\)/gi, '')
+    .replace(/\s*\(trial\)/gi, '')
+    .replace(/\s*\(promo\)/gi, '')
+    .trim() || 'Standard';
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -109,7 +120,7 @@ serve(async (req) => {
       receiptId: payment.id,
       date: payment.payment_date,
       amount: payment.amount,
-      planType: payment.plan_type,
+      planType: cleanPlanName(payment.plan_type),
       status: payment.status,
       method: payment.method || 'stripe',
       userEmail: user.email
