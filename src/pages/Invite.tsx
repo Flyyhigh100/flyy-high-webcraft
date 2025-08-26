@@ -43,22 +43,20 @@ export default function Invite() {
     try {
       console.log('Verifying token:', token);
       
-      const { data, error } = await supabase
-        .from('client_invitations')
-        .select('*')
-        .eq('invite_token', token)
-        .eq('status', 'pending')
-        .maybeSingle();
+      // Use secure edge function to verify invitation
+      const { data, error } = await supabase.functions.invoke('get-invitation-details', {
+        body: { token }
+      });
 
-      console.log('Invitation query result:', { data, error });
+      console.log('Invitation verification result:', { data, error });
 
-      if (error || !data) {
+      if (error || !data?.success) {
         setStatus('error');
-        setError('Invalid or expired invitation token');
+        setError(data?.error || 'Invalid or expired invitation token');
         return;
       }
 
-      setInvitation(data);
+      setInvitation(data.invitation);
       setStatus('ready');
     } catch (err) {
       console.error('Error verifying invitation:', err);
