@@ -13,7 +13,7 @@ export interface PaymentReminder {
 
 export interface PaymentReminderRequest {
   siteId: string;
-  reminderType: '3_day' | '7_day' | '14_day' | '30_day' | 'final_notice';
+  reminderType: '3_day' | '7_day' | '14_day' | '30_day' | 'final_notice' | 'upcoming_7d' | 'upcoming_3d' | 'upcoming_1d';
   manualSend?: boolean;
 }
 

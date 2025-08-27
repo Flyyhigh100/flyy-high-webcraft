@@ -10,7 +10,7 @@ const corsHeaders = {
 
 interface PaymentReminderRequest {
   siteId: string;
-  reminderType: '3_day' | '7_day' | '14_day' | '30_day' | 'final_notice';
+  reminderType: '3_day' | '7_day' | '14_day' | '30_day' | 'final_notice' | 'upcoming_7d' | 'upcoming_3d' | 'upcoming_1d';
   manualSend?: boolean;
 }
 
@@ -131,6 +131,66 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
         </div>
       `;
       break;
+
+    case 'upcoming_7d': {
+      const daysUntilDue = Math.max(1, -daysOverdue);
+      baseTemplate.subject = `Upcoming Payment: ${siteName} due in ${daysUntilDue} days`;
+      baseTemplate.html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb;">Friendly Reminder: Payment due in ${daysUntilDue} days</h2>
+          <p>Hi there,</p>
+          <p>This is a friendly reminder that your subscription for <strong>${siteName}</strong> is due in <strong>${daysUntilDue} days</strong>.</p>
+          <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #60a5fa;">
+            <p><strong>Website:</strong> ${siteName}</p>
+            <p><strong>URL:</strong> <a href="${siteUrl}">${siteUrl}</a></p>
+            <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+          </div>
+          <p>No action is required yet, we just wanted to give you a heads-up.</p>
+          <p>Best regards,<br>The Flyy High Team</p>
+        </div>
+      `;
+      break;
+    }
+
+    case 'upcoming_3d': {
+      const daysUntilDue = Math.max(1, -daysOverdue);
+      baseTemplate.subject = `Reminder: ${siteName} payment due in ${daysUntilDue} days`;
+      baseTemplate.html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1d4ed8;">Reminder: Payment due soon</h2>
+          <p>Hi there,</p>
+          <p>Your payment for <strong>${siteName}</strong> is due in <strong>${daysUntilDue} days</strong>.</p>
+          <div style="background: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+            <p><strong>Website:</strong> ${siteName}</p>
+            <p><strong>URL:</strong> <a href="${siteUrl}">${siteUrl}</a></p>
+            <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+          </div>
+          <p>If you need to update billing details, please do so before the due date.</p>
+          <p>Best regards,<br>The Flyy High Team</p>
+        </div>
+      `;
+      break;
+    }
+
+    case 'upcoming_1d': {
+      const daysUntilDue = Math.max(1, -daysOverdue);
+      baseTemplate.subject = `Action needed: ${siteName} payment due tomorrow`;
+      baseTemplate.html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #0f766e;">Payment due tomorrow</h2>
+          <p>Hi there,</p>
+          <p>This is a reminder that your payment for <strong>${siteName}</strong> is due <strong>tomorrow</strong>.</p>
+          <div style="background: #ccfbf1; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #14b8a6;">
+            <p><strong>Website:</strong> ${siteName}</p>
+            <p><strong>URL:</strong> <a href="${siteUrl}">${siteUrl}</a></p>
+            <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+          </div>
+          <p>To ensure uninterrupted service, please make sure your payment method is up to date.</p>
+          <p>Best regards,<br>The Flyy High Team</p>
+        </div>
+      `;
+      break;
+    }
   }
 
   return baseTemplate;

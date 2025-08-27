@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, Calendar, DollarSign, Send, Clock, CheckCircle } from "lucide-react";
+import { sendPaymentReminder } from "@/utils/paymentReminderUtils";
 
 interface PaymentReminderConfig {
   reminderType: 'gentle' | 'firm' | 'final' | 'overdue';
@@ -117,37 +118,27 @@ export function EnhancedPaymentReminders() {
     }
   };
 
-  const sendReminderEmail = async (website: ClientWebsiteWithReminder, templateName: string) => {
+  const sendReminderEmail = async (website: ClientWebsiteWithReminder, statusType: string) => {
     try {
-      const template = emailTemplates.find(t => t.name.toLowerCase().includes(templateName));
-      if (!template) {
-        throw new Error(`Template ${templateName} not found`);
+      const status = calculateReminderStatus(website);
+      let reminderType = '3_day';
+      
+      if (status.status === 'overdue') {
+        if (status.days >= 30) reminderType = '30_day';
+        else if (status.days >= 14) reminderType = '14_day';
+        else if (status.days >= 7) reminderType = '7_day';
+        else reminderType = '3_day';
+      } else if (status.status === 'urgent') {
+        reminderType = 'upcoming_1d';
+      } else if (status.status === 'soon') {
+        reminderType = status.days <= 3 ? 'upcoming_3d' : 'upcoming_7d';
       }
 
-      const { data, error } = await supabase.functions.invoke('send-payment-reminder', {
-        body: {
-          siteId: website.id,
-          reminderType: templateName,
-          emailTemplate: template.id,
-          customData: {
-            clientName: website.name,
-            websiteName: website.name,
-            websiteUrl: website.url,
-            amount: website.next_payment_amount?.toString() || '0',
-            dueDate: new Date(website.next_payment_date).toLocaleDateString(),
-            planType: website.plan_type,
-            paymentLink: `https://sydevault.com/dashboard`
-          }
-        }
+      await sendPaymentReminder({
+        siteId: website.id,
+        reminderType: reminderType as any,
+        manualSend: true
       });
-
-      if (error) throw error;
-
-      // Update the last reminder sent timestamp
-      await supabase
-        .from('websites')
-        .update({ last_payment_reminder_sent: new Date().toISOString() })
-        .eq('id', website.id);
 
       return { success: true };
     } catch (error) {

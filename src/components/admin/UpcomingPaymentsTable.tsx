@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { AlertCircle } from "lucide-react";
 import { Payment } from "@/types/admin";
+import { sendPaymentReminder } from "@/utils/paymentReminderUtils";
 
 interface UpcomingPaymentsTableProps {
   upcomingPayments: Payment[];
@@ -12,12 +13,26 @@ interface UpcomingPaymentsTableProps {
 export function UpcomingPaymentsTable({ upcomingPayments }: UpcomingPaymentsTableProps) {
   const { toast } = useToast();
 
-  const sendPaymentReminder = (userEmail: string) => {
-    // In a real implementation, this would trigger an email sending process
-    toast({
-      title: "Reminder Sent",
-      description: `Payment reminder sent to ${userEmail}`,
-    });
+  const sendReminder = async (payment: Payment) => {
+    try {
+      const dueDate = new Date(payment.payment_date);
+      const today = new Date();
+      const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const reminderType = daysUntilDue <= 1 ? 'upcoming_1d' : daysUntilDue <= 3 ? 'upcoming_3d' : 'upcoming_7d';
+
+      await sendPaymentReminder({ siteId: payment.id, reminderType, manualSend: true });
+
+      toast({
+        title: "Reminder Sent",
+        description: `Payment reminder (${reminderType.replace('_', ' ')}) sent to ${payment.user_email}`,
+      });
+    } catch (e: any) {
+      toast({
+        title: "Failed",
+        description: e.message || 'Failed to send reminder',
+        variant: "destructive",
+      });
+    }
   };
 
   if (upcomingPayments.length === 0) {
@@ -51,7 +66,7 @@ export function UpcomingPaymentsTable({ upcomingPayments }: UpcomingPaymentsTabl
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => sendPaymentReminder(payment.user_email)}
+                  onClick={() => sendReminder(payment)}
                 >
                   Send Reminder
                 </Button>

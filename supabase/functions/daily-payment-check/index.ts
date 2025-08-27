@@ -45,6 +45,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const results = [];
 
+    // Process overdue websites
     for (const website of overdueWebsites || []) {
       const nextPaymentDate = new Date(website.next_payment_date);
       const daysOverdue = Math.floor((today.getTime() - nextPaymentDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -87,45 +88,92 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (shouldSendReminder && reminderType) {
         try {
-          // Call the send-payment-reminder function
-          const reminderResponse = await fetch(
-            `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-payment-reminder`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
-              },
-              body: JSON.stringify({
-                siteId: website.id,
-                reminderType: reminderType,
-                manualSend: false
-              })
+          // Call the send-payment-reminder function using the Supabase client
+          const { data: reminderResult, error: invokeError } = await supabaseClient.functions.invoke('send-payment-reminder', {
+            body: {
+              siteId: website.id,
+              reminderType,
+              manualSend: false,
             }
-          );
+          });
 
-          const reminderResult = await reminderResponse.json();
-          
+          if (invokeError) throw invokeError;
+
           results.push({
             websiteId: website.id,
             websiteName: website.name,
             reminderType,
-            success: reminderResponse.ok,
-            message: reminderResult.message || reminderResult.error
+            success: true,
+            message: reminderResult?.message || 'Sent',
           });
 
           console.log(`Sent ${reminderType} reminder for ${website.name}`);
           
-        } catch (error) {
+        } catch (error: any) {
           console.error(`Error sending reminder for ${website.name}:`, error);
           results.push({
             websiteId: website.id,
             websiteName: website.name,
             reminderType,
             success: false,
-            message: error.message
+            message: error.message,
           });
         }
+      }
+    }
+
+    // Additionally, process upcoming payments (1, 3, and 7 days before due date)
+    const { data: upcomingWebsites, error: upcomingError } = await supabaseClient
+      .from('websites')
+      .select('*, profiles!websites_user_id_fkey(email)')
+      .eq('payment_status', 'current')
+      .not('next_payment_date', 'is', null);
+
+    if (upcomingError) {
+      console.error('Error fetching upcoming websites:', upcomingError);
+      throw upcomingError;
+    }
+
+    for (const website of upcomingWebsites || []) {
+      const nextPaymentDate = new Date(website.next_payment_date);
+      const daysUntilDue = Math.ceil((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (![1, 3, 7].includes(daysUntilDue)) continue;
+
+      const lastReminderDate = website.last_payment_reminder_sent ? new Date(website.last_payment_reminder_sent) : null;
+      const sentToday = lastReminderDate && lastReminderDate.toDateString() === today.toDateString();
+      if (sentToday) continue; // avoid duplicate sends on the same day
+
+      const reminderType = daysUntilDue === 1 ? 'upcoming_1d' : daysUntilDue === 3 ? 'upcoming_3d' : 'upcoming_7d';
+
+      try {
+        const { data: reminderResult, error: invokeError } = await supabaseClient.functions.invoke('send-payment-reminder', {
+          body: {
+            siteId: website.id,
+            reminderType,
+            manualSend: false,
+          }
+        });
+
+        if (invokeError) throw invokeError;
+
+        results.push({
+          websiteId: website.id,
+          websiteName: website.name,
+          reminderType,
+          success: true,
+          message: reminderResult?.message || 'Sent',
+        });
+
+        console.log(`Sent ${reminderType} reminder for ${website.name}`);
+      } catch (error: any) {
+        console.error(`Error sending upcoming reminder for ${website.name}:`, error);
+        results.push({
+          websiteId: website.id,
+          websiteName: website.name,
+          reminderType,
+          success: false,
+          message: error.message,
+        });
       }
     }
 
