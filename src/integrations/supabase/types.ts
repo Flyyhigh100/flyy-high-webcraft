@@ -481,6 +481,16 @@ export type Database = {
           total: number
         }[]
       }
+      get_user_invitation_status: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          has_active_invitation: boolean
+          invitation_amount: number
+          invitation_id: string
+          invitation_plan: string
+          site_id: string
+        }[]
+      }
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean

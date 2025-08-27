@@ -22,26 +22,23 @@ export const useInvitationStatus = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) return;
 
-      // Check for pending invitations that match the user's email
-      const { data: invitation } = await supabase
-        .from('client_invitations')
-        .select('*')
-        .eq('email', user.email)
-        .eq('status', 'used') // User has accepted the invitation
-        .single();
+      // Fetch sanitized invitation info via secure RPC (no direct table access)
+      const { data: rpcData, error: rpcError } = await (supabase as any).rpc('get_user_invitation_status');
+      if (rpcError) throw rpcError;
+      const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
 
-      if (invitation) {
-        // Check if they have an active subscription for this invitation
+      if (row?.has_active_invitation) {
+        // Check if they have an active subscription for this invitation/site
         let { data: subscription } = await supabase
           .from('subscriptions')
           .select('*')
           .eq('user_id', user.id)
-          .eq('site_id', invitation.site_id)
+          .eq('site_id', row.site_id)
           .eq('status', 'active')
           .single();
 
         // Fallback: if no subscription found with site_id, check for any active subscription for the user
-        if (!subscription && invitation.site_id) {
+        if (!subscription && row.site_id) {
           const { data: fallbackSubscription } = await supabase
             .from('subscriptions')
             .select('*')
@@ -55,10 +52,10 @@ export const useInvitationStatus = () => {
 
         setInvitationStatus({
           hasActiveInvitation: true,
-          invitationPlan: invitation.plan_type,
-          invitationAmount: invitation.next_payment_amount,
-          invitationId: invitation.id,
-          siteId: invitation.site_id,
+          invitationPlan: row.invitation_plan || undefined,
+          invitationAmount: row.invitation_amount ?? undefined,
+          invitationId: row.invitation_id || undefined,
+          siteId: row.site_id || undefined,
           isPaid: !!subscription
         });
       } else {
