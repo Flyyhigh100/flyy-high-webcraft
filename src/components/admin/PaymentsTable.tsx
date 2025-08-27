@@ -6,9 +6,10 @@ import { Payment } from "@/types/admin";
 interface PaymentsTableProps {
   payments: Payment[];
   showStatus?: boolean;
+  onViewDetails?: (payment: Payment) => void;
 }
 
-export function PaymentsTable({ payments, showStatus = true }: PaymentsTableProps) {
+export function PaymentsTable({ payments, showStatus = true, onViewDetails }: PaymentsTableProps) {
   if (payments.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -50,7 +51,13 @@ export function PaymentsTable({ payments, showStatus = true }: PaymentsTableProp
             )}
             <TableCell>{new Date(payment.payment_date).toLocaleDateString()}</TableCell>
             <TableCell>
-              <Button variant="outline" size="sm">View Details</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => onViewDetails?.(payment)}
+              >
+                View Details
+              </Button>
             </TableCell>
           </TableRow>
         ))}

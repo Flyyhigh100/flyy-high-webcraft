@@ -9,6 +9,9 @@ export interface PaymentHistoryItem {
   payment_date: string;
   plan_type: string;
   method?: string;
+  website_name?: string;
+  website_url?: string;
+  site_id?: string;
 }
 
 export const usePaymentHistory = () => {
@@ -32,7 +35,19 @@ export const usePaymentHistory = () => {
 
       const { data, error: fetchError } = await supabase
         .from('payments')
-        .select('id, amount, status, payment_date, plan_type, method')
+        .select(`
+          id, 
+          amount, 
+          status, 
+          payment_date, 
+          plan_type, 
+          method,
+          site_id,
+          websites:site_id (
+            name,
+            url
+          )
+        `)
         .eq('user_id', user.id)
         .order('payment_date', { ascending: false });
 
@@ -43,7 +58,15 @@ export const usePaymentHistory = () => {
       }
 
       console.log('PaymentHistory: Fetched payments:', data?.length || 0, 'payments');
-      setPayments(data || []);
+      
+      // Transform data to include website information
+      const paymentsWithWebsites = (data || []).map((payment: any) => ({
+        ...payment,
+        website_name: payment.websites?.name,
+        website_url: payment.websites?.url,
+      }));
+      
+      setPayments(paymentsWithWebsites);
       
       // Auto-sync if no payments found (first load only)
       if ((!data || data.length === 0) && !isAutoSyncing) {
@@ -78,12 +101,29 @@ export const usePaymentHistory = () => {
       // Refetch payments after reconciliation (without auto-sync to avoid recursion)
       const { data: refreshedData, error: refreshError } = await supabase
         .from('payments')
-        .select('id, amount, status, payment_date, plan_type, method')
+        .select(`
+          id, 
+          amount, 
+          status, 
+          payment_date, 
+          plan_type, 
+          method,
+          site_id,
+          websites:site_id (
+            name,
+            url
+          )
+        `)
         .eq('user_id', user.id)
         .order('payment_date', { ascending: false });
 
       if (!refreshError) {
-        setPayments(refreshedData || []);
+        const paymentsWithWebsites = (refreshedData || []).map((payment: any) => ({
+          ...payment,
+          website_name: payment.websites?.name,
+          website_url: payment.websites?.url,
+        }));
+        setPayments(paymentsWithWebsites);
       }
     } catch (err) {
       console.error('PaymentHistory: Auto-sync failed:', err);

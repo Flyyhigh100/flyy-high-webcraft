@@ -1,16 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DownloadCloud, FileText, Loader2 } from 'lucide-react';
+import { DownloadCloud, FileText, Loader2, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { usePaymentHistory } from '@/hooks/usePaymentHistory';
+import { usePaymentHistory, PaymentHistoryItem } from '@/hooks/usePaymentHistory';
 import { supabase } from '@/integrations/supabase/client';
+import { PaymentDetailsModal } from './PaymentDetailsModal';
 
 const PaymentHistory = () => {
   const { toast } = useToast();
   const { payments, loading, error, refetch } = usePaymentHistory();
+  const [selectedPayment, setSelectedPayment] = useState<PaymentHistoryItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleViewDetails = (payment: PaymentHistoryItem) => {
+    setSelectedPayment(payment);
+    setIsModalOpen(true);
+  };
   
   const handleReconcilePayments = async () => {
     try {
@@ -177,7 +185,7 @@ const PaymentHistory = () => {
                   <th className="py-3 px-4 text-sm font-medium text-gray-500">Invoice</th>
                   <th className="py-3 px-4 text-sm font-medium text-gray-500">Date</th>
                   <th className="py-3 px-4 text-sm font-medium text-gray-500">Amount</th>
-                  <th className="py-3 px-4 text-sm font-medium text-gray-500">Description</th>
+                  <th className="py-3 px-4 text-sm font-medium text-gray-500">Website/Description</th>
                   <th className="py-3 px-4 text-sm font-medium text-gray-500">Status</th>
                   <th className="py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
                 </tr>
@@ -188,10 +196,28 @@ const PaymentHistory = () => {
                     <td className="py-3 px-4 font-medium">{payment.id.slice(0, 8)}...</td>
                     <td className="py-3 px-4">{new Date(payment.payment_date).toLocaleDateString()}</td>
                     <td className="py-3 px-4">${Number(payment.amount).toFixed(2)}</td>
-                    <td className="py-3 px-4">{payment.plan_type} Plan - {payment.method || 'Card'}</td>
+                    <td className="py-3 px-4">
+                      {payment.website_name ? (
+                        <div>
+                          <div className="font-medium">{payment.website_name}</div>
+                          <div className="text-sm text-gray-500">{payment.plan_type} Plan</div>
+                        </div>
+                      ) : (
+                        <div>{payment.plan_type} Plan - {payment.method || 'Card'}</div>
+                      )}
+                    </td>
                     <td className="py-3 px-4">{getStatusBadge(payment.status)}</td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex items-center"
+                          onClick={() => handleViewDetails(payment)}
+                        >
+                          <Eye className="mr-1 h-3 w-3" />
+                          View Details
+                        </Button>
                         <Button 
                           size="sm" 
                           variant="outline" 
@@ -291,6 +317,15 @@ const PaymentHistory = () => {
           </CardContent>
         </Card>
       </div>
+
+      <PaymentDetailsModal 
+        payment={selectedPayment}
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPayment(null);
+        }}
+      />
     </div>
   );
 };

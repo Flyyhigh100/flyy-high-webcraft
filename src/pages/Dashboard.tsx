@@ -100,7 +100,7 @@ export default function Dashboard() {
     handlePaymentReturn();
   }, [user, toast]);
 
-  // Recheck admin status on mount
+  // Recheck admin status on mount and show notification once per session
   useEffect(() => {
     const verifyAdminStatus = async () => {
       if (user) {
@@ -108,10 +108,17 @@ export default function Dashboard() {
         console.log("Dashboard: Admin status verification result:", isUserAdmin);
         
         if (isUserAdmin) {
-          toast({
-            title: "Admin Access Available",
-            description: "You have administrator privileges. Access the admin dashboard from the button above.",
-          });
+          // Check if we've already shown admin notification this session
+          const sessionKey = `admin-notification-shown-${user.id}`;
+          const alreadyShown = sessionStorage.getItem(sessionKey);
+          
+          if (!alreadyShown) {
+            toast({
+              title: "Admin Access Available",
+              description: "You have administrator privileges. Access the admin dashboard from the button above.",
+            });
+            sessionStorage.setItem(sessionKey, 'true');
+          }
         }
       }
     };
