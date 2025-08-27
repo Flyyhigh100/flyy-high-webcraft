@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Line } from "react-chartjs-2";
 import { Payment, RevenueData } from "@/types/admin";
 import { useEffect, useState } from "react";
+// Import chart config to register Chart.js components
+import "@/lib/chart-config";
 
 interface RevenueAnalyticsProps {
   payments: Payment[];
