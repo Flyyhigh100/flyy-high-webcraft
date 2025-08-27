@@ -166,13 +166,15 @@ Deno.serve(async (req) => {
       };
     });
 
-    // Transform websites data for upcoming payments
+    // Transform websites data for upcoming payments (due in next 7-30 days)
     const upcomingPayments = (websitesResult.data || [])
       .filter(website => {
         if (!website.next_payment_date) return false;
         const nextPaymentDate = new Date(website.next_payment_date);
         const today = new Date();
-        return nextPaymentDate <= today;
+        const futureDate = new Date();
+        futureDate.setDate(today.getDate() + 30); // Next 30 days
+        return nextPaymentDate > today && nextPaymentDate <= futureDate;
       })
       .map((website: any) => ({
         id: website.id,
