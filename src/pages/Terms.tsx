@@ -73,14 +73,47 @@ export default function Terms() {
             website is at the user's own risk.
           </p>
           
-          <h2 className="text-2xl font-bold mt-12 mb-4">7. Modifications</h2>
+          <h2 className="text-2xl font-bold mt-12 mb-4">7. Payment Processing</h2>
+          <p>
+            All payments for SydeVault services are processed securely through Stripe, Inc. 
+            When you make a payment, you will see "Flyy High LLC" on your billing statement 
+            as the merchant of record. Flyy High LLC is the company that handles payment 
+            processing for SydeVault services.
+          </p>
+          <p>
+            By making a payment, you agree to Stripe's Terms of Service and Privacy Policy. 
+            Your payment information is encrypted and securely processed by Stripe. We do not 
+            store your credit card information on our servers.
+          </p>
+          
+          <h2 className="text-2xl font-bold mt-12 mb-4">8. Subscription and Billing</h2>
+          <p>
+            Subscription fees are billed in advance on a monthly or annual basis depending on 
+            your selected plan. You can cancel your subscription at any time through your 
+            account dashboard or by contacting our support team. Upon cancellation, you will 
+            continue to have access to the service until the end of your current billing period.
+          </p>
+          <p>
+            Refunds are available within 30 days of your initial purchase. Refunds for 
+            subsequent billing periods are at our discretion and may be prorated based on usage.
+          </p>
+          
+          <h2 className="text-2xl font-bold mt-12 mb-4">9. Data and Privacy</h2>
+          <p>
+            Your website data is stored securely using Supabase's infrastructure. We implement 
+            industry-standard security measures to protect your data. You retain full ownership 
+            of your website content and data. We do not access, modify, or share your data 
+            except as necessary to provide our services or as required by law.
+          </p>
+          
+          <h2 className="text-2xl font-bold mt-12 mb-4">10. Modifications</h2>
           <p>
             SydeVault may revise these terms of service for its website at any time 
             without notice. By using this website you are agreeing to be bound by the then 
             current version of these terms of service.
           </p>
           
-          <h2 className="text-2xl font-bold mt-12 mb-4">8. Governing Law</h2>
+          <h2 className="text-2xl font-bold mt-12 mb-4">11. Governing Law</h2>
           <p>
             These terms and conditions are governed by and construed in accordance with the 
             laws and you irrevocably submit to the exclusive jurisdiction of the courts in that location.

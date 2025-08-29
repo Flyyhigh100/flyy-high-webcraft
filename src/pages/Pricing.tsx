@@ -12,11 +12,11 @@ const Pricing = () => {
   const faqs = [
     {
       question: "What's included in the hosting plan?",
-      answer: "Our hosting plans include reliable server infrastructure, global CDN, automatic backups, SSL certificates, site monitoring, and basic SEO optimization tools. The Pro plan adds additional storage, priority support, and more advanced features."
+      answer: "Our hosting plans include Lovable deployment platform, Supabase backend integration, automatic backups, SSL certificates, real-time monitoring, and SEO optimization tools. The Pro plan adds additional Supabase storage, priority support, and enhanced features."
     },
     {
       question: "How reliable is your hosting service?",
-      answer: "We guarantee 99.9% uptime for our Basic plan and 99.99% for our Pro plan. Our infrastructure is built on industry-leading cloud providers with redundancy across multiple regions to ensure your website stays online."
+      answer: "Our hosting is built on Lovable's deployment platform with Supabase backend services. We provide reliable hosting with automatic monitoring and daily backups to ensure your website stays online and performs well."
     },
     {
       question: "Do you offer site migration services?",
@@ -38,16 +38,16 @@ const Pricing = () => {
 
   // Comparison table data
   const features = [
-    { name: "Uptime Guarantee", basic: "99.9%", pro: "99.99%" },
-    { name: "Storage Space", basic: "1 GB", pro: "5 GB" },
+    { name: "Lovable Platform", basic: "Standard", pro: "Priority" },
+    { name: "Supabase Storage", basic: "1 GB", pro: "5 GB" },
     { name: "SSL Certificate", basic: true, pro: true },
-    { name: "Global CDN", basic: true, pro: true },
-    { name: "Automated Backups", basic: "Weekly", pro: "Daily" },
-    { name: "SEO Tools", basic: "Basic", pro: "Advanced" },
-    { name: "Site Performance", basic: "Standard", pro: "Optimized" },
+    { name: "Supabase Auth", basic: true, pro: true },
+    { name: "Automated Backups", basic: "Daily", pro: "Multiple" },
+    { name: "SEO Optimization", basic: "Basic", pro: "Advanced" },
+    { name: "Build Performance", basic: "Standard", pro: "Optimized" },
     { name: "Support", basic: "Email", pro: "Priority" },
     { name: "Custom Domain", basic: false, pro: true },
-    { name: "Analytics", basic: "Basic", pro: "Advanced" },
+    { name: "Analytics", basic: "Basic", pro: "Enhanced" },
   ];
 
   return (

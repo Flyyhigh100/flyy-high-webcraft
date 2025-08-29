@@ -13,7 +13,7 @@ const logStep = (step: string, details?: any) => {
 };
 
 interface CheckoutRequest {
-  plan: 'basic' | 'standard' | 'premium';
+  plan: 'basic' | 'pro';
   siteId?: string;
   invitation_payment?: boolean;
   amount?: number; // Custom amount from invitation
@@ -84,13 +84,9 @@ serve(async (req) => {
           monthly: { amount: 1500, name: "Basic Hosting Plan" }, // $15.00/month
           yearly: { amount: 1000, name: "Basic Hosting Plan (Annual)" } // $10.00/month when billed yearly
         },
-        standard: { 
+        pro: { 
           monthly: { amount: 3000, name: "Pro Hosting Plan" }, // $30.00/month  
           yearly: { amount: 2000, name: "Pro Hosting Plan (Annual)" } // $20.00/month when billed yearly
-        },
-        premium: { 
-          monthly: { amount: 2999, name: "Premium Hosting Plan" }, // $29.99/month
-          yearly: { amount: 2400, name: "Premium Hosting Plan (Annual)" } // $24.00/month when billed yearly
         }
       };
       
