@@ -100,7 +100,7 @@ export default function Terms() {
           
           <h2 className="text-2xl font-bold mt-12 mb-4">9. Data and Privacy</h2>
           <p>
-            Your website data is stored securely using Supabase's infrastructure. We implement 
+            Your website data is stored securely using our database infrastructure. We implement 
             industry-standard security measures to protect your data. You retain full ownership 
             of your website content and data. We do not access, modify, or share your data 
             except as necessary to provide our services or as required by law.
