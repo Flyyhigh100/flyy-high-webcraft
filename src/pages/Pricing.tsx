@@ -12,15 +12,15 @@ const Pricing = () => {
   const faqs = [
     {
       question: "What's included in the hosting plan?",
-      answer: "Our hosting plans include Lovable deployment platform, Supabase backend integration, automatic backups, SSL certificates, real-time monitoring, and SEO optimization tools. The Pro plan adds additional Supabase storage, priority support, and enhanced features."
+      answer: "Our hosting plans include modern deployment infrastructure, cloud database integration, automatic backups, SSL certificates, website monitoring, and SEO optimization tools. The Pro plan adds additional cloud storage, priority support, and enhanced features."
     },
     {
       question: "How reliable is your hosting service?",
-      answer: "Our hosting is built on Lovable's deployment platform with Supabase backend services. We provide reliable hosting with automatic monitoring and daily backups to ensure your website stays online and performs well."
+      answer: "Our hosting is built on enterprise-grade infrastructure with cloud database services. We provide reliable hosting with automatic monitoring and daily backups to ensure your website stays online and performs well."
     },
     {
       question: "Do you offer site migration services?",
-      answer: "Yes, we can help migrate your existing website to our hosting platform. Our team will ensure a smooth transition with minimal downtime. Contact us for details on our migration services."
+      answer: "We specialize in building custom websites from scratch using modern technologies. If you have specific requirements or content from an existing site, we can incorporate those into your new custom-built website during the development process."
     },
     {
       question: "Can I upgrade my plan later?",
@@ -32,22 +32,22 @@ const Pricing = () => {
     },
     {
       question: "What payment methods do you accept?",
-      answer: "We accept credit/debit cards, bank transfers, and PayPal. For annual plans, we also offer invoicing options for businesses that require it."
+      answer: "We accept all major credit and debit cards through our secure Stripe payment processing. This ensures fast, reliable, and secure transactions for your hosting services."
     },
   ];
 
   // Comparison table data
   const features = [
-    { name: "Lovable Platform", basic: "Standard", pro: "Priority" },
-    { name: "Supabase Storage", basic: "1 GB", pro: "5 GB" },
+    { name: "Deployment Platform", basic: "Standard", pro: "Priority" },
+    { name: "Cloud Storage", basic: "1 GB", pro: "5 GB" },
     { name: "SSL Certificate", basic: true, pro: true },
-    { name: "Supabase Auth", basic: true, pro: true },
+    { name: "User Authentication", basic: true, pro: true },
     { name: "Automated Backups", basic: "Daily", pro: "Multiple" },
     { name: "SEO Optimization", basic: "Basic", pro: "Advanced" },
     { name: "Build Performance", basic: "Standard", pro: "Optimized" },
     { name: "Support", basic: "Email", pro: "Priority" },
     { name: "Custom Domain", basic: false, pro: true },
-    { name: "Analytics", basic: "Basic", pro: "Enhanced" },
+    { name: "Website Monitoring", basic: "Basic", pro: "Enhanced" },
   ];
 
   return (
