@@ -1,9 +1,10 @@
 
 import React from 'react';
 import PricingSection from '@/components/home/PricingSection';
+import WebsiteDevelopmentSection from '@/components/home/WebsiteDevelopmentSection';
 import { DomainSearchSection } from '@/components/home/DomainSearchSection';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check } from 'lucide-react';
+import { Check, Star, Zap, Heart } from 'lucide-react';
 import CTASection from '@/components/home/CTASection';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
@@ -11,28 +12,28 @@ const Pricing = () => {
   // FAQ items
   const faqs = [
     {
-      question: "What's included in the hosting plan?",
-      answer: "Our hosting plans include modern deployment infrastructure, cloud database integration, automatic backups, SSL certificates, website monitoring, and SEO optimization tools. The Pro plan adds additional cloud storage, priority support, and enhanced features."
+      question: "What's included in website development packages?",
+      answer: "Each package includes professional design, mobile responsive layout, SEO optimization, and revision rounds. Higher tiers add more pages, custom functionality, database integration, and extended support."
     },
     {
-      question: "How reliable is your hosting service?",
-      answer: "Our hosting is built on enterprise-grade infrastructure with cloud database services. We provide reliable hosting with automatic monitoring and daily backups to ensure your website stays online and performs well."
+      question: "How long does website development take?",
+      answer: "Delivery times vary by package: Starter (48 hours), Business (5 days), Premium (10 days). We work efficiently while ensuring quality and your satisfaction with the final product."
     },
     {
-      question: "Do you offer site migration services?",
-      answer: "We specialize in building custom websites from scratch using modern technologies. If you have specific requirements or content from an existing site, we can incorporate those into your new custom-built website during the development process."
+      question: "What's included in the hosting plans?",
+      answer: "Our hosting plans include modern deployment infrastructure, cloud database integration, automatic backups, SSL certificates, custom domain support, website monitoring, and email support."
     },
     {
-      question: "Can I upgrade my plan later?",
-      answer: "Absolutely! You can upgrade to a higher-tier plan at any time. We'll prorate your billing so you only pay the difference for the remainder of your billing cycle."
+      question: "Can I get a custom solution outside these packages?",
+      answer: "Absolutely! We work with businesses of all sizes and requirements. Whether you need something simpler than our Starter package or more complex than Premium, we'll create a custom solution that fits your budget and needs."
     },
     {
-      question: "Do you offer custom hosting solutions?",
-      answer: "Yes, we provide custom hosting solutions for businesses with specific requirements. Contact us to discuss your needs, and we'll create a tailored hosting package for you."
+      question: "Do you offer payment plans?",
+      answer: "Yes, for larger projects we offer flexible payment options. Contact us to discuss payment plans that work for your budget, including milestone-based payments for development projects."
     },
     {
-      question: "What payment methods do you accept?",
-      answer: "We accept all major credit and debit cards through our secure Stripe payment processing. This ensures fast, reliable, and secure transactions for your hosting services."
+      question: "What happens after my website is built?",
+      answer: "After delivery, you own your website completely. We offer ongoing hosting services to keep your site online and running smoothly. You can also choose to host elsewhere - we'll help with the transition."
     },
   ];
 
@@ -41,61 +42,82 @@ const Pricing = () => {
     { name: "Deployment Platform", basic: "Standard", pro: "Priority" },
     { name: "Cloud Storage", basic: "1 GB", pro: "5 GB" },
     { name: "SSL Certificate", basic: true, pro: true },
+    { name: "Custom Domain", basic: true, pro: true },
     { name: "User Authentication", basic: true, pro: true },
     { name: "Automated Backups", basic: "Daily", pro: "Multiple" },
     { name: "SEO Optimization", basic: "Basic", pro: "Advanced" },
     { name: "Build Performance", basic: "Standard", pro: "Optimized" },
     { name: "Email Support", basic: true, pro: true },
-    { name: "Custom Domain", basic: false, pro: true },
     { name: "Website Monitoring", basic: "Basic", pro: "Enhanced" },
   ];
 
   return (
     <>
-      <div className="bg-secondary/30 py-16 md:py-24">
+      <div className="bg-gradient-to-br from-primary/5 to-secondary/30 py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">Website Hosting</h1>
-          <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto">
-            Reliable, fast and secure hosting to keep your website running smoothly 24/7.
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">Services & Pricing</h1>
+          <p className="text-xl text-muted-foreground text-center max-w-3xl mx-auto mb-8">
+            From simple websites to complex web applications - we build digital solutions that grow with your business.
           </p>
+          
+          {/* Custom Solutions Banner */}
+          <div className="max-w-4xl mx-auto bg-card border border-border rounded-xl p-8 shadow-sm">
+            <div className="text-center">
+              <div className="flex justify-center items-center gap-2 mb-4">
+                <Heart className="h-6 w-6 text-primary" />
+                <Zap className="h-6 w-6 text-primary" />
+                <Star className="h-6 w-6 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold mb-4">Every Business is Unique</h2>
+              <p className="text-muted-foreground text-lg mb-4">
+                Whether you need a simple $150 landing page or a complex enterprise solution, we work with you to find the perfect fit. 
+                <span className="font-semibold text-foreground"> No project is too small or too large</span> - we'll create a custom solution that matches your budget and requirements.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                💡 All our pricing is flexible. Need something different? Let's talk!
+              </p>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <WebsiteDevelopmentSection />
       
       <PricingSection />
       
       <DomainSearchSection />
       
       {/* Feature comparison table */}
-      <div className="section bg-white">
+      <div className="section bg-background">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">Hosting Plans Comparison</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">Hosting Features Comparison</h2>
           <div className="overflow-x-auto max-w-4xl mx-auto">
-            <Table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
-              <TableHeader className="bg-gray-50">
+            <Table className="min-w-full bg-card border border-border shadow-md rounded-lg overflow-hidden">
+              <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="px-6 py-4 text-left text-gray-700 font-bold">Feature</TableHead>
-                  <TableHead className="px-6 py-4 text-center text-gray-700 font-bold">Basic</TableHead>
-                  <TableHead className="px-6 py-4 text-center text-flyy-700 font-bold">Pro</TableHead>
+                  <TableHead className="px-6 py-4 text-left font-bold">Feature</TableHead>
+                  <TableHead className="px-6 py-4 text-center font-bold">Basic</TableHead>
+                  <TableHead className="px-6 py-4 text-center font-bold">Pro</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-gray-200">
+              <TableBody className="divide-y divide-border">
                 {features.map((feature, index) => (
-                  <TableRow key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-gray-700 font-medium">{feature.name}</TableCell>
+                  <TableRow key={index} className={index % 2 === 0 ? 'bg-muted/20' : ''}>
+                    <TableCell className="px-6 py-4 whitespace-nowrap font-medium">{feature.name}</TableCell>
                     <TableCell className="px-6 py-4 whitespace-nowrap text-center">
                       {feature.basic === true ? (
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       ) : feature.basic === false ? (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-muted-foreground">—</span>
                       ) : (
                         <span>{feature.basic}</span>
                       )}
                     </TableCell>
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-center bg-flyy-50">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-center bg-primary/5">
                       {feature.pro === true ? (
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       ) : feature.pro === false ? (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-muted-foreground">—</span>
                       ) : (
                         <span>{feature.pro}</span>
                       )}
@@ -109,7 +131,7 @@ const Pricing = () => {
       </div>
       
       {/* FAQ section */}
-      <div className="section bg-gray-50">
+      <div className="section bg-muted/30">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -117,7 +139,7 @@ const Pricing = () => {
               <Card key={index}>
                 <CardContent className="pt-6">
                   <h3 className="text-lg font-bold mb-2">{faq.question}</h3>
-                  <p className="text-gray-600">{faq.answer}</p>
+                  <p className="text-muted-foreground">{faq.answer}</p>
                 </CardContent>
               </Card>
             ))}
