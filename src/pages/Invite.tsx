@@ -102,32 +102,16 @@ export default function Invite() {
       if (signupError) throw signupError;
 
       if (authData.user) {
-        // Update website to link to user
-        await supabase
-          .from('websites')
-          .update({ user_id: authData.user.id })
-          .eq('id', invitation.site_id);
-
-        // Mark invitation as used
-        const { error: updateError } = await supabase
-          .from('client_invitations')
-          .update({ 
-            status: 'used',
-            used_at: new Date().toISOString()
-          })
-          .eq('id', invitation.id);
-
-        if (updateError) {
-          console.error('Failed to update invitation status:', updateError);
-        }
-
-        // Confirm user email via edge function
+        // Securely accept invitation via Edge Function (no direct table writes)
         try {
-          await supabase.functions.invoke('confirm-invited-user', {
-            body: { userId: authData.user.id }
+          const { data: acceptData, error: acceptError } = await supabase.functions.invoke('accept-invitation', {
+            body: { token }
           });
-        } catch (confirmError) {
-          console.error('Email confirmation failed:', confirmError);
+          if (acceptError || !acceptData?.success) {
+            console.error('Accept invitation failed:', acceptError || acceptData?.error);
+          }
+        } catch (acceptErr) {
+          console.error('Error accepting invitation:', acceptErr);
         }
 
         setStatus('success');

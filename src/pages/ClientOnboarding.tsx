@@ -63,39 +63,18 @@ export default function ClientOnboarding() {
     try {
       console.log('Verifying invitation token:', inviteToken);
       
-      // First check if the token exists at all (any status)
-      const { data: tokenCheck, error: tokenError } = await supabase
-        .from('client_invitations')
-        .select('*')
-        .eq('invite_token', inviteToken)
-        .single();
+      // Verify invitation securely via Edge Function (no direct table access)
+      const { data, error } = await supabase.functions.invoke('get-invitation-details', {
+        body: { token: inviteToken }
+      });
 
-      console.log('Token check result:', { tokenCheck, tokenError });
+      console.log('Invitation verification result:', { data, error });
 
-      if (tokenError || !tokenCheck) {
-        // Token doesn't exist - could be deleted or invalid
-        throw new Error('INVALID_TOKEN');
+      if (error || !data?.success) {
+        throw new Error(data?.error || 'INVALID_TOKEN');
       }
 
-      // Check invitation status and provide specific error messages
-      if (tokenCheck.status === 'used') {
-        throw new Error('ALREADY_USED');
-      }
-
-      if (tokenCheck.superseded_at) {
-        throw new Error('SUPERSEDED');
-      }
-
-      if (tokenCheck.status !== 'pending') {
-        throw new Error('NOT_PENDING');
-      }
-
-      // Check if invitation is expired
-      if (new Date(tokenCheck.expires_at) < new Date()) {
-        throw new Error('EXPIRED');
-      }
-
-      setInvitation(tokenCheck);
+      setInvitation(data.invitation as any);
     } catch (error: any) {
       console.error('Invitation verification error:', error);
       
@@ -191,24 +170,17 @@ export default function ClientOnboarding() {
           console.error('Error confirming user email:', confirmError);
         }
 
-        // Update the website to link to this user
-        const { error: websiteError } = await supabase
-          .from('websites')
-          .update({ user_id: authData.user.id })
-          .eq('id', invitation.site_id);
-
-        if (websiteError) console.error('Website update error:', websiteError);
-
-        // Mark invitation as used
-        const { error: inviteError } = await supabase
-          .from('client_invitations')
-          .update({ 
-            status: 'used',
-            used_at: new Date().toISOString()
-          })
-          .eq('id', invitation.id);
-
-        if (inviteError) console.error('Invitation update error:', inviteError);
+        // Securely accept invitation via Edge Function (no direct table writes)
+        try {
+          const { data: acceptData, error: acceptError } = await supabase.functions.invoke('accept-invitation', {
+            body: { token }
+          });
+          if (acceptError || !acceptData?.success) {
+            console.error('Accept invitation failed:', acceptError || acceptData?.error);
+          }
+        } catch (acceptErr) {
+          console.error('Error accepting invitation:', acceptErr);
+        }
 
         toast({
           title: "Account Created!",
