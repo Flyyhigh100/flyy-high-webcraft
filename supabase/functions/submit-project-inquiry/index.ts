@@ -8,6 +8,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const securityHeaders = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+  "X-Frame-Options": "DENY",
+  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+};
+
 interface ProjectInquiryRequest {
   name: string;
   email: string;
@@ -15,12 +22,24 @@ interface ProjectInquiryRequest {
   projectType: string;
   currentWebsite?: string;
   projectDescription: string;
+  botField?: string; // honeypot
 }
+
+const isValidEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) && email.length <= 254;
+
+const sanitize = (text: string | undefined | null, max = 2000) =>
+  (text ?? "")
+    .toString()
+    .replace(/[<>]/g, "")
+    .replace(/javascript:/gi, "")
+    .trim()
+    .slice(0, max);
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, ...securityHeaders } });
   }
 
   try {
@@ -30,6 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "admin@sydevault.com";
 
     const {
       name,
@@ -38,21 +58,75 @@ const handler = async (req: Request): Promise<Response> => {
       projectType,
       currentWebsite,
       projectDescription,
+      botField,
     }: ProjectInquiryRequest = await req.json();
 
-    console.log("Received project inquiry:", { name, email, projectType });
+    // Basic validation
+    if (!name || !email || !projectType || !projectDescription) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing required fields" }),
+        { status: 422, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
+      );
+    }
+
+    if (!isValidEmail(email)) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid email address" }),
+        { status: 422, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
+      );
+    }
+
+    // Honeypot check (simple anti-bot)
+    if (botField && botField.trim() !== "") {
+      return new Response(JSON.stringify({ success: false, error: "Bot detected" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders },
+      });
+    }
+
+    // Normalize/sanitize fields
+    const clean = {
+      name: sanitize(name, 120),
+      email: email.toLowerCase().trim(),
+      phone: sanitize(phone ?? "", 40),
+      projectType: sanitize(projectType, 80),
+      currentWebsite: sanitize(currentWebsite ?? "", 200),
+      projectDescription: sanitize(projectDescription, 2000),
+    };
+
+    // Basic rate limiting per email: 1 request / 60s
+    const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+    const { data: recent, error: recentErr } = await supabase
+      .from("project_inquiries")
+      .select("id, created_at")
+      .eq("email", clean.email)
+      .gte("created_at", oneMinuteAgo)
+      .limit(1);
+
+    if (recentErr) {
+      console.error("Error checking rate limit:", recentErr);
+    }
+
+    if (recent && recent.length > 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Too many requests. Please try again later." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
+      );
+    }
+
+    console.log("Received project inquiry:", { name: clean.name, email: clean.email, projectType: clean.projectType });
 
     // Insert inquiry into database
     const { data: inquiry, error: dbError } = await supabase
       .from("project_inquiries")
       .insert([
         {
-          name,
-          email,
-          phone,
-          project_type: projectType,
-          current_website: currentWebsite,
-          project_description: projectDescription,
+          name: clean.name,
+          email: clean.email,
+          phone: clean.phone || null,
+          project_type: clean.projectType,
+          current_website: clean.currentWebsite || null,
+          project_description: clean.projectDescription,
         },
       ])
       .select()
@@ -60,7 +134,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (dbError) {
       console.error("Database error:", dbError);
-      throw new Error(`Database error: ${dbError.message}`);
+      throw new Error("DB_INSERT_FAILED");
     }
 
     console.log("Inquiry saved to database:", inquiry.id);
@@ -68,18 +142,18 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to client
     const clientEmailResponse = await resend.emails.send({
       from: "Syde Vault <onboarding@resend.dev>",
-      to: [email],
+      to: [clean.email],
       subject: "We received your project inquiry!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Thank you for your interest, ${name}!</h1>
+          <h1 style="color: #333;">Thank you for your interest, ${clean.name}!</h1>
           <p>We've received your project inquiry and are excited to learn more about your needs.</p>
           
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3>Your Project Details:</h3>
-            <p><strong>Project Type:</strong> ${projectType}</p>
-            ${currentWebsite ? `<p><strong>Current Website:</strong> ${currentWebsite}</p>` : ""}
-            <p><strong>Description:</strong> ${projectDescription}</p>
+            <p><strong>Project Type:</strong> ${clean.projectType}</p>
+            ${clean.currentWebsite ? `<p><strong>Current Website:</strong> ${clean.currentWebsite}</p>` : ""}
+            <p><strong>Description:</strong> ${clean.projectDescription}</p>
           </div>
           
           <p>Our team will review your inquiry and get back to you within 24 hours with next steps.</p>
@@ -98,24 +172,24 @@ const handler = async (req: Request): Promise<Response> => {
     // Send notification email to admin
     const adminEmailResponse = await resend.emails.send({
       from: "Syde Vault <onboarding@resend.dev>",
-      to: ["admin@sydevault.com"], // Replace with actual admin email
-      subject: `New Project Inquiry from ${name}`,
+      to: [ADMIN_EMAIL],
+      subject: `New Project Inquiry from ${clean.name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #333;">New Project Inquiry Received</h1>
           
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3>Client Information:</h3>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ""}
+            <p><strong>Name:</strong> ${clean.name}</p>
+            <p><strong>Email:</strong> ${clean.email}</p>
+            ${clean.phone ? `<p><strong>Phone:</strong> ${clean.phone}</p>` : ""}
           </div>
           
           <div style="background-color: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3>Project Details:</h3>
-            <p><strong>Project Type:</strong> ${projectType}</p>
-            ${currentWebsite ? `<p><strong>Current Website:</strong> ${currentWebsite}</p>` : ""}
-            <p><strong>Description:</strong> ${projectDescription}</p>
+            <p><strong>Project Type:</strong> ${clean.projectType}</p>
+            ${clean.currentWebsite ? `<p><strong>Current Website:</strong> ${clean.currentWebsite}</p>` : ""}
+            <p><strong>Description:</strong> ${clean.projectDescription}</p>
           </div>
           
           <p><a href="https://sydevault.com/admin" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View in Admin Dashboard</a></p>
@@ -138,19 +212,17 @@ const handler = async (req: Request): Promise<Response> => {
         headers: {
           "Content-Type": "application/json",
           ...corsHeaders,
+          ...securityHeaders,
         },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in submit-project-inquiry function:", error);
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message,
-      }),
+      JSON.stringify({ success: false, error: "Internal server error" }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders },
       }
     );
   }

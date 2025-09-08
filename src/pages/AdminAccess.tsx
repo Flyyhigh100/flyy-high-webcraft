@@ -56,16 +56,7 @@ export default function AdminAccess() {
       
       if (error) {
         console.error("Database error:", error);
-        setMessage("Error updating profile in database. Using local storage fallback.");
-        
-        // Fallback: Store admin status in localStorage
-        localStorage.setItem('flyy_high_admin', 'true');
-        
-        // Navigate to admin dashboard
-        setTimeout(() => {
-          navigate('/admin');
-        }, 1000);
-        
+        setMessage("Error updating profile in database. Please contact support.");
         return;
       }
       

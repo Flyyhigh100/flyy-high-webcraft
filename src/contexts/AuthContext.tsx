@@ -38,57 +38,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Improved admin check that queries the database directly
+  // Strict admin check using DB only
   const checkAdminStatus = async (): Promise<boolean> => {
     if (!user) return false;
-    
-    console.log("Checking admin status for user:", user.email);
-    
+
     try {
-      // Method 1: Check email directly (most reliable fallback)
-      const adminEmail = 'flyyhigh824@gmail.com';
-      if (user.email === adminEmail) {
-        console.log(`Email match found: ${user.email} is admin`);
-        setIsAdmin(true);
-        localStorage.setItem('flyy_high_admin', 'true');
-        return true;
+      // Prefer secure RPC if available
+      const { data: isAdminRpc, error: rpcError } = await supabase.rpc('is_admin', { _user_id: user.id });
+
+      if (rpcError) {
+        console.warn('is_admin RPC unavailable, falling back to profiles check:', rpcError.message);
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        const allowed = !error && profile?.role === 'admin';
+        setIsAdmin(!!allowed);
+        return !!allowed;
       }
-      
-      // Method 2: Query the profiles table for role
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) {
-        console.error("Error checking profile role:", error);
-      }
-      
-      if (profile && profile.role === 'admin') {
-        console.log("Database role check: User is admin");
-        setIsAdmin(true);
-        localStorage.setItem('flyy_high_admin', 'true');
-        return true;
-      } else {
-        console.log("Database role check: User is NOT admin", profile);
-      }
-      
-      // Method 3: Check localStorage fallback
-      const localStorageAdmin = localStorage.getItem('flyy_high_admin');
-      if (localStorageAdmin === 'true') {
-        console.log("localStorage fallback: User is admin");
-        setIsAdmin(true);
-        return true;
-      }
-      
-      // If we get here, user is not admin
-      console.log("Final determination: User is NOT admin");
-      setIsAdmin(false);
-      localStorage.removeItem('flyy_high_admin');
-      return false;
+
+      setIsAdmin(!!isAdminRpc);
+      return !!isAdminRpc;
     } catch (err) {
-      console.error("Error in admin check:", err);
+      console.error('Error in admin check:', err);
+      setIsAdmin(false);
       return false;
     }
   };
@@ -129,7 +103,6 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange(
     } else {
       console.log("No user or session, setting isAdmin to false");
       setIsAdmin(false);
-      localStorage.removeItem('flyy_high_admin');
     }
     
     setIsLoading(false);
@@ -166,7 +139,6 @@ const signIn = async (email: string, password: string) => {
   // Sign out function
   const signOut = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('flyy_high_admin');
     window.location.href = '/login';
   };
   

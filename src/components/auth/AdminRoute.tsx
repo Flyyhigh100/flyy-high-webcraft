@@ -36,13 +36,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
       // Direct database check - most reliable
       if (user) {
         try {
-          // Method 1: Direct email check
-          if (user.email === 'flyyhigh824@gmail.com') {
-            console.log('AdminRoute: Admin access granted via direct email match');
-            setHasAdminAccess(true);
-            setIsCheckingAccess(false);
-            return;
-          }
+          // Email-based admin check removed for security
           
           // Method 2: Query the profile directly
           console.log('AdminRoute: Querying profile for user:', user.id);
@@ -85,14 +79,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
             return;
           }
           
-          // Last resort: Check localStorage
-          const localStorageAdmin = localStorage.getItem('flyy_high_admin');
-          if (localStorageAdmin === 'true') {
-            console.log('AdminRoute: Admin access granted via localStorage');
-            setHasAdminAccess(true);
-            setIsCheckingAccess(false);
-            return;
-          }
+          // localStorage-based admin fallback removed for security
           
           // If all checks fail, redirect
           console.log('AdminRoute: No admin access confirmed, redirecting');

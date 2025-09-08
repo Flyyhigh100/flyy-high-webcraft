@@ -14,6 +14,7 @@ const ProjectIntakeForm = () => {
     projectType: '',
     currentWebsite: '',
     projectDescription: '',
+    botField: '', // honeypot
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,6 +39,7 @@ const ProjectIntakeForm = () => {
           projectType: formData.projectType,
           currentWebsite: formData.currentWebsite || undefined,
           projectDescription: formData.projectDescription,
+          botField: formData.botField || undefined,
         },
       });
 
@@ -56,6 +58,7 @@ const ProjectIntakeForm = () => {
         projectType: '',
         currentWebsite: '',
         projectDescription: '',
+        botField: '',
       });
     } catch (error: any) {
       console.error('Error submitting inquiry:', error);
@@ -73,6 +76,19 @@ const ProjectIntakeForm = () => {
     <div className="bg-background rounded-xl shadow-md p-6 md:p-8 border border-border">
       <h2 className="text-2xl font-bold mb-6 text-foreground">Tell Us About Your Project</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Honeypot field for bots */}
+        <div className="absolute left-[-9999px]" aria-hidden="true">
+          <label htmlFor="botField">Company</label>
+          <input
+            id="botField"
+            name="botField"
+            type="text"
+            value={formData.botField}
+            onChange={handleChange}
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
