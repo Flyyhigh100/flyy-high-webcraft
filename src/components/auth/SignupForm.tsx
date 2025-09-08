@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { validatePassword, getPasswordStrengthLabel, getPasswordStrengthColor } from "@/utils/passwordValidation";
 
 export function SignupForm() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export function SignupForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(validatePassword(""));
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,8 +36,9 @@ export function SignupForm() {
     }
 
     // Check password strength
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.feedback.join(". "));
       setIsLoading(false);
       return;
     }
@@ -111,7 +114,10 @@ export function SignupForm() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordStrength(validatePassword(e.target.value));
+                  }}
                   required
                   disabled={isLoading || !!success}
                   className="pr-10"
@@ -131,7 +137,27 @@ export function SignupForm() {
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">Must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters</p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Must be at least 12 characters long and include uppercase, lowercase, numbers, and special characters</p>
+                {password && (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          passwordStrength.score === 0 ? "bg-red-500 w-1/4" :
+                          passwordStrength.score === 1 ? "bg-red-500 w-2/4" :
+                          passwordStrength.score === 2 ? "bg-yellow-500 w-3/4" :
+                          passwordStrength.score === 3 ? "bg-blue-500 w-full" :
+                          "bg-green-500 w-full"
+                        }`}
+                      />
+                    </div>
+                    <span className={`text-xs font-medium ${getPasswordStrengthColor(passwordStrength.score)}`}>
+                      {getPasswordStrengthLabel(passwordStrength.score)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="space-y-2">

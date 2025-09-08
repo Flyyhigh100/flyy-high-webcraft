@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, Eye, Save, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import DOMPurify from 'dompurify';
 
 interface EmailTemplate {
   id: string;
@@ -453,7 +454,7 @@ export function EmailTemplateManager() {
                         <DialogTitle>Email Preview: {editingTemplate.name}</DialogTitle>
                       </DialogHeader>
                       <div 
-                        dangerouslySetInnerHTML={{ __html: getPreviewContent() }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getPreviewContent()) }}
                         className="border rounded p-4"
                       />
                     </DialogContent>
