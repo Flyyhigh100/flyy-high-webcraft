@@ -19,11 +19,11 @@ const HeroSection = () => {
               Custom Websites Built for Success
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 mx-auto max-w-2xl">
-              Modern, fast, and conversion-focused sites crafted to grow your business.
+              Professional websites designed to represent you perfectly and achieve your goals.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
-                Get Started
+              <Button asChild className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
+                <a href="/get-started">Get Started</a>
               </Button>
               <Button asChild variant="outline" className="border-primary text-primary hover:bg-secondary px-8 py-6 text-lg">
                 <a href="#portfolio">View Portfolio</a>

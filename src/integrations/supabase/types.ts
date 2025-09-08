@@ -285,6 +285,51 @@ export type Database = {
         }
         Relationships: []
       }
+      project_inquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          current_website: string | null
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          project_description: string
+          project_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          current_website?: string | null
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          project_description: string
+          project_type: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          current_website?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          project_description?: string
+          project_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           amount: number
