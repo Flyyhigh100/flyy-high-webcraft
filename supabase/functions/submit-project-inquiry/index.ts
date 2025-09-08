@@ -36,6 +36,66 @@ const sanitize = (text: string | undefined | null, max = 2000) =>
     .trim()
     .slice(0, max);
 
+// Rate limiting function
+const checkRateLimit = async (supabase: any, ipAddress: string, endpoint: string, maxRequests = 2, windowMinutes = 15) => {
+  const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000);
+  
+  // Clean up old entries first
+  await supabase.rpc('cleanup_old_rate_limits');
+  
+  // Check current rate limit
+  const { data: existingLimits, error } = await supabase
+    .from('rate_limits')
+    .select('*')
+    .eq('ip_address', ipAddress)
+    .eq('endpoint', endpoint)
+    .gte('window_start', windowStart.toISOString());
+    
+  if (error) {
+    console.error('Rate limit check error:', error);
+    return false; // Allow on error to avoid blocking legitimate users
+  }
+  
+  const totalRequests = existingLimits?.reduce((sum, limit) => sum + limit.request_count, 0) || 0;
+  
+  if (totalRequests >= maxRequests) {
+    return false; // Rate limited
+  }
+  
+  // Update or insert rate limit entry
+  const { error: upsertError } = await supabase
+    .from('rate_limits')
+    .upsert({
+      ip_address: ipAddress,
+      endpoint: endpoint,
+      request_count: 1,
+      window_start: new Date().toISOString()
+    });
+    
+  if (upsertError) {
+    console.error('Rate limit update error:', upsertError);
+  }
+  
+  return true;
+};
+
+// Security logging function
+const logSecurityEvent = async (supabase: any, eventType: string, ipAddress?: string, userAgent?: string, details?: any, success = true) => {
+  const { error } = await supabase
+    .from('security_logs')
+    .insert({
+      event_type: eventType,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      details: details,
+      success: success
+    });
+    
+  if (error) {
+    console.error('Security logging error:', error);
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -47,6 +107,26 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+
+    // Get client IP and user agent for logging and rate limiting
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const userAgent = req.headers.get('user-agent') || 'Unknown';
+    
+    // IP-based rate limiting check - max 2 project inquiries per 15 minutes per IP
+    const rateLimitPassed = await checkRateLimit(supabase, clientIP, 'project-inquiry', 2, 15);
+    if (!rateLimitPassed) {
+      await logSecurityEvent(supabase, 'project_inquiry_rate_limited', clientIP, userAgent, {
+        endpoint: 'project-inquiry'
+      }, false);
+      
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Too many project inquiries. Please wait 15 minutes before submitting another inquiry.' 
+      }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders },
+      });
+    }
 
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
     const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "admin@sydevault.com";
@@ -63,6 +143,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Basic validation
     if (!name || !email || !projectType || !projectDescription) {
+      await logSecurityEvent(supabase, 'project_inquiry_validation_error', clientIP, userAgent, {
+        missing_fields: { name: !name, email: !email, projectType: !projectType, projectDescription: !projectDescription }
+      }, false);
+      
       return new Response(
         JSON.stringify({ success: false, error: "Missing required fields" }),
         { status: 422, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
@@ -70,6 +154,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!isValidEmail(email)) {
+      await logSecurityEvent(supabase, 'project_inquiry_invalid_email', clientIP, userAgent, {
+        provided_email: email
+      }, false);
+      
       return new Response(
         JSON.stringify({ success: false, error: "Invalid email address" }),
         { status: 422, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
@@ -78,6 +166,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Honeypot check (simple anti-bot)
     if (botField && botField.trim() !== "") {
+      await logSecurityEvent(supabase, 'project_inquiry_bot_detected', clientIP, userAgent, {
+        bot_field_content: botField.slice(0, 50) // Log first 50 chars for analysis
+      }, false);
+      
       return new Response(JSON.stringify({ success: false, error: "Bot detected" }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders },
@@ -108,6 +200,11 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (recent && recent.length > 0) {
+      await logSecurityEvent(supabase, 'project_inquiry_email_rate_limited', clientIP, userAgent, {
+        email: clean.email,
+        last_submission: recent[0].created_at
+      }, false);
+      
       return new Response(
         JSON.stringify({ success: false, error: "Too many requests. Please try again later." }),
         { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
@@ -201,6 +298,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Emails sent:", { clientEmailResponse, adminEmailResponse });
 
+    // Log successful project inquiry submission
+    await logSecurityEvent(supabase, 'project_inquiry_submitted', clientIP, userAgent, {
+      inquiry_id: inquiry.id,
+      name: clean.name,
+      email: clean.email,
+      project_type: clean.projectType,
+      client_email_sent: !!clientEmailResponse,
+      admin_email_sent: !!adminEmailResponse
+    }, true);
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -218,6 +325,24 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error) {
     console.error("Error in submit-project-inquiry function:", error);
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const userAgent = req.headers.get('user-agent') || 'Unknown';
+    
+    // Try to log the error (but don't fail if logging fails)
+    try {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      
+      await logSecurityEvent(supabase, 'project_inquiry_server_error', clientIP, userAgent, {
+        error: error.message,
+        stack: error.stack
+      }, false);
+    } catch (logError) {
+      console.error('Failed to log security event:', logError);
+    }
+    
     return new Response(
       JSON.stringify({ success: false, error: "Internal server error" }),
       {

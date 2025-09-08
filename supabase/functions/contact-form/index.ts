@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,9 +13,75 @@ interface ContactFormRequest {
   email: string;
   subject: string;
   message: string;
+  company?: string;
 }
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
+
+// Rate limiting function
+const checkRateLimit = async (ipAddress: string, endpoint: string, maxRequests = 3, windowMinutes = 10) => {
+  const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000);
+  
+  // Clean up old entries first
+  await supabase.rpc('cleanup_old_rate_limits');
+  
+  // Check current rate limit
+  const { data: existingLimits, error } = await supabase
+    .from('rate_limits')
+    .select('*')
+    .eq('ip_address', ipAddress)
+    .eq('endpoint', endpoint)
+    .gte('window_start', windowStart.toISOString());
+    
+  if (error) {
+    console.error('Rate limit check error:', error);
+    return false; // Allow on error to avoid blocking legitimate users
+  }
+  
+  const totalRequests = existingLimits?.reduce((sum, limit) => sum + limit.request_count, 0) || 0;
+  
+  if (totalRequests >= maxRequests) {
+    return false; // Rate limited
+  }
+  
+  // Update or insert rate limit entry
+  const { error: upsertError } = await supabase
+    .from('rate_limits')
+    .upsert({
+      ip_address: ipAddress,
+      endpoint: endpoint,
+      request_count: 1,
+      window_start: new Date().toISOString()
+    });
+    
+  if (upsertError) {
+    console.error('Rate limit update error:', upsertError);
+  }
+  
+  return true;
+};
+
+// Security logging function
+const logSecurityEvent = async (eventType: string, ipAddress?: string, userAgent?: string, details?: any, success = true) => {
+  const { error } = await supabase
+    .from('security_logs')
+    .insert({
+      event_type: eventType,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      details: details,
+      success: success
+    });
+    
+  if (error) {
+    console.error('Security logging error:', error);
+  }
+};
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -22,12 +89,71 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, subject, message }: ContactFormRequest = await req.json();
+    // Get client IP and user agent for logging and rate limiting
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const userAgent = req.headers.get('user-agent') || 'Unknown';
+    
+    // Rate limiting check - max 3 contact form submissions per 10 minutes per IP
+    const rateLimitPassed = await checkRateLimit(clientIP, 'contact-form', 3, 10);
+    if (!rateLimitPassed) {
+      await logSecurityEvent('contact_form_rate_limited', clientIP, userAgent, {
+        endpoint: 'contact-form'
+      }, false);
+      
+      return new Response(JSON.stringify({ 
+        error: 'Too many contact form submissions. Please wait 10 minutes before trying again.' 
+      }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const { name, email, subject, message, company }: ContactFormRequest = await req.json();
 
     // Validate required fields
     if (!name || !email || !subject || !message) {
+      await logSecurityEvent('contact_form_validation_error', clientIP, userAgent, {
+        missing_fields: { name: !name, email: !email, subject: !subject, message: !message }
+      }, false);
+      
       return new Response(
-        JSON.stringify({ error: "All fields are required" }),
+        JSON.stringify({ error: "All required fields must be filled out" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      await logSecurityEvent('contact_form_invalid_email', clientIP, userAgent, {
+        provided_email: email
+      }, false);
+      
+      return new Response(
+        JSON.stringify({ error: "Please provide a valid email address" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Content validation (basic spam detection)
+    const spamIndicators = ['viagra', 'casino', 'lottery', 'click here', 'free money'];
+    const messageContent = `${name} ${email} ${subject} ${message}`.toLowerCase();
+    const hasSpamContent = spamIndicators.some(indicator => messageContent.includes(indicator));
+    
+    if (hasSpamContent) {
+      await logSecurityEvent('contact_form_spam_detected', clientIP, userAgent, {
+        email: email,
+        content_flags: spamIndicators.filter(indicator => messageContent.includes(indicator))
+      }, false);
+      
+      return new Response(
+        JSON.stringify({ error: "Message could not be processed" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -46,9 +172,17 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Name:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
+            ${company ? `<p><strong>Company:</strong> ${company}</p>` : ''}
             <p><strong>Subject:</strong> ${subject}</p>
             <p><strong>Message:</strong></p>
             <p style="white-space: pre-wrap;">${message}</p>
+            <hr style="margin: 20px 0;">
+            <p style="font-size: 12px; color: #666;">
+              <strong>Technical Details:</strong><br>
+              IP: ${clientIP}<br>
+              User Agent: ${userAgent}<br>
+              Timestamp: ${new Date().toISOString()}
+            </p>
           </div>
           <p>This message was sent through the contact form on your website.</p>
         </div>
@@ -73,9 +207,20 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
+    // Log successful contact form submission
+    await logSecurityEvent('contact_form_submitted', clientIP, userAgent, {
+      name: name,
+      email: email,
+      subject: subject,
+      company: company,
+      admin_email_sent: !!adminEmailResponse,
+      confirmation_email_sent: !!confirmationEmailResponse
+    }, true);
+
     console.log("Contact form emails sent successfully:", {
       admin: adminEmailResponse,
-      confirmation: confirmationEmailResponse
+      confirmation: confirmationEmailResponse,
+      from: { name, email, subject }
     });
 
     return new Response(JSON.stringify({ 
@@ -88,6 +233,14 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("Error in contact-form function:", error);
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const userAgent = req.headers.get('user-agent') || 'Unknown';
+    
+    await logSecurityEvent('contact_form_server_error', clientIP, userAgent, {
+      error: error.message,
+      stack: error.stack
+    }, false);
+    
     return new Response(
       JSON.stringify({ error: "Failed to send message. Please try again." }),
       {

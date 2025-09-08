@@ -68,3 +68,9 @@ verify_jwt = true
 
 [functions.get-invitation-details]
 verify_jwt = false
+
+[functions.admin-access]
+verify_jwt = true
+
+[functions.submit-project-inquiry]
+verify_jwt = false

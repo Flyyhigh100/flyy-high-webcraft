@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const ContactForm = () => {
   const { toast } = useToast();
@@ -26,23 +27,94 @@ const ContactForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Basic client-side validation
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Simulate form submission with a timeout
-    setTimeout(() => {
+    try {
+      // Call the contact-form edge function
+      const { data, error } = await supabase.functions.invoke('contact-form', {
+        body: {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject,
+          message: formData.message.trim(),
+          company: formData.company.trim() || undefined
+        }
+      });
+
+      if (error) {
+        console.error("Contact form error:", error);
+        
+        // Handle specific error cases
+        if (error.message?.includes('Too many attempts') || error.message?.includes('rate limit')) {
+          toast({
+            title: "Too Many Requests",
+            description: "Please wait a moment before sending another message.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Unable to send your message. Please try again or contact us directly.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      if (data?.success) {
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for reaching out. We'll get back to you shortly.",
+        });
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          company: '',
+          subject: '',
+          message: '',
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Unable to send your message. Please try again.",
+          variant: "destructive",
+        });
+      }
+      
+    } catch (err) {
+      console.error("Contact form network error:", err);
       toast({
-        title: "Message sent!",
-        description: "Thank you for reaching out. We'll get back to you shortly.",
+        title: "Network Error",
+        description: "Unable to connect to the server. Please check your connection and try again.",
+        variant: "destructive",
       });
-      setFormData({
-        name: '',
-        email: '',
-        company: '',
-        subject: '',
-        message: '',
-      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
