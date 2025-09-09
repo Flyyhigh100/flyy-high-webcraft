@@ -162,14 +162,19 @@ const Portfolio = () => {
                       </div>
                     </div>
                     
-                    <a 
-                      href={project.websiteUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center bg-flyy-600 text-white px-6 py-3 rounded-md hover:bg-flyy-700 transition-colors w-full md:w-auto"
+                    <Button 
+                      asChild
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 w-full md:w-auto"
                     >
-                      Visit Live Website <ExternalLink className="ml-2 w-4 h-4" />
-                    </a>
+                      <a 
+                        href={project.websiteUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center"
+                      >
+                        View Website <ExternalLink className="ml-2 w-4 h-4" />
+                      </a>
+                    </Button>
                   </div>
                 </div>
               </div>
