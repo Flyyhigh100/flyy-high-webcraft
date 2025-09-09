@@ -112,7 +112,7 @@ const Portfolio = () => {
       
       <div className="section bg-white">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {caseStudies.map((project, index) => (
               <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-lg border border-gray-100">
                 <div className="bg-gray-100 border-b border-gray-300 p-2 flex items-center">
@@ -122,8 +122,8 @@ const Portfolio = () => {
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2">
-                  <div className="h-80 md:h-96 overflow-hidden bg-gray-50 flex items-center justify-center p-4">
+                <div className="flex flex-col">
+                  <div className="h-64 overflow-hidden bg-gray-50 flex items-center justify-center p-4">
                     {imageErrors[project.id] ? (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                         <div className="text-center p-8">
@@ -143,19 +143,19 @@ const Portfolio = () => {
                       />
                     )}
                   </div>
-                  <div className="p-8">
+                  <div className="p-6">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-flyy-600 text-sm font-medium">{project.category}</span>
                       <span className="text-gray-500 text-sm">Client: {project.client}</span>
                     </div>
-                    <h3 className="text-2xl font-bold mb-3">{project.title}</h3>
-                    <p className="text-gray-600 mb-6">{project.description}</p>
+                    <h3 className="text-xl font-bold mb-3">{project.title}</h3>
+                    <p className="text-gray-600 mb-4 text-sm">{project.description}</p>
                     
-                    <div className="mb-6">
-                      <h4 className="font-medium text-lg mb-2">Technologies:</h4>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mb-4">
+                      <h4 className="font-medium text-sm mb-2">Technologies:</h4>
+                      <div className="flex flex-wrap gap-1">
                         {project.technologies.map((tech, index) => (
-                          <span key={index} className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full">
+                          <span key={index} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
                             {tech}
                           </span>
                         ))}
@@ -164,7 +164,7 @@ const Portfolio = () => {
                     
                     <Button 
                       asChild
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 w-full md:w-auto"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 w-full text-sm"
                     >
                       <a 
                         href={project.websiteUrl} 
@@ -172,7 +172,7 @@ const Portfolio = () => {
                         rel="noopener noreferrer"
                         className="flex items-center justify-center"
                       >
-                        View Website <ExternalLink className="ml-2 w-4 h-4" />
+                        View Website <ExternalLink className="ml-2 w-3 h-3" />
                       </a>
                     </Button>
                   </div>
