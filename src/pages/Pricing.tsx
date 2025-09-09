@@ -17,7 +17,7 @@ const Pricing = () => {
     },
     {
       question: "How long does website development take?",
-      answer: "Delivery times vary by package: Starter (48 hours), Business (5 days), Premium (10 days). We work efficiently while ensuring quality and your satisfaction with the final product."
+      answer: "Development timelines are discussed and agreed upon during the project consultation. We work efficiently while ensuring quality and your satisfaction with the final product."
     },
     {
       question: "What's included in the hosting plans?",
