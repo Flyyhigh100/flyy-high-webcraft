@@ -20,7 +20,7 @@ const GetStarted = () => {
           
           <div className="text-center mt-8">
             <p className="text-sm text-muted-foreground">
-              Have questions? <a href="/contact" className="text-primary hover:underline">Contact us directly</a> or call us at (555) 123-4567
+              Have questions? <a href="/contact" className="text-primary hover:underline">Contact us directly</a>
             </p>
           </div>
         </div>
