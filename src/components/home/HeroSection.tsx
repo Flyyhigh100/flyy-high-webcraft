@@ -19,7 +19,7 @@ const HeroSection = () => {
               Custom Websites Built for Success
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 mx-auto max-w-2xl">
-              Professional websites designed to represent you perfectly and achieve your goals.
+              Professional websites designed to achieve your goals.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Button asChild className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
