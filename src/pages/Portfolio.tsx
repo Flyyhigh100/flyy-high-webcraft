@@ -47,13 +47,13 @@ const caseStudies = [
   },
   {
     id: 5,
-    title: "Shys Luxury Hairstyles",
-    client: "Beauty Services",
-    category: "Beauty & Luxury Services Website",
-    description: "Elegant website for premium hairstyling services, featuring sophisticated design with gold accents and luxury branding to attract discerning clientele.",
-    imageUrl: "/lovable-uploads/455e111d-d86f-4217-893b-fd46bc580648.png",
-    websiteUrl: "https://shysluxuryhairstyles.com/",
-    technologies: ["React", "Booking System", "Luxury Design", "Service Showcase"]
+    title: "Across The King's River",
+    client: "Spiritual & Cultural",
+    category: "Spiritual & Cultural Platform",
+    description: "Inspirational website merging African wisdom traditions with modern spiritual growth, featuring books, meditations, and cultural storytelling to empower personal transformation.",
+    imageUrl: "/lovable-uploads/ba8be40b-5e1c-47c8-a4bf-6b416c87fad8.png",
+    websiteUrl: "https://acrossthekingsriver.com/",
+    technologies: ["React", "Content Management", "Cultural Design", "Spiritual Resources"]
   },
   {
     id: 6,
