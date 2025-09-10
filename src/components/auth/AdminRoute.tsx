@@ -19,7 +19,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
 
   useEffect(() => {
     console.log("AdminRoute: Starting admin access check");
-    console.log("Current auth state - isAdmin:", isAdmin, "User:", user?.email);
+    console.log("Current auth state - User:", user?.email);
     
     const verifyAccess = async () => {
       setIsCheckingAccess(true);
@@ -27,62 +27,81 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
       // First check if user is authenticated
       if (!isLoading && !user) {
         console.log("AdminRoute: No user found, redirecting to login");
+        // Log failed admin access attempt
+        try {
+          await supabase.from('security_logs').insert({
+            event_type: 'admin_access_denied',
+            details: { reason: 'not_authenticated', ip: 'unknown' },
+            success: false
+          });
+        } catch (e) {
+          console.error('Failed to log security event:', e);
+        }
         navigate('/login', { replace: true });
         return;
       }
       
       console.log(`AdminRoute: User authenticated: ${user?.email}`);
       
-      // Direct database check - most reliable
+      // Use only the secure is_admin RPC function for verification
       if (user) {
         try {
-          // Email-based admin check removed for security
-          
-          // Method 2: Query the profile directly
-          console.log('AdminRoute: Querying profile for user:', user.id);
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+          console.log('AdminRoute: Checking admin status via secure RPC');
+          const { data: isAdminResult, error } = await supabase
+            .rpc('is_admin', { _user_id: user.id });
             
           if (error) {
-            console.error('Error checking profile:', error);
-            console.error('Auth session during error:', await supabase.auth.getSession());
-            // Don't fail here, try other methods
-          } else {
-            console.log('AdminRoute: Profile query result:', data);
+            console.error('Error checking admin status:', error);
+            // Log failed admin verification
+            try {
+              await supabase.from('security_logs').insert({
+                event_type: 'admin_verification_error',
+                details: { error: error.message, user_id: user.id },
+                success: false
+              });
+            } catch (e) {
+              console.error('Failed to log security event:', e);
+            }
+            
+            toast({
+              title: "Error",
+              description: "Failed to verify admin access",
+              variant: "destructive",
+            });
+            navigate(redirectPath, { replace: true });
+            return;
           }
           
-          if (data && data.role === 'admin') {
-            console.log('AdminRoute: Admin access granted via database role');
+          if (isAdminResult) {
+            console.log('AdminRoute: Admin access granted');
+            // Log successful admin access
+            try {
+              await supabase.from('security_logs').insert({
+                event_type: 'admin_access_granted',
+                details: { user_id: user.id, email: user.email },
+                success: true
+              });
+            } catch (e) {
+              console.error('Failed to log security event:', e);
+            }
+            
             setHasAdminAccess(true);
             setIsCheckingAccess(false);
             return;
           }
           
-          // Method 3: Check isAdmin state
-          if (isAdmin) {
-            console.log('AdminRoute: Admin access granted via AuthContext isAdmin state');
-            setHasAdminAccess(true);
-            setIsCheckingAccess(false);
-            return;
+          // Access denied - log and redirect
+          console.log('AdminRoute: Admin access denied - insufficient privileges');
+          try {
+            await supabase.from('security_logs').insert({
+              event_type: 'admin_access_denied',
+              details: { reason: 'insufficient_privileges', user_id: user.id, email: user.email },
+              success: false
+            });
+          } catch (e) {
+            console.error('Failed to log security event:', e);
           }
           
-          // Method 4: Force a fresh check of admin status
-          const refreshedAdminStatus = await checkAdminStatus();
-          console.log('AdminRoute: Refreshed admin status check:', refreshedAdminStatus);
-          if (refreshedAdminStatus) {
-            console.log('AdminRoute: Admin access granted via refreshed check');
-            setHasAdminAccess(true);
-            setIsCheckingAccess(false);
-            return;
-          }
-          
-          // localStorage-based admin fallback removed for security
-          
-          // If all checks fail, redirect
-          console.log('AdminRoute: No admin access confirmed, redirecting');
           toast({
             title: "Access Denied",
             description: "You don't have admin privileges to access this page",
@@ -91,6 +110,17 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
           navigate(redirectPath, { replace: true });
         } catch (error) {
           console.error('Error verifying admin status:', error);
+          // Log security error
+          try {
+            await supabase.from('security_logs').insert({
+              event_type: 'admin_verification_error',
+              details: { error: error.message, user_id: user.id },
+              success: false
+            });
+          } catch (e) {
+            console.error('Failed to log security event:', e);
+          }
+          
           toast({
             title: "Error",
             description: "Failed to verify admin access",
@@ -104,7 +134,7 @@ export function AdminRoute({ redirectPath = '/dashboard' }: AdminRouteProps) {
     };
     
     verifyAccess();
-  }, [user, isLoading, navigate, redirectPath, checkAdminStatus, isAdmin, toast]);
+  }, [user, isLoading, navigate, redirectPath, toast]);
 
   if (isLoading || isCheckingAccess) {
     return (
