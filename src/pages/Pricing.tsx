@@ -33,7 +33,7 @@ const Pricing = () => {
     },
     {
       question: "What happens after my website is built?",
-      answer: "After delivery, you own your website completely. We offer ongoing hosting services to keep your site online and running smoothly. You can also choose to host elsewhere - we'll help with the transition."
+      answer: "After delivery, you own your website completely. We offer ongoing hosting services to keep your site online and running smoothly."
     },
   ];
 
