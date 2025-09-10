@@ -5,14 +5,6 @@ import CTASection from '@/components/home/CTASection';
 const Services = () => {
   return (
     <>
-      <div className="bg-secondary/30 py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-4">Our Services</h1>
-          <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto">
-            We provide end-to-end web development solutions tailored to your business needs.
-          </p>
-        </div>
-      </div>
       
       <ServicesSection />
       
