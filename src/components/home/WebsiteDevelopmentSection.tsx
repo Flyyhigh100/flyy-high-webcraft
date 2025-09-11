@@ -92,12 +92,12 @@ const WebsiteDevelopmentSection = () => {
               <div className="p-6 md:p-8">
                 <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
                 <p className="text-muted-foreground mb-6">{pkg.description}</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold">
-                    {pkg.startingAt ? "Starting at " : ""}${pkg.price}
-                  </span>
-                  <span className="text-muted-foreground ml-2">
+                <div className="mb-6 flex justify-between items-baseline">
+                  <span className="text-muted-foreground">
                     {pkg.startingAt ? "starting at" : "one-time"}
+                  </span>
+                  <span className="text-4xl font-bold">
+                    ${pkg.price}
                   </span>
                 </div>
                 <Button 
