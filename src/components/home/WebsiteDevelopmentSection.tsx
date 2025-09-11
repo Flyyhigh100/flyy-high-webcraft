@@ -8,14 +8,15 @@ const WebsiteDevelopmentSection = () => {
   const packages = [
     {
       name: "Starter Package",
-      description: "Perfect for small businesses and personal websites",
-      price: 150,
+      description: "Personal brands & small businesses",
+      price: 200,
       features: [
-        "1-3 pages (Home, About, Contact)",
-        "Mobile responsive design",
+        "1–3 pages",
+        "Mobile-responsive design",
+        "Basic SEO setup",
         "Contact form integration",
-        "Basic SEO optimization",
         "Social media links",
+        "SSL + hosting setup",
         "1 revision round",
       ],
       featured: false,
@@ -23,33 +24,34 @@ const WebsiteDevelopmentSection = () => {
     },
     {
       name: "Business Package",
-      description: "Ideal for growing businesses and service providers",
-      price: 350,
+      description: "Growing businesses & service providers",
+      price: 500,
       features: [
-        "5-8 professional pages",
-        "Custom design & branding",
-        "Advanced contact forms",
-        "E-commerce ready setup",
+        "5–8 professional pages",
+        "Advanced forms",
+        "E-commerce ready",
         "Google Analytics integration",
-        "Advanced SEO optimization",
+        "Enhanced SEO",
         "2 revision rounds",
+        "15 days of support",
       ],
       featured: true,
       cta: "Get Started",
     },
     {
       name: "Premium Package",
-      description: "Full web application with custom functionality",
-      price: 750,
+      description: "Startups & businesses needing custom apps",
+      price: 1200,
+      startingAt: true,
       features: [
-        "Unlimited pages",
-        "Custom web application",
+        "Up to 20 custom pages",
         "Database integration",
-        "User authentication system",
-        "Advanced functionality",
+        "User authentication & dashboards",
         "API integrations",
+        "Advanced functionality",
+        "SEO + performance optimization",
         "3 revision rounds",
-        "30-day support included",
+        "60 days of support",
       ],
       featured: false,
       cta: "Get Started",
@@ -92,7 +94,7 @@ const WebsiteDevelopmentSection = () => {
                 <p className="text-muted-foreground mb-6">{pkg.description}</p>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">
-                    ${pkg.price}
+                    {pkg.startingAt ? "Starting at " : ""}${pkg.price}
                   </span>
                   <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
