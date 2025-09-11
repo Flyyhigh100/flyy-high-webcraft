@@ -96,7 +96,9 @@ const WebsiteDevelopmentSection = () => {
                   <span className="text-4xl font-bold">
                     {pkg.startingAt ? "Starting at " : ""}${pkg.price}
                   </span>
-                  <span className="text-muted-foreground ml-2">one-time</span>
+                  <span className="text-muted-foreground ml-2">
+                    {pkg.startingAt ? "starting at" : "one-time"}
+                  </span>
                 </div>
                 <Button 
                   className={`w-full mb-8 ${pkg.featured ? "bg-primary hover:bg-primary/90" : ""}`}
