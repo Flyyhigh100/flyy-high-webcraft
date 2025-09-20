@@ -87,7 +87,7 @@ const Pricing = () => {
                 </div>
                 <div className="text-center">
                   <div className="font-semibold text-foreground mb-2">3. Collaborative Build</div>
-                  <p className="text-sm text-muted-foreground">Regular check-ins and revisions until it's perfect</p>
+                  <p className="text-sm text-muted-foreground">We work together to build exactly what you need</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
