@@ -1,7 +1,6 @@
 
 import React from 'react';
 import PricingSection from '@/components/home/PricingSection';
-import WebsiteDevelopmentSection from '@/components/home/WebsiteDevelopmentSection';
 import { DomainSearchSection } from '@/components/home/DomainSearchSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Star, Zap, Heart } from 'lucide-react';
@@ -12,28 +11,32 @@ const Pricing = () => {
   // FAQ items
   const faqs = [
     {
-      question: "What's included in website development packages?",
-      answer: "Each package includes professional design, mobile responsive layout, SEO optimization, and revision rounds. Higher tiers add more pages, custom functionality, database integration, and extended support."
+      question: "How do you determine project pricing?",
+      answer: "Every project is unique, so we create custom quotes based on your specific needs, timeline, and budget. After our free consultation, we'll provide a detailed proposal with transparent pricing and clear deliverables."
     },
     {
-      question: "How long does website development take?",
-      answer: "Development timelines are discussed and agreed upon during the project consultation. We work efficiently while ensuring quality and your satisfaction with the final product."
+      question: "What's the consultation process like?",
+      answer: "We start with a free discovery call to understand your goals, target audience, and requirements. We'll discuss your budget range and create a tailored solution that maximizes value within your parameters."
+    },
+    {
+      question: "Can you work with smaller budgets?",
+      answer: "Absolutely! We believe every business deserves a great web presence. We'll find creative solutions to deliver maximum impact within your budget, whether it's a simple landing page or a phased development approach."
     },
     {
       question: "What's included in the hosting plans?",
       answer: "Our hosting plans include modern deployment infrastructure, cloud database integration, automatic backups, SSL certificates, custom domain support, website monitoring, and email support."
     },
     {
-      question: "Can I get a custom solution outside these packages?",
-      answer: "Absolutely! We work with businesses of all sizes and requirements. Whether you need something simpler than our Starter package or more complex than Premium, we'll create a custom solution that fits your budget and needs."
+      question: "How long does development take?",
+      answer: "Timeline depends on project scope and complexity. During our consultation, we'll provide realistic timelines with milestone dates. We prioritize quality while working efficiently to meet your launch goals."
     },
     {
       question: "Do you offer payment plans?",
-      answer: "Yes, for larger projects we offer flexible payment options. Contact us to discuss payment plans that work for your budget, including milestone-based payments for development projects."
+      answer: "Yes, for larger projects we offer flexible payment options including milestone-based payments and extended payment plans. We'll work with you to find a payment structure that fits your cash flow."
     },
     {
       question: "What happens after my website is built?",
-      answer: "After delivery, you own your website completely. We offer ongoing hosting services to keep your site online and running smoothly."
+      answer: "You own your website completely. We provide training on how to manage it, offer ongoing hosting services, and are available for future updates or enhancements as your business grows."
     },
   ];
 
@@ -68,20 +71,34 @@ const Pricing = () => {
                 <Zap className="h-6 w-6 text-primary" />
                 <Star className="h-6 w-6 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold mb-4">Every Business is Unique</h2>
-              <p className="text-muted-foreground text-lg mb-4">
-                Whether you need a simple $150 landing page or a complex enterprise solution, we work with you to find the perfect fit. 
-                <span className="font-semibold text-foreground"> No project is too small or too large</span> - we'll create a custom solution that matches your budget and requirements.
+              <h2 className="text-2xl font-bold mb-4">How We Work With You</h2>
+              <p className="text-muted-foreground text-lg mb-6">
+                Every project starts with a <span className="font-semibold text-foreground">free consultation</span> where we understand your needs, goals, and budget. 
+                We then create a custom proposal that fits perfectly with what you want to achieve.
               </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="text-center">
+                  <div className="font-semibold text-foreground mb-2">1. Discovery Call</div>
+                  <p className="text-sm text-muted-foreground">We discuss your vision, requirements, and budget</p>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-foreground mb-2">2. Custom Proposal</div>
+                  <p className="text-sm text-muted-foreground">Tailored solution with clear timeline and pricing</p>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-foreground mb-2">3. Collaborative Build</div>
+                  <p className="text-sm text-muted-foreground">Regular check-ins and revisions until it's perfect</p>
+                </div>
+              </div>
               <p className="text-sm text-muted-foreground">
-                💡 All our pricing is flexible. Need something different? Let's talk!
+                💡 <span className="font-semibold">Any budget works</span> - from simple landing pages to complex applications
               </p>
             </div>
           </div>
         </div>
       </div>
       
-      <WebsiteDevelopmentSection />
+      
       
       <PricingSection />
       
