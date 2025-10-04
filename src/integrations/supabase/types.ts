@@ -240,6 +240,13 @@ export type Database = {
             foreignKeyName: "fk_payments_user_id"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "admin_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_payments_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -255,7 +262,6 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
-          email: string | null
           id: string
           marketing_opt_in: boolean | null
           marketing_updated_at: string | null
@@ -265,7 +271,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          email?: string | null
           id: string
           marketing_opt_in?: boolean | null
           marketing_updated_at?: string | null
@@ -275,7 +280,6 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          email?: string | null
           id?: string
           marketing_opt_in?: boolean | null
           marketing_updated_at?: string | null
@@ -589,6 +593,13 @@ export type Database = {
             foreignKeyName: "fk_websites_user_id"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "admin_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_websites_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -596,9 +607,28 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_profiles_view: {
+        Row: {
+          auth_created_at: string | null
+          created_at: string | null
+          email: string | null
+          email_confirmed_at: string | null
+          id: string | null
+          last_sign_in_at: string | null
+          marketing_opt_in: boolean | null
+          marketing_updated_at: string | null
+          role: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      check_profile_query_rate_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       cleanup_client_data: {
         Args: { client_email_param?: string; website_id_param?: string }
         Returns: Json
@@ -612,6 +642,27 @@ export type Database = {
         Returns: {
           month: string
           total: number
+        }[]
+      }
+      get_own_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      get_user_email_by_id: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      get_user_emails_bulk: {
+        Args: { user_ids: string[] }
+        Returns: {
+          email: string
+          user_id: string
         }[]
       }
       get_user_invitation_status: {
