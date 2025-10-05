@@ -596,6 +596,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_user_access_invitation: {
+        Args: { invitation_id: string }
+        Returns: boolean
+      }
       check_invitation_query_rate_limit: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -659,6 +663,10 @@ export type Database = {
       }
       is_admin: {
         Args: { _user_id: string }
+        Returns: boolean
+      }
+      is_user_email_verified: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       table_exists: {
