@@ -596,6 +596,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_invitation_query_rate_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_profile_query_rate_limit: {
         Args: Record<PropertyKey, never>
         Returns: boolean
