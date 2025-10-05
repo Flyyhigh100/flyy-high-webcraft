@@ -240,13 +240,6 @@ export type Database = {
             foreignKeyName: "fk_payments_user_id"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "admin_profiles_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_payments_user_id"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -593,13 +586,6 @@ export type Database = {
             foreignKeyName: "fk_websites_user_id"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "admin_profiles_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_websites_user_id"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -607,22 +593,7 @@ export type Database = {
       }
     }
     Views: {
-      admin_profiles_view: {
-        Row: {
-          auth_created_at: string | null
-          created_at: string | null
-          email: string | null
-          email_confirmed_at: string | null
-          id: string | null
-          last_sign_in_at: string | null
-          marketing_opt_in: boolean | null
-          marketing_updated_at: string | null
-          role: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       check_profile_query_rate_limit: {

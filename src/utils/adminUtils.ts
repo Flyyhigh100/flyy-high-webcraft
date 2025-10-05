@@ -82,18 +82,21 @@ export const fetchCompletedPayments = async (): Promise<Payment[]> => {
     throw paymentsError;
   }
 
-  // Then fetch profiles to get email addresses
-  const { data: profilesData, error: profilesError } = await supabase
-    .from('profiles')
-    .select('user_id, email');
+  // Get user IDs and fetch emails using the secure function
+  const userIds = (paymentsData || []).map(p => p.user_id);
   
-  if (profilesError) {
-    console.error('Error fetching profiles:', profilesError);
-    throw profilesError;
+  let emailMap = new Map();
+  if (userIds.length > 0) {
+    const { data: emailsData, error: emailsError } = await supabase
+      .rpc('get_user_emails_bulk', { user_ids: userIds });
+    
+    if (emailsError) {
+      console.error('Error fetching emails:', emailsError);
+      // Continue without emails rather than throwing
+    } else {
+      emailMap = new Map((emailsData || []).map((e: any) => [e.user_id, e.email]));
+    }
   }
-
-  // Create a map of user_id to email for quick lookup
-  const emailMap = new Map(profilesData?.map(profile => [profile.user_id, profile.email]) || []);
   
   // Transform the data to match the Payment interface
   return (paymentsData || []).map(payment => ({
@@ -125,18 +128,21 @@ export const fetchUpcomingPayments = async (): Promise<Payment[]> => {
     throw websitesError;
   }
 
-  // Then fetch profiles to get email addresses
-  const { data: profilesData, error: profilesError } = await supabase
-    .from('profiles')
-    .select('user_id, email');
+  // Get user IDs and fetch emails using the secure function
+  const userIds = (websitesData || []).map(w => w.user_id).filter(Boolean);
   
-  if (profilesError) {
-    console.error('Error fetching profiles:', profilesError);
-    throw profilesError;
+  let emailMap = new Map();
+  if (userIds.length > 0) {
+    const { data: emailsData, error: emailsError } = await supabase
+      .rpc('get_user_emails_bulk', { user_ids: userIds });
+    
+    if (emailsError) {
+      console.error('Error fetching emails:', emailsError);
+      // Continue without emails rather than throwing
+    } else {
+      emailMap = new Map((emailsData || []).map((e: any) => [e.user_id, e.email]));
+    }
   }
-
-  // Create a map of user_id to email for quick lookup
-  const emailMap = new Map(profilesData?.map(profile => [profile.user_id, profile.email]) || []);
   
   // Transform the data to match the Payment interface
   return (websitesData || []).map(website => ({

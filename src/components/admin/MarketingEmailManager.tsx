@@ -35,25 +35,61 @@ export const MarketingEmailManager = () => {
   const fetchMarketingSubscribers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // First get profiles with marketing opt-in
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, marketing_opt_in, marketing_updated_at, created_at')
+        .select('id, marketing_opt_in, marketing_updated_at, created_at')
         .eq('marketing_opt_in', true)
-        .not('email', 'is', null)
         .order('marketing_updated_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching subscribers:', error);
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
         toast({
           title: "Error",
           description: "Failed to load marketing subscribers",
           variant: "destructive",
         });
-      } else {
-        setSubscribers(data || []);
+        return;
       }
+
+      // Get emails using the secure function
+      const userIds = (profilesData || []).map(p => p.id);
+      if (userIds.length === 0) {
+        setSubscribers([]);
+        return;
+      }
+
+      const { data: emailsData, error: emailsError } = await supabase
+        .rpc('get_user_emails_bulk', { user_ids: userIds });
+
+      if (emailsError) {
+        console.error('Error fetching emails:', emailsError);
+        toast({
+          title: "Error",
+          description: "Failed to load subscriber emails",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Combine profile data with emails
+      const emailMap = new Map((emailsData || []).map((e: any) => [e.user_id, e.email]));
+      const subscribersWithEmails = (profilesData || [])
+        .map(profile => ({
+          ...profile,
+          email: emailMap.get(profile.id) || ''
+        }))
+        .filter(s => s.email); // Only include profiles with emails
+
+      setSubscribers(subscribersWithEmails);
     } catch (error) {
       console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load marketing subscribers",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
