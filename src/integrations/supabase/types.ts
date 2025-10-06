@@ -564,8 +564,11 @@ export type Database = {
           auto_renew: boolean | null
           billing_cycle: string | null
           created_at: string | null
+          domain_live_date: string | null
+          grace_period_days: number | null
           grace_period_end_date: string | null
           id: string
+          initial_payment_received: boolean | null
           last_payment_reminder_sent: string | null
           name: string
           next_payment_amount: number | null
@@ -582,8 +585,11 @@ export type Database = {
           auto_renew?: boolean | null
           billing_cycle?: string | null
           created_at?: string | null
+          domain_live_date?: string | null
+          grace_period_days?: number | null
           grace_period_end_date?: string | null
           id?: string
+          initial_payment_received?: boolean | null
           last_payment_reminder_sent?: string | null
           name: string
           next_payment_amount?: number | null
@@ -600,8 +606,11 @@ export type Database = {
           auto_renew?: boolean | null
           billing_cycle?: string | null
           created_at?: string | null
+          domain_live_date?: string | null
+          grace_period_days?: number | null
           grace_period_end_date?: string | null
           id?: string
+          initial_payment_received?: boolean | null
           last_payment_reminder_sent?: string | null
           name?: string
           next_payment_amount?: number | null

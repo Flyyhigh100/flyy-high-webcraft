@@ -156,22 +156,54 @@ serve(async (req) => {
 
     // Update website record with subscription details and next payment info
     if (siteId) {
+      // Check if this is the first payment
+      const { data: websiteData } = await db
+        .from('websites')
+        .select('initial_payment_received')
+        .eq('id', siteId)
+        .single();
+      
+      const isFirstPayment = !websiteData?.initial_payment_received;
       const nextPaymentDate = new Date(sub.current_period_end * 1000);
+      
+      // Calculate next payment date based on actual payment date for first payment
+      let calculatedNextPaymentDate = nextPaymentDate;
+      if (isFirstPayment) {
+        const now = new Date();
+        calculatedNextPaymentDate = new Date(now);
+        if (billingCycle === 'monthly') {
+          calculatedNextPaymentDate.setMonth(calculatedNextPaymentDate.getMonth() + 1);
+        } else {
+          calculatedNextPaymentDate.setFullYear(calculatedNextPaymentDate.getFullYear() + 1);
+        }
+        logStep('First payment detected, calculating next payment date from payment date', { 
+          paymentDate: now.toISOString(), 
+          calculatedNextPaymentDate: calculatedNextPaymentDate.toISOString() 
+        });
+      }
+      
       const { error: websiteUpdateErr } = await db
         .from('websites')
         .update({
           stripe_subscription_id: sub.id,
           billing_cycle: billingCycle,
-          next_payment_date: nextPaymentDate.toISOString(),
+          next_payment_date: calculatedNextPaymentDate.toISOString(),
           next_payment_amount: unitAmount / 100, // Convert cents to dollars for display
-          payment_status: 'current'
+          payment_status: 'current',
+          initial_payment_received: true,
+          domain_live_date: null // Clear any grace period when payment is received
         })
         .eq('id', siteId);
       
       if (websiteUpdateErr) {
         logStep('Warning: Failed to update website record', { error: websiteUpdateErr });
       } else {
-        logStep('Updated website with subscription details', { siteId, billingCycle, nextPaymentDate });
+        logStep('Updated website with subscription details', { 
+          siteId, 
+          billingCycle, 
+          nextPaymentDate: calculatedNextPaymentDate.toISOString(),
+          isFirstPayment 
+        });
       }
     }
 

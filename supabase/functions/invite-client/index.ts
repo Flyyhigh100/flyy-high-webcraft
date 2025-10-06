@@ -19,7 +19,6 @@ interface InviteClientRequest {
   websiteUrl: string;
   planType: string;
   billingCycle?: 'monthly' | 'yearly';
-  nextPaymentDate?: string;
   nextPaymentAmount?: number;
   siteId: string;
 }
@@ -61,8 +60,8 @@ serve(async (req) => {
       throw new Error("Unauthorized: Admin access required");
     }
 
-    const { email, clientName, websiteName, websiteUrl, planType, billingCycle, nextPaymentDate, nextPaymentAmount, siteId }: InviteClientRequest = await req.json();
-    logStep("Processing invite request", { email, clientName, websiteName, billingCycle, nextPaymentDate, nextPaymentAmount });
+    const { email, clientName, websiteName, websiteUrl, planType, billingCycle, nextPaymentAmount, siteId }: InviteClientRequest = await req.json();
+    logStep("Processing invite request", { email, clientName, websiteName, billingCycle, nextPaymentAmount });
 
     // Generate invitation token
     const inviteToken = crypto.randomUUID();
@@ -117,7 +116,6 @@ serve(async (req) => {
         website_name: websiteName,
         website_url: websiteUrl,
         plan_type: planType,
-        next_payment_date: nextPaymentDate,
         next_payment_amount: nextPaymentAmount,
         site_id: siteId,
         invite_token: inviteToken,

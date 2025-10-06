@@ -7,8 +7,9 @@ import { ExternalLink, Link as LinkIcon, Mail, AlertTriangle, Trash2 } from "luc
 import { ClientWebsite } from "@/types/admin";
 import { getPlanBadgeColor } from './clientWebsiteUtils';
 import { getPaymentStatusColor, getPaymentStatusLabel, sendPaymentReminder } from '@/utils/paymentReminderUtils';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { MarkDomainLiveModal } from './MarkDomainLiveModal';
 
 interface ClientWebsiteTableProps {
   clients: ClientWebsite[];
@@ -93,6 +94,11 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
   };
 
   const getReminderButtonType = (paymentStatus: string) => {
+    // Don't show reminder button for pending initial payment
+    if (paymentStatus === 'pending_initial_payment') {
+      return null;
+    }
+    
     switch (paymentStatus) {
       case 'overdue_3d':
         return '3_day';
@@ -152,14 +158,25 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
               </TableCell>
               <TableCell>
                 <Badge className={getPaymentStatusColor(client.paymentStatus || 'current')}>
-                  {getPaymentStatusLabel(client.paymentStatus || 'current')}
+                  {client.paymentStatus === 'pending_initial_payment' ? '⏳ Awaiting First Payment' : getPaymentStatusLabel(client.paymentStatus || 'current')}
                 </Badge>
+                {client.paymentStatus === 'pending_initial_payment' && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Billing starts on payment
+                  </div>
+                )}
               </TableCell>
               <TableCell>
-                <div className="text-sm">
-                  <div>{new Date(client.nextPaymentDate || "").toLocaleDateString()}</div>
-                  <div className="text-gray-500">${client.nextPaymentAmount.toFixed(2)}</div>
-                </div>
+                {client.paymentStatus === 'pending_initial_payment' ? (
+                  <div className="text-sm text-muted-foreground">
+                    Pending
+                  </div>
+                ) : (
+                  <div className="text-sm">
+                    <div>{new Date(client.nextPaymentDate || "").toLocaleDateString()}</div>
+                    <div className="text-gray-500">${client.nextPaymentAmount.toFixed(2)}</div>
+                  </div>
+                )}
               </TableCell>
               <TableCell>
                 <div className="flex gap-2 flex-wrap">
@@ -198,6 +215,11 @@ export function ClientWebsiteTable({ clients, onViewDetails, onRefresh }: Client
                       <span>Send Reminder</span>
                     </Button>
                   )}
+                  <MarkDomainLiveModal 
+                    websiteId={client.id}
+                    websiteName={client.name}
+                    onSuccess={onRefresh}
+                  />
                   <Button 
                     variant="outline" 
                     size="sm"

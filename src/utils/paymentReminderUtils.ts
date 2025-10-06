@@ -77,6 +77,8 @@ export const updatePaymentStatuses = async () => {
 
 export const getPaymentStatusColor = (status: string) => {
   switch (status) {
+    case 'pending_initial_payment':
+      return 'bg-blue-100 text-blue-800';
     case 'current':
       return 'bg-green-100 text-green-800';
     case 'overdue_3d':

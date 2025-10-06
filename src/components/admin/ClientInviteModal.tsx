@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ClientInviteModalProps {
   onRefresh?: () => void;
@@ -22,7 +23,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     clientName: '',
     websiteUrl: '',
     plan: 'basic-monthly', // Combined format: planType-billingCycle
-    nextPaymentDate: new Date().toISOString().split('T')[0],
     nextPaymentAmount: 15.00
   });
   const { toast } = useToast();
@@ -49,7 +49,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
       // Extract site name from URL for database storage
       const websiteName = formData.websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
       
-      // Create the website record with payment details
+      // Create the website record with payment details - no next_payment_date set
       const { data: websiteData, error: websiteError } = await supabase
         .from('websites')
         .insert({
@@ -57,15 +57,16 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           url: formData.websiteUrl,
           plan_type: planType,
           billing_cycle: billingCycle,
-          next_payment_date: formData.nextPaymentDate,
-          next_payment_amount: formData.nextPaymentAmount
+          next_payment_amount: formData.nextPaymentAmount,
+          payment_status: 'pending_initial_payment',
+          initial_payment_received: false
         })
         .select()
         .single();
 
       if (websiteError) throw websiteError;
 
-      // Send invitation with payment details
+      // Send invitation without next_payment_date
       const { data, error } = await supabase.functions.invoke('invite-client', {
         body: {
           email: formData.email,
@@ -74,7 +75,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           websiteUrl: formData.websiteUrl,
           planType: planType,
           billingCycle: billingCycle,
-          nextPaymentDate: formData.nextPaymentDate,
           nextPaymentAmount: formData.nextPaymentAmount,
           siteId: websiteData.id
         }
@@ -84,7 +84,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
 
       toast({
         title: "Invitation Sent!",
-        description: `Client invitation has been sent to ${formData.email}`,
+        description: `Client invitation has been sent to ${formData.email}. Billing will start when they make their first payment.`,
       });
 
       setFormData({
@@ -92,7 +92,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         clientName: '',
         websiteUrl: '',
         plan: 'basic-monthly',
-        nextPaymentDate: new Date().toISOString().split('T')[0],
         nextPaymentAmount: 15.00
       });
       setOpen(false);
@@ -125,6 +124,13 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                The billing cycle will start when the client makes their first payment.
+              </AlertDescription>
+            </Alert>
+            
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">
                 Email
@@ -182,19 +188,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="nextPaymentDate" className="text-right">
-                Next Payment Date
-              </Label>
-              <Input
-                id="nextPaymentDate"
-                type="date"
-                value={formData.nextPaymentDate}
-                onChange={(e) => setFormData({ ...formData, nextPaymentDate: e.target.value })}
-                className="col-span-3"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="nextPaymentAmount" className="text-right">
                 Payment Amount
               </Label>
@@ -204,9 +197,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
                 step="0.01"
                 min="0"
                 value={formData.nextPaymentAmount}
-                onChange={(e) => setFormData({ ...formData, nextPaymentAmount: parseFloat(e.target.value) || 0 })}
-                className="col-span-3"
-                required
+                readOnly
+                className="col-span-3 bg-muted"
               />
             </div>
           </div>
