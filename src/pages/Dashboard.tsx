@@ -64,12 +64,25 @@ export default function Dashboard() {
         console.log("Dashboard: Payment success detected, verifying payment...", { sessionId });
         
         try {
-          const { data, error } = await supabase.functions.invoke('verify-payment', {
-            body: { session_id: sessionId }
+          const session = await supabase.auth.getSession();
+          console.log('[Dashboard] Calling verify-payment with session:', {
+            hasSession: !!session.data.session,
+            hasAccessToken: !!session.data.session?.access_token,
+            sessionId: sessionId
           });
+
+          const { data, error } = await supabase.functions.invoke('verify-payment', {
+            body: { session_id: sessionId },
+            headers: {
+              Authorization: `Bearer ${session.data.session?.access_token}`
+            }
+          });
+
+          console.log('[Dashboard] verify-payment response:', { data, error });
           
           if (error) {
             console.error("Payment verification failed:", error);
+            console.error("Full error details:", JSON.stringify(error, null, 2));
             toast({
               title: "Payment Verification Issue",
               description: "Your payment was processed, but verification failed. Please contact support if needed.",

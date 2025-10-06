@@ -151,8 +151,22 @@ serve(async (req) => {
 
     // Optional: we could also update websites/payment_status here if needed.
 
-    // Record successful payment in payments table
-    const paymentAmount = unitAmount / 100; // Convert cents to dollars
+    // Check if payment already recorded for this session to prevent duplicates
+    const { data: existingPayment } = await db
+      .from('payments')
+      .select('id')
+      .eq('stripe_session_id', sessionId)
+      .maybeSingle();
+
+    if (existingPayment) {
+      logStep("Payment already recorded for this session", { sessionId });
+      return new Response(JSON.stringify({ success: true, message: 'Payment already recorded' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // Record successful payment in payments table (amount in cents)
     
     // Try to get invoice information from the session
     let invoiceUrl = null;
@@ -183,7 +197,7 @@ serve(async (req) => {
       .insert({
         user_id: user.id,
         site_id: siteId,
-        amount: paymentAmount,
+        amount: unitAmount, // Store in cents (Stripe standard)
         status: 'completed',
         plan_type: plan || 'basic',
         method: 'stripe',
