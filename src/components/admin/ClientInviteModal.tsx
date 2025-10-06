@@ -22,22 +22,29 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     clientName: '',
     websiteUrl: '',
     planType: 'basic',
+    billingCycle: 'monthly' as 'monthly' | 'yearly',
     nextPaymentDate: new Date().toISOString().split('T')[0], // Today's date as default
     nextPaymentAmount: 15.00 // Default amount based on basic plan
   });
   const { toast } = useToast();
 
-  // Update payment amount when plan type changes
+  // Update payment amount when plan type or billing cycle changes
   const handlePlanTypeChange = (value: string) => {
+    updatePaymentAmount(value, formData.billingCycle);
+  };
+
+  const handleBillingCycleChange = (value: 'monthly' | 'yearly') => {
+    updatePaymentAmount(formData.planType, value);
+  };
+
+  const updatePaymentAmount = (planType: string, billingCycle: 'monthly' | 'yearly') => {
     let amount = 15.00;
-    switch (value) {
-      case 'pro':
-        amount = 30.00;
-        break;
-      default:
-        amount = 15.00;
+    if (billingCycle === 'yearly') {
+      amount = planType === 'pro' ? 240.00 : 120.00; // Yearly total
+    } else {
+      amount = planType === 'pro' ? 30.00 : 15.00; // Monthly
     }
-    setFormData({ ...formData, planType: value, nextPaymentAmount: amount });
+    setFormData({ ...formData, planType, billingCycle, nextPaymentAmount: amount });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,6 +62,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           name: websiteName,
           url: formData.websiteUrl,
           plan_type: formData.planType,
+          billing_cycle: formData.billingCycle,
           next_payment_date: formData.nextPaymentDate,
           next_payment_amount: formData.nextPaymentAmount
         })
@@ -71,6 +79,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           websiteName,
           websiteUrl: formData.websiteUrl,
           planType: formData.planType,
+          billingCycle: formData.billingCycle,
           nextPaymentDate: formData.nextPaymentDate,
           nextPaymentAmount: formData.nextPaymentAmount,
           siteId: websiteData.id
@@ -89,6 +98,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         clientName: '',
         websiteUrl: '',
         planType: 'basic',
+        billingCycle: 'monthly',
         nextPaymentDate: new Date().toISOString().split('T')[0],
         nextPaymentAmount: 15.00
       });
@@ -171,8 +181,22 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">Hosting Basic - $15/month</SelectItem>
-                  <SelectItem value="pro">Hosting Pro - $30/month</SelectItem>
+                  <SelectItem value="basic">Hosting Basic</SelectItem>
+                  <SelectItem value="pro">Hosting Pro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="billingCycle" className="text-right">
+                Billing Cycle
+              </Label>
+              <Select value={formData.billingCycle} onValueChange={handleBillingCycleChange}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly - ${formData.planType === 'pro' ? '30' : '15'}/month</SelectItem>
+                  <SelectItem value="yearly">Yearly - ${formData.planType === 'pro' ? '240' : '120'}/year (save 33%)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

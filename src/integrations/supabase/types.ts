@@ -562,6 +562,7 @@ export type Database = {
       websites: {
         Row: {
           auto_renew: boolean | null
+          billing_cycle: string | null
           created_at: string | null
           grace_period_end_date: string | null
           id: string
@@ -571,6 +572,7 @@ export type Database = {
           next_payment_date: string | null
           payment_status: string | null
           plan_type: string
+          stripe_subscription_id: string | null
           suspension_date: string | null
           updated_at: string | null
           url: string
@@ -578,6 +580,7 @@ export type Database = {
         }
         Insert: {
           auto_renew?: boolean | null
+          billing_cycle?: string | null
           created_at?: string | null
           grace_period_end_date?: string | null
           id?: string
@@ -587,6 +590,7 @@ export type Database = {
           next_payment_date?: string | null
           payment_status?: string | null
           plan_type: string
+          stripe_subscription_id?: string | null
           suspension_date?: string | null
           updated_at?: string | null
           url: string
@@ -594,6 +598,7 @@ export type Database = {
         }
         Update: {
           auto_renew?: boolean | null
+          billing_cycle?: string | null
           created_at?: string | null
           grace_period_end_date?: string | null
           id?: string
@@ -603,6 +608,7 @@ export type Database = {
           next_payment_date?: string | null
           payment_status?: string | null
           plan_type?: string
+          stripe_subscription_id?: string | null
           suspension_date?: string | null
           updated_at?: string | null
           url?: string

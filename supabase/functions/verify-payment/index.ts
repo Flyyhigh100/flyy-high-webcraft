@@ -77,6 +77,11 @@ serve(async (req) => {
     const currentPeriodStart = new Date(sub.current_period_start * 1000).toISOString();
     const currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
     const unitAmount = sub.items.data[0]?.price?.unit_amount ?? 0;
+    
+    // Determine billing cycle from Stripe interval
+    const priceInterval = sub.items.data[0]?.price?.recurring?.interval;
+    const billingCycle = priceInterval === 'year' ? 'yearly' : 'monthly';
+    logStep('Detected billing cycle', { interval: priceInterval, billingCycle });
 
     // Check for existing subscription with same Stripe subscription ID
     const { data: existing, error: existingErr } = await db
@@ -149,7 +154,26 @@ serve(async (req) => {
       logStep('Updated existing subscription record', { id: existing.id });
     }
 
-    // Optional: we could also update websites/payment_status here if needed.
+    // Update website record with subscription details and next payment info
+    if (siteId) {
+      const nextPaymentDate = new Date(sub.current_period_end * 1000);
+      const { error: websiteUpdateErr } = await db
+        .from('websites')
+        .update({
+          stripe_subscription_id: sub.id,
+          billing_cycle: billingCycle,
+          next_payment_date: nextPaymentDate.toISOString(),
+          next_payment_amount: unitAmount / 100, // Convert cents to dollars for display
+          payment_status: 'current'
+        })
+        .eq('id', siteId);
+      
+      if (websiteUpdateErr) {
+        logStep('Warning: Failed to update website record', { error: websiteUpdateErr });
+      } else {
+        logStep('Updated website with subscription details', { siteId, billingCycle, nextPaymentDate });
+      }
+    }
 
     // Check if payment already recorded for this session to prevent duplicates
     const { data: existingPayment } = await db

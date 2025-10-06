@@ -18,6 +18,7 @@ interface InviteClientRequest {
   websiteName: string;
   websiteUrl: string;
   planType: string;
+  billingCycle?: 'monthly' | 'yearly';
   nextPaymentDate?: string;
   nextPaymentAmount?: number;
   siteId: string;
@@ -60,8 +61,8 @@ serve(async (req) => {
       throw new Error("Unauthorized: Admin access required");
     }
 
-    const { email, clientName, websiteName, websiteUrl, planType, nextPaymentDate, nextPaymentAmount, siteId }: InviteClientRequest = await req.json();
-    logStep("Processing invite request", { email, clientName, websiteName, nextPaymentDate, nextPaymentAmount });
+    const { email, clientName, websiteName, websiteUrl, planType, billingCycle, nextPaymentDate, nextPaymentAmount, siteId }: InviteClientRequest = await req.json();
+    logStep("Processing invite request", { email, clientName, websiteName, billingCycle, nextPaymentDate, nextPaymentAmount });
 
     // Generate invitation token
     const inviteToken = crypto.randomUUID();
@@ -136,9 +137,10 @@ serve(async (req) => {
       .single();
 
     // Format plan with pricing
-    const getPlanDisplayText = (plan: string, amount: number) => {
+    const getPlanDisplayText = (plan: string, amount: number, cycle: string = 'monthly') => {
       const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-      return `${planName} - $${amount?.toFixed(2) || '0.00'}/month`;
+      const period = cycle === 'yearly' ? 'year' : 'month';
+      return `${planName} - $${amount?.toFixed(2) || '0.00'}/${period}`;
     };
 
     let emailSubject = `You're invited to join SydeVault - ${websiteName}`;
@@ -154,7 +156,7 @@ serve(async (req) => {
           <h3 style="margin: 0; color: #333;">Website Details:</h3>
           <p style="margin: 5px 0;"><strong>Name:</strong> ${websiteName}</p>
           <p style="margin: 5px 0;"><strong>URL:</strong> <a href="${websiteUrl}" target="_blank">${websiteUrl}</a></p>
-          <p style="margin: 5px 0;"><strong>Plan:</strong> ${getPlanDisplayText(planType, nextPaymentAmount || 0)}</p>
+          <p style="margin: 5px 0;"><strong>Plan:</strong> ${getPlanDisplayText(planType, nextPaymentAmount || 0, billingCycle || 'monthly')}</p>
         </div>
         
         <p>By creating your account, you'll be able to:</p>
@@ -198,7 +200,7 @@ serve(async (req) => {
         .replace(/\{\{websiteName\}\}/g, websiteName)
         .replace(/\{\{websiteUrl\}\}/g, websiteUrl)
         .replace(/\{\{planType\}\}/g, planType)
-        .replace(/\{\{planDisplay\}\}/g, getPlanDisplayText(planType, nextPaymentAmount || 0))
+        .replace(/\{\{planDisplay\}\}/g, getPlanDisplayText(planType, nextPaymentAmount || 0, billingCycle || 'monthly'))
         .replace(/\{\{inviteUrl\}\}/g, inviteUrl);
     } else {
       logStep("Using fallback email template", { templateError: templateError?.message });
