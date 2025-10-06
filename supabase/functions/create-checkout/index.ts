@@ -82,11 +82,11 @@ serve(async (req) => {
       const pricing = {
         basic: { 
           monthly: { amount: 1500, name: "Basic Hosting Plan" }, // $15.00/month
-          yearly: { amount: 1000, name: "Basic Hosting Plan (Annual)" } // $10.00/month when billed yearly
+          yearly: { amount: 12000, name: "Basic Hosting Plan (Annual)" } // $120.00/year ($10/month × 12)
         },
         pro: { 
           monthly: { amount: 3000, name: "Pro Hosting Plan" }, // $30.00/month  
-          yearly: { amount: 2000, name: "Pro Hosting Plan (Annual)" } // $20.00/month when billed yearly
+          yearly: { amount: 24000, name: "Pro Hosting Plan (Annual)" } // $240.00/year ($20/month × 12)
         }
       };
       
