@@ -59,9 +59,10 @@ export const usePaymentHistory = () => {
 
       console.log('PaymentHistory: Fetched payments:', data?.length || 0, 'payments');
       
-      // Transform data to include website information
+      // Transform data to include website information and convert cents to dollars
       const paymentsWithWebsites = (data || []).map((payment: any) => ({
         ...payment,
+        amount: payment.amount / 100, // Convert cents to dollars
         website_name: payment.websites?.name,
         website_url: payment.websites?.url,
       }));
@@ -120,6 +121,7 @@ export const usePaymentHistory = () => {
       if (!refreshError) {
         const paymentsWithWebsites = (refreshedData || []).map((payment: any) => ({
           ...payment,
+          amount: payment.amount / 100, // Convert cents to dollars
           website_name: payment.websites?.name,
           website_url: payment.websites?.url,
         }));
