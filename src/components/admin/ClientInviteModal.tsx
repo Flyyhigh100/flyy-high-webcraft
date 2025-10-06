@@ -31,11 +31,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
   const handlePlanTypeChange = (value: string) => {
     let amount = 15.00;
     switch (value) {
-      case 'standard':
-        amount = 19.99;
-        break;
-      case 'premium':
-        amount = 29.99;
+      case 'pro':
+        amount = 30.00;
         break;
       default:
         amount = 15.00;
@@ -174,9 +171,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">Basic - $15/month</SelectItem>
-                  <SelectItem value="standard">Standard - $19.99/month</SelectItem>
-                  <SelectItem value="premium">Premium - $29.99/month</SelectItem>
+                  <SelectItem value="basic">Hosting Basic - $15/month</SelectItem>
+                  <SelectItem value="pro">Hosting Pro - $30/month</SelectItem>
                 </SelectContent>
               </Select>
             </div>

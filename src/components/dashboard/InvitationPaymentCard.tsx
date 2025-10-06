@@ -27,7 +27,7 @@ export const InvitationPaymentCard: React.FC<InvitationPaymentCardProps> = ({
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
-          plan: plan.toLowerCase() as 'basic' | 'standard' | 'premium',
+          plan: plan.toLowerCase() as 'basic' | 'pro',
           siteId: siteId,
           invitation_payment: true,
           amount: Math.round(amount * 100) // Convert to cents and ensure integer

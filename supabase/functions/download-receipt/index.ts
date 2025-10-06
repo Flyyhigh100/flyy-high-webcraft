@@ -13,14 +13,14 @@ const logStep = (step: string, details?: any) => {
 };
 
 const cleanPlanName = (planType: string): string => {
-  if (!planType) return 'Standard';
+  if (!planType) return 'basic';
   
   // Remove common suffixes like "(Invited)", "(Trial)", etc.
   return planType
     .replace(/\s*\(invited\)/gi, '')
     .replace(/\s*\(trial\)/gi, '')
     .replace(/\s*\(promo\)/gi, '')
-    .trim() || 'Standard';
+    .trim() || 'basic';
 };
 
 serve(async (req) => {

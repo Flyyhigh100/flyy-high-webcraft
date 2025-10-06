@@ -8,6 +8,7 @@ import { CreditCard, Loader2, Settings } from "lucide-react";
 import { useInvitationStatus } from '@/hooks/useInvitationStatus';
 import { InvitationPaymentCard } from './InvitationPaymentCard';
 import { SubscriptionManagementModal } from './SubscriptionManagementModal';
+import { getPlanDisplayName } from '@/utils/planDisplayNames';
 
 interface Subscription {
   id: string;
@@ -72,7 +73,7 @@ export function SubscriptionManager() {
     }
   };
 
-  const handleCreateCheckout = async (plan: 'basic' | 'standard' | 'premium', siteId?: string) => {
+  const handleCreateCheckout = async (plan: 'basic' | 'pro', siteId?: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { plan, siteId }
@@ -157,16 +158,16 @@ export function SubscriptionManager() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <Card className={invitationStatus.invitationPlan === 'basic' ? 'border-primary bg-primary/5' : ''}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    Basic Plan
+                    {getPlanDisplayName('basic')}
                     {invitationStatus.invitationPlan === 'basic' && (
                       <Badge variant="outline">Your Plan</Badge>
                     )}
                   </CardTitle>
-                  <CardDescription>Perfect for small websites</CardDescription>
+                  <CardDescription>Everything you need to keep your website online</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold mb-4">$15/month</div>
@@ -176,53 +177,30 @@ export function SubscriptionManager() {
                     variant={invitationStatus.invitationPlan === 'basic' ? 'outline' : 'default'}
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    {invitationStatus.invitationPlan === 'basic' ? 'Switch to Basic' : 'Subscribe to Basic'}
+                    {invitationStatus.invitationPlan === 'basic' ? 'Current Plan' : 'Subscribe to Hosting Basic'}
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className={invitationStatus.invitationPlan === 'standard' ? 'border-primary bg-primary/5' : ''}>
+              <Card className={invitationStatus.invitationPlan === 'pro' ? 'border-primary bg-primary/5' : ''}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    Standard Plan
-                    {invitationStatus.invitationPlan === 'standard' && (
+                    {getPlanDisplayName('pro')}
+                    {invitationStatus.invitationPlan === 'pro' && (
                       <Badge variant="outline">Your Plan</Badge>
                     )}
                   </CardTitle>
-                  <CardDescription>Great for growing businesses</CardDescription>
+                  <CardDescription>Enhanced features for growing businesses</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold mb-4">$19.99/month</div>
+                  <div className="text-2xl font-bold mb-4">$30/month</div>
                   <Button 
-                    onClick={() => handleCreateCheckout('standard')}
+                    onClick={() => handleCreateCheckout('pro')}
                     className="w-full"
-                    variant={invitationStatus.invitationPlan === 'standard' ? 'outline' : 'default'}
+                    variant={invitationStatus.invitationPlan === 'pro' ? 'outline' : 'default'}
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    {invitationStatus.invitationPlan === 'standard' ? 'Switch to Standard' : 'Subscribe to Standard'}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className={invitationStatus.invitationPlan === 'premium' ? 'border-primary bg-primary/5' : ''}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    Premium Plan
-                    {invitationStatus.invitationPlan === 'premium' && (
-                      <Badge variant="outline">Your Plan</Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>For high-traffic websites</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold mb-4">$29.99/month</div>
-                  <Button 
-                    onClick={() => handleCreateCheckout('premium')}
-                    className="w-full"
-                    variant={invitationStatus.invitationPlan === 'premium' ? 'outline' : 'default'}
-                  >
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    {invitationStatus.invitationPlan === 'premium' ? 'Switch to Premium' : 'Subscribe to Premium'}
+                    {invitationStatus.invitationPlan === 'pro' ? 'Current Plan' : 'Subscribe to Hosting Pro'}
                   </Button>
                 </CardContent>
               </Card>
@@ -237,7 +215,7 @@ export function SubscriptionManager() {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="capitalize">
-                      {subscription.plan_type} Plan
+                      {getPlanDisplayName(subscription.plan_type)}
                     </CardTitle>
                     <CardDescription>
                       {subscription.websites?.name || 'Website'} - {subscription.websites?.url}

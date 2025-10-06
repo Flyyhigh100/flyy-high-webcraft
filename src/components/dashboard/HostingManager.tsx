@@ -11,6 +11,7 @@ import { useInvitationStatus } from '@/hooks/useInvitationStatus';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { InvitationPaymentCard } from './InvitationPaymentCard';
+import { getPlanDisplayName } from '@/utils/planDisplayNames';
 
 const HostingManager = () => {
   const { websites, isLoading, updateAutoRenewal } = useUserWebsites();
@@ -21,7 +22,7 @@ const HostingManager = () => {
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
-          plan: (primaryWebsite.plan_type || 'standard').toLowerCase() as 'basic' | 'standard' | 'premium',
+          plan: (primaryWebsite.plan_type || 'basic').toLowerCase() as 'basic' | 'pro',
           siteId: primaryWebsite.id
         }
       });
@@ -177,7 +178,7 @@ const HostingManager = () => {
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">Hosting Plan</Label>
               <Badge variant="outline" className="w-fit">
-                {primaryWebsite.plan_type}
+                {getPlanDisplayName(primaryWebsite.plan_type)}
               </Badge>
             </div>
             <div className="space-y-2">

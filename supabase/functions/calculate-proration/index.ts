@@ -13,8 +13,8 @@ const logStep = (step: string, details?: any) => {
 };
 
 interface ProrationRequest {
-  currentPlan: 'basic' | 'standard' | 'premium';
-  newPlan: 'basic' | 'standard' | 'premium';
+  currentPlan: 'basic' | 'pro';
+  newPlan: 'basic' | 'pro';
   newBillingCycle: 'monthly' | 'yearly';
   subscriptionId?: string;
 }
@@ -55,13 +55,9 @@ serve(async (req) => {
         monthly: 1500, // $15.00/month
         yearly: 1000   // $10.00/month when billed yearly
       },
-      standard: { 
+      pro: { 
         monthly: 3000, // $30.00/month  
         yearly: 2000   // $20.00/month when billed yearly
-      },
-      premium: { 
-        monthly: 2999, // $29.99/month
-        yearly: 2400   // $24.00/month when billed yearly
       }
     };
 

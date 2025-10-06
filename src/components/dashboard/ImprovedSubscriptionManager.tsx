@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Loader2, ExternalLink, ArrowUpDown, Globe, Calendar, AlertTriangle } from "lucide-react";
+import { CreditCard, Loader2, ExternalLink, ArrowUpDown, Globe, Calendar, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useInvitationStatus } from '@/hooks/useInvitationStatus';
 import { InvitationPaymentCard } from './InvitationPaymentCard';
 import { useUserWebsites } from '@/hooks/useUserWebsites';
 import { SubscriptionManagementModal } from './SubscriptionManagementModal';
+import { getPlanDisplayName } from '@/utils/planDisplayNames';
 
 interface Subscription {
   id: string;
@@ -116,7 +117,7 @@ export function ImprovedSubscriptionManager() {
     }
   };
 
-  const calculateProration = async (currentPlan: string, newPlan: 'basic' | 'standard' | 'premium') => {
+  const calculateProration = async (currentPlan: string, newPlan: 'basic' | 'pro') => {
     try {
       const currentSubscription = subscriptions.find(sub => sub.status === 'active');
       const { data, error } = await supabase.functions.invoke('calculate-proration', {
@@ -136,7 +137,7 @@ export function ImprovedSubscriptionManager() {
     }
   };
 
-  const handleCreateCheckout = async (plan: 'basic' | 'standard' | 'premium', siteId?: string) => {
+  const handleCreateCheckout = async (plan: 'basic' | 'pro', siteId?: string) => {
     try {
       // If user has active subscription and changing plans, show proration preview
       const currentSubscription = subscriptions.find(sub => sub.status === 'active');
@@ -177,7 +178,7 @@ export function ImprovedSubscriptionManager() {
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
-          plan: (websites[0].plan_type || 'standard').toLowerCase() as 'basic' | 'standard' | 'premium',
+          plan: (websites[0].plan_type || 'basic').toLowerCase() as 'basic' | 'pro',
           siteId: websites[0].id
         }
       });
@@ -240,20 +241,18 @@ export function ImprovedSubscriptionManager() {
     }
   };
 
-  const getPlanPrice = (plan: 'basic' | 'standard' | 'premium') => {
+  const getPlanPrice = (plan: 'basic' | 'pro') => {
     const pricing = {
       basic: { monthly: 15, yearly: 10 },
-      standard: { monthly: 30, yearly: 20 },
-      premium: { monthly: 29.99, yearly: 24 }
+      pro: { monthly: 30, yearly: 20 }
     };
     return pricing[plan][selectedBillingCycle];
   };
 
-  const getYearlySavings = (plan: 'basic' | 'standard' | 'premium') => {
+  const getYearlySavings = (plan: 'basic' | 'pro') => {
     const pricing = {
       basic: { monthly: 15, yearly: 10 },
-      standard: { monthly: 30, yearly: 20 },
-      premium: { monthly: 29.99, yearly: 24 }
+      pro: { monthly: 30, yearly: 20 }
     };
     const monthlyTotal = pricing[plan].monthly * 12;
     const yearlyTotal = pricing[plan].yearly * 12;
@@ -394,18 +393,19 @@ export function ImprovedSubscriptionManager() {
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="capitalize flex items-center gap-2">
-                  {currentPlan} Plan
-                  <Badge variant="outline">Current Plan</Badge>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  {getPlanDisplayName(currentPlan)}
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Current Plan</Badge>
                 </CardTitle>
                 <CardDescription>
-                  {websites[0]?.name} - Active website hosting
+                  {websites[0]?.name} - Your website is active and hosted
                 </CardDescription>
               </div>
               {hasActiveSubscription ? (
                 <Badge className="bg-green-500">Active Subscription</Badge>
               ) : (
-                <Badge variant="outline">Website Plan</Badge>
+                <Badge variant="outline">Manual Billing</Badge>
               )}
             </div>
           </CardHeader>
@@ -543,16 +543,16 @@ export function ImprovedSubscriptionManager() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card className={currentPlan === 'basic' ? 'border-primary bg-primary/5' : ''}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  Basic Plan
+                  {getPlanDisplayName('basic')}
                   {currentPlan === 'basic' && (
                     <Badge variant="outline">Current</Badge>
                   )}
                 </CardTitle>
-                <CardDescription>Perfect for small websites</CardDescription>
+                <CardDescription>Everything you need to keep your website online</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold mb-2">
@@ -570,69 +570,38 @@ export function ImprovedSubscriptionManager() {
                   disabled={currentPlan === 'basic'}
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
-                  {currentPlan === 'basic' ? 'Current Plan' : 'Switch to Basic'}
+                  {currentPlan === 'basic' ? 'Current Plan' : 'Switch to Hosting Basic'}
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className={currentPlan === 'standard' ? 'border-primary bg-primary/5' : ''}>
+            <Card className={currentPlan === 'pro' ? 'border-primary bg-primary/5' : ''}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  Standard Plan
-                  {currentPlan === 'standard' && (
+                  {getPlanDisplayName('pro')}
+                  {currentPlan === 'pro' && (
                     <Badge variant="outline">Current</Badge>
                   )}
                 </CardTitle>
-                <CardDescription>Great for growing businesses</CardDescription>
+                <CardDescription>Enhanced features for growing businesses</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold mb-2">
-                  ${getPlanPrice('standard')}/month
+                  ${getPlanPrice('pro')}/month
                 </div>
                 {selectedBillingCycle === 'yearly' && (
                   <p className="text-green-600 text-sm font-medium mb-4">
-                    Save ${getYearlySavings('standard')}/year • Billed annually
+                    Save ${getYearlySavings('pro')}/year • Billed annually
                   </p>
                 )}
                 <Button 
-                  onClick={() => handleCreateCheckout('standard', websites[0]?.id)}
+                  onClick={() => handleCreateCheckout('pro', websites[0]?.id)}
                   className="w-full"
-                  variant={currentPlan === 'standard' ? 'outline' : 'default'}
-                  disabled={currentPlan === 'standard'}
+                  variant={currentPlan === 'pro' ? 'outline' : 'default'}
+                  disabled={currentPlan === 'pro'}
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
-                  {currentPlan === 'standard' ? 'Current Plan' : 'Switch to Standard'}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className={currentPlan === 'premium' ? 'border-primary bg-primary/5' : ''}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Premium Plan
-                  {currentPlan === 'premium' && (
-                    <Badge variant="outline">Current</Badge>
-                  )}
-                </CardTitle>
-                <CardDescription>For high-traffic websites</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold mb-2">
-                  ${getPlanPrice('premium')}/month
-                </div>
-                {selectedBillingCycle === 'yearly' && (
-                  <p className="text-green-600 text-sm font-medium mb-4">
-                    Save ${getYearlySavings('premium')}/year • Billed annually
-                  </p>
-                )}
-                <Button 
-                  onClick={() => handleCreateCheckout('premium', websites[0]?.id)}
-                  className="w-full"
-                  variant={currentPlan === 'premium' ? 'outline' : 'default'}
-                  disabled={currentPlan === 'premium'}
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  {currentPlan === 'premium' ? 'Current Plan' : 'Switch to Premium'}
+                  {currentPlan === 'pro' ? 'Current Plan' : 'Switch to Hosting Pro'}
                 </Button>
               </CardContent>
             </Card>

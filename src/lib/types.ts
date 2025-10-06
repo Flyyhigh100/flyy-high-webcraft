@@ -22,8 +22,7 @@ export interface Testimonial {
 export interface PlanFeature {
   name: string;
   basic: boolean | string;
-  growth: boolean | string;
-  enterprise: boolean | string;
+  pro: boolean | string;
 }
 
 export interface PricingPlan {
@@ -50,3 +49,12 @@ export interface ContactFormData {
   subject: string;
   message: string;
 }
+
+// Plan type mapping for consistent display names
+export const PLAN_DISPLAY_NAMES: Record<string, string> = {
+  basic: 'Hosting Basic',
+  pro: 'Hosting Pro'
+};
+
+export type PlanType = 'basic' | 'pro';
+

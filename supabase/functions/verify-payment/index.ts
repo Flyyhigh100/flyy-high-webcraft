@@ -185,7 +185,7 @@ serve(async (req) => {
         site_id: siteId,
         amount: paymentAmount,
         status: 'completed',
-        plan_type: plan || 'standard',
+        plan_type: plan || 'basic',
         method: 'stripe',
         payment_date: new Date().toISOString(),
         stripe_payment_intent_id: paymentIntentId,
