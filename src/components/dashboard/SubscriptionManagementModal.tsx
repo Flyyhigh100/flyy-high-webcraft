@@ -37,30 +37,46 @@ export const SubscriptionManagementModal = ({
   const handleUpdatePaymentMethod = async () => {
     setIsLoading(true);
     try {
-      // Create a $0 setup session to update payment method
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { 
-          plan: subscription.plan_type,
-          setupMode: true, // This will be handled in the edge function
-          amount: 0
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) {
+        // Handle specific error types
+        if (error.message?.includes('NO_CUSTOMER')) {
+          toast({
+            title: "No Payment History",
+            description: "Please make a payment first to access billing management.",
+            variant: "destructive",
+          });
+        } else if (error.message?.includes('NO_ACTIVE_SUBSCRIPTION')) {
+          toast({
+            title: "No Active Subscription",
+            description: "Please subscribe to a plan first to manage billing.",
+            variant: "destructive",
+          });
+        } else if (error.message?.includes('PORTAL_NOT_CONFIGURED')) {
+          toast({
+            title: "Portal Unavailable",
+            description: "Stripe Customer Portal isn't configured in test mode. Payment method updates are limited in testing.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
         }
-      });
-
-      if (error) throw error;
-
+        return;
+      }
+      
       if (data?.url) {
         window.open(data.url, '_blank');
         toast({
-          title: "Payment Method Update",
-          description: "Redirecting to secure payment method update page.",
-          variant: "default",
+          title: "Redirecting to Billing Portal",
+          description: "Opening Stripe billing portal where you can update your payment method.",
         });
       }
     } catch (error) {
-      console.error('Error updating payment method:', error);
+      console.error('Portal error:', error);
       toast({
-        title: "Update Not Available",
-        description: "Payment method updates are currently limited in test mode. Please contact support for assistance.",
+        title: "Portal Error",
+        description: "Unable to open billing portal. Please contact support for assistance.",
         variant: "destructive",
       });
     } finally {
@@ -167,11 +183,10 @@ export const SubscriptionManagementModal = ({
               </div>
             </div>
 
-            {/* Enhanced Test Mode Information */}
+            {/* Billing Management Information */}
             <div className="text-xs text-muted-foreground p-3 bg-muted rounded-lg">
               <p>
-                <strong>Test Mode:</strong> Payment method updates and some billing features are limited. 
-                Use the cancellation option to manage your subscription, or contact support for assistance with billing changes.
+                <strong>Billing Management:</strong> The "Update Payment Method" button opens the Stripe Customer Portal where you can securely update your payment information, view invoices, and manage billing details.
               </p>
             </div>
           </div>
