@@ -79,6 +79,30 @@ serve(async (req) => {
       cancelAtPeriodEnd: cancelledSubscription.cancel_at_period_end 
     });
 
+    // Sync cancellation status to Supabase subscriptions table
+    const { error: updateError } = await supabaseClient
+      .from('subscriptions')
+      .update({
+        status: cancelledSubscription.status,
+        cancel_at_period_end: cancelledSubscription.cancel_at_period_end,
+        canceled_at: cancelAt === 'now' 
+          ? new Date().toISOString() 
+          : (cancelledSubscription.cancel_at_period_end ? new Date().toISOString() : null),
+        updated_at: new Date().toISOString()
+      })
+      .eq('stripe_subscription_id', subscriptionId);
+
+    if (updateError) {
+      logStep("Failed to update subscription in database", { error: updateError });
+      // Log but don't fail - Stripe cancellation already succeeded
+    } else {
+      logStep("Subscription status synced to database", { 
+        subscriptionId,
+        newStatus: cancelledSubscription.status,
+        cancelAtPeriodEnd: cancelledSubscription.cancel_at_period_end 
+      });
+    }
+
     // Store cancellation feedback
     if (reason || comment) {
       await supabaseClient.from('cancellation_feedback').insert({

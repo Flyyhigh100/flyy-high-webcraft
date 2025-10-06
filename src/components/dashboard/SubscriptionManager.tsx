@@ -18,6 +18,8 @@ interface Subscription {
   current_period_end: string;
   stripe_subscription_id: string;
   site_id: string;
+  cancel_at_period_end?: boolean;
+  canceled_at?: string;
   websites?: {
     name: string;
     url: string;
@@ -33,6 +35,8 @@ interface SubscriptionForModal {
   stripe_subscription_id: string;
   websiteName?: string;
   websiteUrl?: string;
+  cancel_at_period_end?: boolean;
+  canceled_at?: string;
 }
 
 export function SubscriptionManager() {
@@ -108,17 +112,32 @@ export function SubscriptionManager() {
     handleModalClose();
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, cancelAtPeriodEnd?: boolean) => {
+    if (cancelAtPeriodEnd) {
+      return 'bg-orange-500';
+    }
+    
     switch (status.toLowerCase()) {
       case 'active':
         return 'bg-green-500';
       case 'past_due':
         return 'bg-yellow-500';
       case 'canceled':
+      case 'cancelled':
         return 'bg-red-500';
+      case 'incomplete':
+      case 'incomplete_expired':
+        return 'bg-gray-500';
       default:
         return 'bg-gray-500';
     }
+  };
+
+  const getStatusLabel = (status: string, cancelAtPeriodEnd?: boolean) => {
+    if (cancelAtPeriodEnd) {
+      return 'Cancelling';
+    }
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   if (loading || invitationLoading) {
@@ -221,8 +240,8 @@ export function SubscriptionManager() {
                       {subscription.websites?.name || 'Website'} - {subscription.websites?.url}
                     </CardDescription>
                   </div>
-                  <Badge className={getStatusColor(subscription.status)}>
-                    {subscription.status}
+                  <Badge className={getStatusColor(subscription.status, subscription.cancel_at_period_end)}>
+                    {getStatusLabel(subscription.status, subscription.cancel_at_period_end)}
                   </Badge>
                 </div>
               </CardHeader>
@@ -261,6 +280,8 @@ export function SubscriptionManager() {
             stripe_subscription_id: selectedSubscription.stripe_subscription_id,
             websiteName: selectedSubscription.websites?.name || 'Website',
             websiteUrl: selectedSubscription.websites?.url || '',
+            cancel_at_period_end: selectedSubscription.cancel_at_period_end,
+            canceled_at: selectedSubscription.canceled_at,
           } as SubscriptionForModal}
           onSubscriptionUpdated={handleSubscriptionUpdate}
         />

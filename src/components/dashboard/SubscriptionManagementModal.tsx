@@ -15,6 +15,8 @@ interface Subscription {
   amount: number;
   current_period_end: string;
   stripe_subscription_id: string;
+  cancel_at_period_end?: boolean;
+  canceled_at?: string;
 }
 
 interface SubscriptionManagementModalProps {
@@ -134,8 +136,15 @@ export const SubscriptionManagementModal = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium capitalize">{subscription.plan_type} Plan</span>
-                    <Badge className={getStatusColor(subscription.status)}>
-                      {subscription.status}
+                    <Badge className={
+                      subscription.cancel_at_period_end 
+                        ? 'bg-orange-500 text-white' 
+                        : getStatusColor(subscription.status)
+                    }>
+                      {subscription.cancel_at_period_end 
+                        ? 'Cancelling at Period End' 
+                        : subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)
+                      }
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -182,6 +191,17 @@ export const SubscriptionManagementModal = ({
                 </Button>
               </div>
             </div>
+
+            {/* Cancellation Warning */}
+            {subscription.cancel_at_period_end && (
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <p className="text-sm text-orange-800">
+                  <strong>Subscription Ending:</strong> Your subscription will be cancelled on{' '}
+                  {new Date(subscription.current_period_end).toLocaleDateString()}. 
+                  You'll continue to have access until then.
+                </p>
+              </div>
+            )}
 
             {/* Billing Management Information */}
             <div className="text-xs text-muted-foreground p-3 bg-muted rounded-lg">
