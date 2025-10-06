@@ -29,6 +29,19 @@ export function EmailChangeForm({ currentEmail, onClose }: EmailChangeFormProps)
     setIsLoading(true);
 
     try {
+      // Check AAL level (authenticator assurance level)
+      const { data: { currentLevel } } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      
+      // Check if user has MFA enabled
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const hasMfa = (factors?.totp || []).length > 0;
+
+      // If user has MFA but hasn't verified in this session, require AAL2
+      if (hasMfa && currentLevel !== 'aal2') {
+        setError("For your security, please sign out and sign in again with your 2FA code before changing your email.");
+        return;
+      }
+
       // First verify the password by attempting to sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: currentEmail,

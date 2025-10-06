@@ -9,12 +9,14 @@ type AuthContextType = {
   session: Session | null;
   isLoading: boolean;
   isAdmin: boolean;
+  hasMfaEnabled: boolean;
   signUp: (email: string, password: string) => Promise<{ error: Error | null; data: any }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; data: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null; data: any }>;
   updatePassword: (password: string) => Promise<{ error: Error | null; data: any }>;
   checkAdminStatus: () => Promise<boolean>;
+  checkMfaStatus: () => Promise<boolean>;
 };
 
 // Create the context with a default value
@@ -26,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [hasMfaEnabled, setHasMfaEnabled] = useState<boolean>(false);
 
   // Track last sign-in via Edge Function
   const trackSignIn = async () => {
@@ -67,6 +70,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Check if user has MFA enabled
+  const checkMfaStatus = async (): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (error) throw error;
+
+      const enrolledFactors = data?.totp || [];
+      const mfaEnabled = enrolledFactors.length > 0;
+      setHasMfaEnabled(mfaEnabled);
+      return mfaEnabled;
+    } catch (err) {
+      console.error('Error checking MFA status:', err);
+      setHasMfaEnabled(false);
+      return false;
+    }
+  };
+
   useEffect(() => {
     // Get current session from Supabase
     async function getInitialSession() {
@@ -79,8 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       
 if (session?.user) {
-  console.log("Checking admin status during initial session");
+  console.log("Checking admin and MFA status during initial session");
   await checkAdminStatus();
+  await checkMfaStatus();
   setTimeout(() => { trackSignIn(); }, 0);
 }
 
@@ -97,12 +120,14 @@ const { data: { subscription } } = supabase.auth.onAuthStateChange(
     setUser(session?.user ?? null);
     
     if (session?.user) {
-      console.log("User authenticated, checking admin status");
+      console.log("User authenticated, checking admin and MFA status");
       await checkAdminStatus();
+      await checkMfaStatus();
       setTimeout(() => { trackSignIn(); }, 0);
     } else {
-      console.log("No user or session, setting isAdmin to false");
+      console.log("No user or session, setting isAdmin and MFA to false");
       setIsAdmin(false);
+      setHasMfaEnabled(false);
     }
     
     setIsLoading(false);
@@ -160,12 +185,14 @@ const signIn = async (email: string, password: string) => {
     session,
     isLoading,
     isAdmin,
+    hasMfaEnabled,
     signUp,
     signIn,
     signOut,
     resetPassword,
     updatePassword,
     checkAdminStatus,
+    checkMfaStatus,
   };
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

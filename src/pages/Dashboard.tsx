@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ImprovedSubscriptionManager } from "@/components/dashboard/ImprovedSubscriptionManager";
 import { EmailChangeForm } from "@/components/dashboard/EmailChangeForm";
 import PaymentHistory from "@/components/dashboard/PaymentHistory";
+import { TwoFactorManagement } from "@/components/dashboard/TwoFactorManagement";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
@@ -288,16 +289,8 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 
-                <div className="space-y-2 pt-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Two-Factor Authentication</Label>
-                      <p className="text-sm text-gray-500">
-                        Add an extra layer of security to your account
-                      </p>
-                    </div>
-                    <Switch defaultChecked={false} />
-                  </div>
+                <div className="space-y-2 pt-4 border-t">
+                  <TwoFactorManagement />
                 </div>
               </CardContent>
             </Card>
