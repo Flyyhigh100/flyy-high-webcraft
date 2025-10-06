@@ -209,7 +209,7 @@ export default function Invite() {
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="font-medium">Name:</span>
-                <span>{invitation?.website_name}</span>
+                <span>{invitation?.client_name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">URL:</span>
