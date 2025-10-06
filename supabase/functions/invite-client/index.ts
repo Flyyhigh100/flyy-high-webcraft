@@ -139,8 +139,11 @@ serve(async (req) => {
     // Format plan with pricing
     const getPlanDisplayText = (plan: string, amount: number, cycle: string = 'monthly') => {
       const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-      const period = cycle === 'yearly' ? 'year' : 'month';
-      return `${planName} - $${amount?.toFixed(2) || '0.00'}/${period}`;
+      if (cycle === 'yearly') {
+        const perMonth = amount / 12;
+        return `${planName} - $${amount?.toFixed(2) || '0.00'}/year ($${perMonth.toFixed(0)}/month equivalent)`;
+      }
+      return `${planName} - $${amount?.toFixed(2) || '0.00'}/month`;
     };
 
     let emailSubject = `You're invited to join SydeVault - ${websiteName}`;

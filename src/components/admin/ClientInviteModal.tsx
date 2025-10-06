@@ -21,30 +21,21 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     email: '',
     clientName: '',
     websiteUrl: '',
-    planType: 'basic',
-    billingCycle: 'monthly' as 'monthly' | 'yearly',
-    nextPaymentDate: new Date().toISOString().split('T')[0], // Today's date as default
-    nextPaymentAmount: 15.00 // Default amount based on basic plan
+    plan: 'basic-monthly', // Combined format: planType-billingCycle
+    nextPaymentDate: new Date().toISOString().split('T')[0],
+    nextPaymentAmount: 15.00
   });
   const { toast } = useToast();
 
-  // Update payment amount when plan type or billing cycle changes
-  const handlePlanTypeChange = (value: string) => {
-    updatePaymentAmount(value, formData.billingCycle);
-  };
-
-  const handleBillingCycleChange = (value: 'monthly' | 'yearly') => {
-    updatePaymentAmount(formData.planType, value);
-  };
-
-  const updatePaymentAmount = (planType: string, billingCycle: 'monthly' | 'yearly') => {
+  // Update payment amount based on combined plan selection
+  const handlePlanChange = (value: string) => {
     let amount = 15.00;
-    if (billingCycle === 'yearly') {
-      amount = planType === 'pro' ? 240.00 : 120.00; // Yearly total
-    } else {
-      amount = planType === 'pro' ? 30.00 : 15.00; // Monthly
-    }
-    setFormData({ ...formData, planType, billingCycle, nextPaymentAmount: amount });
+    if (value === 'basic-monthly') amount = 15.00;
+    else if (value === 'basic-yearly') amount = 120.00;
+    else if (value === 'pro-monthly') amount = 30.00;
+    else if (value === 'pro-yearly') amount = 240.00;
+    
+    setFormData({ ...formData, plan: value, nextPaymentAmount: amount });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,6 +43,9 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     setLoading(true);
 
     try {
+      // Parse combined plan
+      const [planType, billingCycle] = formData.plan.split('-') as [string, 'monthly' | 'yearly'];
+      
       // Extract site name from URL for database storage
       const websiteName = formData.websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
       
@@ -61,8 +55,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         .insert({
           name: websiteName,
           url: formData.websiteUrl,
-          plan_type: formData.planType,
-          billing_cycle: formData.billingCycle,
+          plan_type: planType,
+          billing_cycle: billingCycle,
           next_payment_date: formData.nextPaymentDate,
           next_payment_amount: formData.nextPaymentAmount
         })
@@ -78,8 +72,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           clientName: formData.clientName,
           websiteName,
           websiteUrl: formData.websiteUrl,
-          planType: formData.planType,
-          billingCycle: formData.billingCycle,
+          planType: planType,
+          billingCycle: billingCycle,
           nextPaymentDate: formData.nextPaymentDate,
           nextPaymentAmount: formData.nextPaymentAmount,
           siteId: websiteData.id
@@ -97,8 +91,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         email: '',
         clientName: '',
         websiteUrl: '',
-        planType: 'basic',
-        billingCycle: 'monthly',
+        plan: 'basic-monthly',
         nextPaymentDate: new Date().toISOString().split('T')[0],
         nextPaymentAmount: 15.00
       });
@@ -173,30 +166,18 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="planType" className="text-right">
-                Plan Type
+              <Label htmlFor="plan" className="text-right">
+                Plan
               </Label>
-              <Select value={formData.planType} onValueChange={handlePlanTypeChange}>
+              <Select value={formData.plan} onValueChange={handlePlanChange}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">Hosting Basic</SelectItem>
-                  <SelectItem value="pro">Hosting Pro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="billingCycle" className="text-right">
-                Billing Cycle
-              </Label>
-              <Select value={formData.billingCycle} onValueChange={handleBillingCycleChange}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monthly">Monthly - ${formData.planType === 'pro' ? '30' : '15'}/month</SelectItem>
-                  <SelectItem value="yearly">Yearly - ${formData.planType === 'pro' ? '240' : '120'}/year (save 33%)</SelectItem>
+                  <SelectItem value="basic-monthly">Basic - $15/month</SelectItem>
+                  <SelectItem value="basic-yearly">Basic - $120/year ($10/month equivalent)</SelectItem>
+                  <SelectItem value="pro-monthly">Pro - $30/month</SelectItem>
+                  <SelectItem value="pro-yearly">Pro - $240/year ($20/month equivalent)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
