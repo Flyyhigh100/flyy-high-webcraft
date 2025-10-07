@@ -86,7 +86,7 @@ export default function Invite() {
     try {
       console.log('Creating account for:', invitation.email);
       
-      // Sign up the user
+      // Sign up the user (email confirmation handled server-side in accept-invitation)
       const { data: authData, error: signupError } = await supabase.auth.signUp({
         email: invitation.email,
         password: password,

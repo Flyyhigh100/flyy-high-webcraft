@@ -115,6 +115,21 @@ serve(async (req) => {
       }
     }
 
+    // Auto-confirm the user's email (eliminates Supabase confirmation email)
+    const { error: confirmErr } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      { 
+        email_confirm: true
+      }
+    );
+
+    if (confirmErr) {
+      log("Email confirmation error", { error: confirmErr.message });
+      // Non-critical error, continue with invitation acceptance
+    } else {
+      log("User email auto-confirmed", { user_id: user.id });
+    }
+
     // Mark invitation as used
     const { error: updErr } = await supabaseAdmin
       .from('client_invitations')
