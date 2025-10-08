@@ -7,6 +7,8 @@ import { ClientInviteModal } from '../ClientInviteModal';
 import { BulkClientImport } from '../BulkClientImport';
 import { EmailTemplateManager } from '../EmailTemplateManager';
 import { EnhancedPaymentReminders } from '../EnhancedPaymentReminders';
+import { PendingInvitationsTable } from '../PendingInvitationsTable';
+import { OrphanedWebsiteCleanup } from '../OrphanedWebsiteCleanup';
 import { ClientWebsite } from "@/types/admin";
 import { useAdminData } from "@/hooks/useAdminData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -58,6 +60,8 @@ export function ClientWebsiteList() {
             <ClientInviteModal onRefresh={refreshData} />
           </div>
           
+          <PendingInvitationsTable />
+          
           <ClientWebsiteTable 
             clients={sortedClients}
             onViewDetails={handleViewDetails}
@@ -68,6 +72,7 @@ export function ClientWebsiteList() {
 
       <TabsContent value="tools">
         <div className="space-y-6">
+          <OrphanedWebsiteCleanup />
           <PaymentCollectionTools onRefresh={refreshData} />
           <BulkClientImport onRefresh={refreshData} />
           <EnhancedPaymentReminders />

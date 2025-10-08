@@ -49,6 +49,42 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
       // Extract site name from URL for database storage
       const websiteName = formData.websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
       
+      // Check for existing website with same URL
+      const { data: existingWebsite } = await supabase
+        .from('websites')
+        .select('id, name')
+        .eq('url', formData.websiteUrl)
+        .maybeSingle();
+      
+      if (existingWebsite) {
+        toast({
+          title: "Website Already Exists",
+          description: `A website with URL ${formData.websiteUrl} already exists.`,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // Check for existing pending invitation for this email
+      const { data: pendingInvite } = await supabase
+        .from('client_invitations')
+        .select('id, website_name, status, expires_at')
+        .eq('email', formData.email)
+        .eq('status', 'pending')
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle();
+      
+      if (pendingInvite) {
+        toast({
+          title: "Pending Invitation Exists",
+          description: `${formData.email} already has a pending invitation for ${pendingInvite.website_name}. Please wait for them to accept or resend from the Invitations table.`,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
       // Create the website record with payment details - no next_payment_date set
       const { data: websiteData, error: websiteError } = await supabase
         .from('websites')

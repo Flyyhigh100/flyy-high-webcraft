@@ -74,3 +74,9 @@ verify_jwt = true
 
 [functions.submit-project-inquiry]
 verify_jwt = false
+
+[functions.cleanup-orphaned-websites]
+verify_jwt = true
+
+[functions.resend-invitation]
+verify_jwt = true
