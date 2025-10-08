@@ -37,6 +37,44 @@ export function ImprovedSubscriptionManager() {
   const { websites } = useUserWebsites();
   const { toast } = useToast();
 
+  const fetchSubscriptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select(`
+          *,
+          websites (
+            name,
+            url
+          )
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Remove duplicates - keep only the most recent subscription per site
+      const uniqueSubs = new Map<string, Subscription>();
+      (data || []).forEach((sub: Subscription) => {
+        const siteKey = sub.site_id || 'no-site';
+        const existing = uniqueSubs.get(siteKey);
+        if (!existing || new Date(sub.current_period_end) > new Date(existing.current_period_end)) {
+          uniqueSubs.set(siteKey, sub);
+        }
+      });
+      
+      setSubscriptions(Array.from(uniqueSubs.values()));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch subscriptions",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchSubscriptions();
     
@@ -78,44 +116,6 @@ export function ImprovedSubscriptionManager() {
       })();
     }
   }, []);
-
-  const fetchSubscriptions = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select(`
-          *,
-          websites (
-            name,
-            url
-          )
-        `)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Remove duplicates - keep only the most recent subscription per site
-      const uniqueSubs = new Map<string, Subscription>();
-      (data || []).forEach((sub: Subscription) => {
-        const siteKey = sub.site_id || 'no-site';
-        const existing = uniqueSubs.get(siteKey);
-        if (!existing || new Date(sub.current_period_end) > new Date(existing.current_period_end)) {
-          uniqueSubs.set(siteKey, sub);
-        }
-      });
-      
-      setSubscriptions(Array.from(uniqueSubs.values()));
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch subscriptions",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const calculateProration = async (currentPlan: string, newPlan: 'basic' | 'pro') => {
     try {

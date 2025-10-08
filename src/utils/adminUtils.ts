@@ -160,9 +160,13 @@ export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
   // Ensure proper authentication before proceeding
   const session = await ensureAuthenticated();
 
-  const { data, error } = await supabase
+  // Fetch websites with user profile information
+  const { data: websitesData, error } = await supabase
     .from('websites')
-    .select('*')
+    .select(`
+      *,
+      profiles!websites_user_id_fkey(role, user_id)
+    `)
     .order('name', { ascending: true });
   
   if (error) {
@@ -170,19 +174,39 @@ export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
     console.error('Auth state during error:', await supabase.auth.getUser());
     throw error;
   }
+
+  // Get user emails using the secure RPC function
+  const userIds = (websitesData || [])
+    .map(w => w.user_id)
+    .filter(Boolean);
   
-  return (data || []).map(website => ({
-    id: website.id,
-    name: website.name,
-    url: website.url,
-    planType: website.plan_type,
-    nextPaymentDate: website.next_payment_date || '',
-    nextPaymentAmount: website.next_payment_amount || 0,
-    paymentStatus: website.payment_status || 'current',
-    lastPaymentReminderSent: website.last_payment_reminder_sent || '',
-    gracePeriodEndDate: website.grace_period_end_date || '',
-    suspensionDate: website.suspension_date || ''
-  }));
+  let emailMap = new Map();
+  if (userIds.length > 0) {
+    const { data: emailsData, error: emailsError } = await supabase
+      .rpc('get_user_emails_bulk', { user_ids: userIds });
+    
+    if (!emailsError && emailsData) {
+      emailMap = new Map(emailsData.map((e: any) => [e.user_id, e.email]));
+    }
+  }
+  
+  return (websitesData || []).map(website => {
+    const profile = Array.isArray(website.profiles) ? website.profiles[0] : website.profiles;
+    return {
+      id: website.id,
+      name: website.name,
+      url: website.url,
+      planType: website.plan_type,
+      nextPaymentDate: website.next_payment_date || '',
+      nextPaymentAmount: website.next_payment_amount || 0,
+      paymentStatus: website.payment_status || 'current',
+      lastPaymentReminderSent: website.last_payment_reminder_sent || '',
+      gracePeriodEndDate: website.grace_period_end_date || '',
+      suspensionDate: website.suspension_date || '',
+      clientEmail: emailMap.get(website.user_id) || '',
+      clientRole: profile?.role || ''
+    };
+  });
 };
 
 export const calculateRevenueData = (payments: Payment[]): RevenueData => {
