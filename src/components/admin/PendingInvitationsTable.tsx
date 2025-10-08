@@ -29,9 +29,10 @@ export function PendingInvitationsTable() {
 
   const fetchPendingInvitations = async () => {
     try {
+      // Phase 4: Query only necessary fields, minimize sensitive data exposure
       const { data, error } = await supabase
         .from('client_invitations')
-        .select('*')
+        .select('id, email, client_name, website_name, website_url, plan_type, next_payment_amount, status, expires_at, created_at, site_id')
         .in('status', ['pending'])
         .order('created_at', { ascending: false });
 

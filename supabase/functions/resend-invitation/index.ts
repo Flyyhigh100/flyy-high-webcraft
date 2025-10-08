@@ -64,18 +64,25 @@ serve(async (req) => {
 
     logStep("Found invitation", { id: invitation_id, email: invitation.email });
 
-    // Generate new token and expiry
+    // Phase 3: Generate new token, hash it, and set expiry
     const newToken = crypto.randomUUID();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(newToken);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const tokenHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
     const newExpiry = new Date();
     newExpiry.setDate(newExpiry.getDate() + 7); // 7 days from now
 
-    const inviteUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.lovable.app/invite?token=${newToken}&site=${invitation.site_id}`;
+    const inviteUrl = `https://sydevault.com/invite?token=${newToken}&site=${invitation.site_id}`;
 
-    // Update invitation with new token and expiry
+    // Update invitation with new token, hash, and expiry
     const { error: updateError } = await supabaseClient
       .from('client_invitations')
       .update({
         invite_token: newToken,
+        invite_token_hash: tokenHash, // Phase 3: Store hashed token
         expires_at: newExpiry.toISOString(),
         status: 'pending',
         invitation_version: (invitation.invitation_version || 1) + 1

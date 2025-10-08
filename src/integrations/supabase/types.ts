@@ -54,6 +54,7 @@ export type Database = {
           id: string
           invitation_version: number | null
           invite_token: string
+          invite_token_hash: string | null
           invited_by: string | null
           next_payment_amount: number | null
           next_payment_date: string | null
@@ -75,6 +76,7 @@ export type Database = {
           id?: string
           invitation_version?: number | null
           invite_token: string
+          invite_token_hash?: string | null
           invited_by?: string | null
           next_payment_amount?: number | null
           next_payment_date?: string | null
@@ -96,6 +98,7 @@ export type Database = {
           id?: string
           invitation_version?: number | null
           invite_token?: string
+          invite_token_hash?: string | null
           invited_by?: string | null
           next_payment_amount?: number | null
           next_payment_date?: string | null
@@ -648,6 +651,15 @@ export type Database = {
         Args: { invitation_id: string }
         Returns: boolean
       }
+      check_edge_function_rate_limit: {
+        Args: {
+          endpoint_name: string
+          ip_addr: string
+          max_requests: number
+          window_minutes: number
+        }
+        Returns: boolean
+      }
       check_invitation_query_rate_limit: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -659,6 +671,10 @@ export type Database = {
       cleanup_client_data: {
         Args: { client_email_param?: string; website_id_param?: string }
         Returns: Json
+      }
+      cleanup_old_rate_limit_records: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       cleanup_old_rate_limits: {
         Args: Record<PropertyKey, never>

@@ -63,8 +63,14 @@ serve(async (req) => {
     const { email, clientName, websiteName, websiteUrl, planType, billingCycle, nextPaymentAmount, siteId }: InviteClientRequest = await req.json();
     logStep("Processing invite request", { email, clientName, websiteName, billingCycle, nextPaymentAmount });
 
-    // Generate invitation token
+    // Phase 3: Generate invitation token and hash it
     const inviteToken = crypto.randomUUID();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(inviteToken);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const tokenHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
     const inviteUrl = `https://sydevault.com/invite?token=${inviteToken}&site=${siteId}`;
 
     // Check for existing pending invitations and supersede them
@@ -119,6 +125,7 @@ serve(async (req) => {
         next_payment_amount: nextPaymentAmount,
         site_id: siteId,
         invite_token: inviteToken,
+        invite_token_hash: tokenHash, // Phase 3: Store hashed token
         invited_by: user.id,
         invitation_version: newVersion,
         created_by_name: adminProfile?.email || 'Admin',

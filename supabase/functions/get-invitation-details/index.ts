@@ -26,6 +26,30 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Phase 2: Apply rate limiting
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0] || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+
+    const { data: rateLimitCheck } = await supabaseServiceClient
+      .rpc('check_edge_function_rate_limit', {
+        ip_addr: clientIp,
+        endpoint_name: 'get-invitation-details',
+        max_requests: 20,
+        window_minutes: 60
+      });
+
+    if (!rateLimitCheck) {
+      logStep("Rate limit exceeded", { ip: clientIp });
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: "Rate limit exceeded. Please try again later." 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 429,
+      });
+    }
+
     const { token } = await req.json();
     if (!token) {
       throw new Error("Token is required");
@@ -33,11 +57,19 @@ serve(async (req) => {
 
     logStep("Verifying invitation token", { token: token.substring(0, 8) + '...' });
 
+    // Phase 3: Hash the token for secure lookup
+    const encoder = new TextEncoder();
+    const data = encoder.encode(token);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const tokenHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
     // Get invitation using service role - bypassing RLS
+    // Phase 3: Query by token hash for security
     const { data: invitation, error } = await supabaseServiceClient
       .from('client_invitations')
-      .select('*')
-      .eq('invite_token', token)
+      .select('id, email, client_name, website_name, website_url, plan_type, site_id, expires_at, invite_token')
+      .eq('invite_token_hash', tokenHash)
       .eq('status', 'pending')
       .maybeSingle();
 
@@ -71,13 +103,25 @@ serve(async (req) => {
       });
     }
 
+    // Verify the plain token matches (double-check security)
+    if (invitation.invite_token !== token) {
+      logStep("Token hash collision or tampering detected");
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: "Invalid invitation token" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403,
+      });
+    }
+
     logStep("Valid invitation found", { 
       id: invitation.id, 
       email: invitation.email,
       websiteName: invitation.website_name 
     });
 
-    // Return only necessary invitation details (without sensitive info like payment amounts visible to non-admins)
+    // Phase 4: Return only necessary invitation details (minimizing sensitive data exposure)
     const sanitizedInvitation = {
       id: invitation.id,
       email: invitation.email,
