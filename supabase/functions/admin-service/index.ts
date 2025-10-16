@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch all admin data using service role (bypasses RLS)
-    const [profilesResult, paymentsResult, websitesResult, sessionsResult] = await Promise.all([
+    const [profilesResult, paymentsResult, websitesResult, sessionsResult, authUsersResult] = await Promise.all([
       // Fetch all profiles with last sign-in information
       supabaseAdmin
         .from('profiles')
@@ -92,14 +92,18 @@ Deno.serve(async (req) => {
       supabaseAdmin
         .from('user_sessions')
         .select('*')
-        .order('last_sign_in', { ascending: false })
+        .order('last_sign_in', { ascending: false }),
+
+      // Fetch emails from auth.users (profiles table doesn't have email column)
+      supabaseAdmin.auth.admin.listUsers()
     ]);
 
     console.log('Data fetch results:', {
       profiles: profilesResult.error ? 'error' : `${profilesResult.data?.length} records`,
       payments: paymentsResult.error ? 'error' : `${paymentsResult.data?.length} records`,
       websites: websitesResult.error ? 'error' : `${websitesResult.data?.length} records`,
-      sessions: sessionsResult.error ? 'error' : `${sessionsResult.data?.length} records`
+      sessions: sessionsResult.error ? 'error' : `${sessionsResult.data?.length} records`,
+      authUsers: authUsersResult.error ? 'error' : `${authUsersResult.data?.users?.length} records`
     });
 
     // Check for errors
@@ -124,6 +128,11 @@ Deno.serve(async (req) => {
       console.warn('Continuing without session data');
     }
 
+    if (authUsersResult.error) {
+      console.error('Auth users fetch error:', authUsersResult.error);
+      throw new Error(`Failed to fetch auth users: ${authUsersResult.error.message}`);
+    }
+
     // Create a map of user sessions for quick lookup
     const sessionsMap = new Map();
     if (sessionsResult.data) {
@@ -135,16 +144,24 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Create email lookup map from auth.users
+    const emailMap = new Map<string, string>();
+    if (authUsersResult.data?.users) {
+      authUsersResult.data.users.forEach(u => {
+        emailMap.set(u.id, u.email || '');
+      });
+    }
+
     // Build a profiles map for quick lookups
     const profilesMap = new Map<string, any>();
     (profilesResult.data || []).forEach((p: any) => {
       profilesMap.set(p.id, p);
     });
 
-    // Transform profiles data
+    // Transform profiles data (fetch email from auth.users)
     const profiles = (profilesResult.data || []).map((profile: any) => ({
       id: profile.id,
-      email: profile.email || '',
+      email: emailMap.get(profile.id) || 'Unknown',
       role: profile.role || 'user',
       created_at: profile.created_at,
       updated_at: profile.updated_at,
@@ -158,7 +175,7 @@ Deno.serve(async (req) => {
       return {
         id: payment.id,
         user_id: payment.user_id,
-        user_email: profilesMap.get(payment.user_id)?.email || 'Unknown',
+        user_email: emailMap.get(payment.user_id) || 'Unknown',
         amount,
         status: payment.status,
         payment_date: payment.payment_date,
@@ -179,7 +196,7 @@ Deno.serve(async (req) => {
       .map((website: any) => ({
         id: website.id,
         user_id: website.user_id || '',
-        user_email: profilesMap.get(website.user_id || '')?.email || 'Unknown',
+        user_email: emailMap.get(website.user_id || '') || 'Unknown',
         amount: website.next_payment_amount || 0,
         status: website.payment_status || 'pending',
         payment_date: website.next_payment_date,
@@ -200,7 +217,7 @@ Deno.serve(async (req) => {
         lastPaymentReminderSent: website.last_payment_reminder_sent,
         gracePeriodEndDate: website.grace_period_end_date,
         suspensionDate: website.suspension_date,
-        clientEmail: clientProfile?.email || 'Unknown',
+        clientEmail: emailMap.get(website.user_id || '') || 'Unknown',
         clientRole: clientProfile?.role || 'user'
       };
     });
