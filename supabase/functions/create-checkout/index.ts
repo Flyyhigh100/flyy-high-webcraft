@@ -74,19 +74,19 @@ serve(async (req) => {
     let planAmount, planName, interval;
     if (invitation_payment && amount) {
       planAmount = amount; // Amount already in cents from frontend
-      planName = `${plan.charAt(0).toUpperCase() + plan.slice(1)} Hosting Plan (Invited)`;
+      planName = `SydeVault ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan (Invited)`;
       interval = "month";
       logStep("Using invitation amount", { amount, plan });
     } else {
       // Define pricing based on plan and billing cycle
       const pricing = {
         basic: { 
-          monthly: { amount: 1500, name: "Basic Hosting Plan" }, // $15.00/month
-          yearly: { amount: 12000, name: "Basic Hosting Plan (Annual)" } // $120.00/year ($10/month × 12)
+          monthly: { amount: 1500, name: "SydeVault Basic Hosting Plan" }, // $15.00/month
+          yearly: { amount: 12000, name: "SydeVault Basic Hosting Plan (Annual)" } // $120.00/year ($10/month × 12)
         },
         pro: { 
-          monthly: { amount: 3000, name: "Pro Hosting Plan" }, // $30.00/month  
-          yearly: { amount: 24000, name: "Pro Hosting Plan (Annual)" } // $240.00/year ($20/month × 12)
+          monthly: { amount: 3000, name: "SydeVault Pro Hosting Plan" }, // $30.00/month  
+          yearly: { amount: 24000, name: "SydeVault Pro Hosting Plan (Annual)" } // $240.00/year ($20/month × 12)
         }
       };
       
@@ -111,7 +111,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: { 
               name: planName,
-              description: `${interval === 'year' ? 'Annual' : 'Monthly'} hosting for your website`
+              description: `${interval === 'year' ? 'Annual' : 'Monthly'} website hosting by SydeVault`
             },
             unit_amount: planAmount,
             recurring: { interval: interval as 'month' | 'year' },

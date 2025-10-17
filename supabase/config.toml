@@ -10,8 +10,8 @@ max_rows = 1000
 [auth]
 enabled = true
 port = 54324
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://wutyryaqlmgsbllnyoop.supabase.co"]
+site_url = "https://sydevault.com"
+additional_redirect_urls = ["https://www.sydevault.com", "http://localhost:3000"]
 jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_captcha_enabled = false

@@ -188,18 +188,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to user
     const confirmationEmailResponse = await resend.emails.send({
-      from: "Syde Vault <onboarding@resend.dev>",
+      from: "SydeVault Support <support@sydevault.com>",
       to: [email],
       subject: "Thank you for contacting us!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #7B68EE;">Thank you for contacting us, ${name}!</h2>
+          <h2 style="color: #DAA520;">Thank you for contacting us, ${name}!</h2>
           <p>We have received your message and will get back to you as soon as possible.</p>
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Your message:</strong></p>
             <p style="white-space: pre-wrap;">${message}</p>
           </div>
-          <p>Best regards,<br>The Syde Vault Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `,
     });

@@ -18,7 +18,7 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: string, daysOverdue: number, amount: number) => {
   const baseTemplate = {
-    from: "Flyy High <onboarding@resend.dev>",
+    from: "SydeVault Billing <billing@sydevault.com>",
     subject: "",
     html: ""
   };
@@ -28,7 +28,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
       baseTemplate.subject = `Payment Reminder: ${siteName} - 3 Days Overdue`;
       baseTemplate.html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #7B68EE;">Payment Reminder - 3 Days Overdue</h2>
+          <h2 style="color: #DAA520;">Payment Reminder - 3 Days Overdue</h2>
           <p>Dear Client,</p>
           <p>This is a friendly reminder that your payment for <strong>${siteName}</strong> is now 3 days overdue.</p>
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -39,7 +39,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
           </div>
           <p>Please make your payment as soon as possible to avoid any service interruption.</p>
           <p>If you have any questions, please don't hesitate to contact us.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
@@ -60,7 +60,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
           <p><strong>Action Required:</strong> Please make your payment immediately to avoid service suspension.</p>
           <p>If payment is not received within 7 days, your website may be temporarily suspended.</p>
           <p>If you're experiencing difficulties, please contact us immediately to discuss payment arrangements.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
@@ -81,7 +81,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
           <p><strong>URGENT:</strong> If payment is not received within 16 days (2 days from now), your website will be suspended.</p>
           <p>During suspension, your website will display a maintenance page until payment is received.</p>
           <p>To avoid suspension, please make your payment immediately or contact us to arrange a payment plan.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
@@ -106,7 +106,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
             <li>Contact us to confirm payment and request reactivation</li>
           </ol>
           <p>We want to restore your service as quickly as possible. Please contact us immediately.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
@@ -127,7 +127,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
           </div>
           <p><strong>FINAL WARNING:</strong> If payment is not received within 7 days, your account will be terminated and all data will be permanently deleted.</p>
           <p>This is your last opportunity to save your website and data. Please contact us immediately.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
@@ -146,7 +146,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
             <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
           </div>
           <p>No action is required yet, we just wanted to give you a heads-up.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
@@ -166,7 +166,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
             <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
           </div>
           <p>If you need to update billing details, please do so before the due date.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
@@ -186,7 +186,7 @@ const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: strin
             <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
           </div>
           <p>To ensure uninterrupted service, please make sure your payment method is up to date.</p>
-          <p>Best regards,<br>The Flyy High Team</p>
+          <p>Best regards,<br>The SydeVault Team</p>
         </div>
       `;
       break;
