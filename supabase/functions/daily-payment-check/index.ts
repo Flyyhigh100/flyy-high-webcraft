@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
     const today = new Date();
     const { data: overdueWebsites, error: fetchError } = await supabaseClient
       .from('websites')
-      .select('*, profiles!websites_user_id_fkey(email)')
+      .select('*')
       .in('payment_status', ['overdue_3d', 'overdue_7d', 'overdue_14d', 'overdue_30d'])
       .not('next_payment_date', 'is', null);
 
@@ -41,12 +41,29 @@ const handler = async (req: Request): Promise<Response> => {
       throw fetchError;
     }
 
-    console.log(`Found ${overdueWebsites?.length || 0} overdue websites`);
+    // Fetch user emails from auth
+    const { data: authData } = await supabaseClient.auth.admin.listUsers();
+    const emailMap = new Map<string, string>();
+    if (authData?.users) {
+      authData.users.forEach((user: any) => {
+        if (user.id && user.email) {
+          emailMap.set(user.id, user.email);
+        }
+      });
+    }
+
+    // Merge email data with websites
+    const overdueWebsitesWithEmails = (overdueWebsites || []).map(website => ({
+      ...website,
+      email: emailMap.get(website.user_id)
+    }));
+
+    console.log(`Found ${overdueWebsitesWithEmails.length} overdue websites`);
 
     const results = [];
 
     // Process overdue websites
-    for (const website of overdueWebsites || []) {
+    for (const website of overdueWebsitesWithEmails) {
       const nextPaymentDate = new Date(website.next_payment_date);
       const daysOverdue = Math.floor((today.getTime() - nextPaymentDate.getTime()) / (1000 * 60 * 60 * 24));
       
@@ -125,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Additionally, process upcoming payments (1, 3, and 7 days before due date)
     const { data: upcomingWebsites, error: upcomingError } = await supabaseClient
       .from('websites')
-      .select('*, profiles!websites_user_id_fkey(email)')
+      .select('*')
       .eq('payment_status', 'current')
       .not('next_payment_date', 'is', null);
 
@@ -134,7 +151,13 @@ const handler = async (req: Request): Promise<Response> => {
       throw upcomingError;
     }
 
-    for (const website of upcomingWebsites || []) {
+    // Merge email data with upcoming websites
+    const upcomingWebsitesWithEmails = (upcomingWebsites || []).map(website => ({
+      ...website,
+      email: emailMap.get(website.user_id)
+    }));
+
+    for (const website of upcomingWebsitesWithEmails) {
       const nextPaymentDate = new Date(website.next_payment_date);
       const daysUntilDue = Math.ceil((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       if (![1, 3, 7].includes(daysUntilDue)) continue;
@@ -181,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ 
       success: true,
-      checkedWebsites: overdueWebsites?.length || 0,
+      checkedWebsites: overdueWebsitesWithEmails.length,
       remindersSent: results.filter(r => r.success).length,
       results
     }), {
