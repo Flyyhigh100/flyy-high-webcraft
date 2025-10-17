@@ -46,19 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return false;
 
     try {
-      // Prefer secure RPC if available
       const { data: isAdminRpc, error: rpcError } = await supabase.rpc('is_admin', { _user_id: user.id });
 
       if (rpcError) {
-        console.warn('is_admin RPC unavailable, falling back to profiles check:', rpcError.message);
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        const allowed = !error && profile?.role === 'admin';
-        setIsAdmin(!!allowed);
-        return !!allowed;
+        console.error('is_admin RPC failed:', rpcError.message);
+        setIsAdmin(false);
+        return false;
       }
 
       setIsAdmin(!!isAdminRpc);
