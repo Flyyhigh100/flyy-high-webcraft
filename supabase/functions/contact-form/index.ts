@@ -2,19 +2,21 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ContactFormRequest {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  company?: string;
-}
+// Zod schema for contact form validation
+const contactFormSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+  email: z.string().trim().email("Invalid email address").max(254, "Email must be less than 254 characters"),
+  subject: z.string().trim().min(1, "Subject is required").max(200, "Subject must be less than 200 characters"),
+  message: z.string().trim().min(1, "Message is required").max(5000, "Message must be less than 5000 characters"),
+  company: z.string().trim().max(200, "Company name must be less than 200 characters").optional()
+});
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -108,38 +110,33 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const { name, email, subject, message, company }: ContactFormRequest = await req.json();
+    const requestBody = await req.json();
 
-    // Validate required fields
-    if (!name || !email || !subject || !message) {
-      await logSecurityEvent('contact_form_validation_error', clientIP, userAgent, {
-        missing_fields: { name: !name, email: !email, subject: !subject, message: !message }
-      }, false);
-      
-      return new Response(
-        JSON.stringify({ error: "All required fields must be filled out" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+    // Validate using Zod schema
+    let validatedData;
+    try {
+      validatedData = contactFormSchema.parse(requestBody);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        await logSecurityEvent('contact_form_validation_error', clientIP, userAgent, {
+          validation_errors: error.errors
+        }, false);
+        
+        return new Response(
+          JSON.stringify({ 
+            error: "Validation failed", 
+            details: error.errors.map(e => ({ field: e.path.join('.'), message: e.message }))
+          }),
+          {
+            status: 422,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
+      throw error;
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      await logSecurityEvent('contact_form_invalid_email', clientIP, userAgent, {
-        provided_email: email
-      }, false);
-      
-      return new Response(
-        JSON.stringify({ error: "Please provide a valid email address" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
+    const { name, email, subject, message, company } = validatedData;
 
     // Content validation (basic spam detection)
     const spamIndicators = ['viagra', 'casino', 'lottery', 'click here', 'free money'];

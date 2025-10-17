@@ -131,6 +131,30 @@ const handler = async (req: Request): Promise<Response> => {
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
     const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "admin@sydevault.com";
 
+    const requestBody = await req.json();
+
+    // Validate using Zod schema
+    let validatedData;
+    try {
+      validatedData = projectInquirySchema.parse(requestBody);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        await logSecurityEvent(supabase, 'project_inquiry_validation_error', clientIP, userAgent, {
+          validation_errors: error.errors
+        }, false);
+        
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "Validation failed", 
+            details: error.errors.map(e => ({ field: e.path.join('.'), message: e.message }))
+          }),
+          { status: 422, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
+        );
+      }
+      throw error;
+    }
+
     const {
       name,
       email,
@@ -139,30 +163,7 @@ const handler = async (req: Request): Promise<Response> => {
       currentWebsite,
       projectDescription,
       botField,
-    }: ProjectInquiryRequest = await req.json();
-
-    // Basic validation
-    if (!name || !email || !projectType || !projectDescription) {
-      await logSecurityEvent(supabase, 'project_inquiry_validation_error', clientIP, userAgent, {
-        missing_fields: { name: !name, email: !email, projectType: !projectType, projectDescription: !projectDescription }
-      }, false);
-      
-      return new Response(
-        JSON.stringify({ success: false, error: "Missing required fields" }),
-        { status: 422, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
-      );
-    }
-
-    if (!isValidEmail(email)) {
-      await logSecurityEvent(supabase, 'project_inquiry_invalid_email', clientIP, userAgent, {
-        provided_email: email
-      }, false);
-      
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid email address" }),
-        { status: 422, headers: { "Content-Type": "application/json", ...corsHeaders, ...securityHeaders } }
-      );
-    }
+    } = validatedData;
 
     // Honeypot check (simple anti-bot)
     if (botField && botField.trim() !== "") {
@@ -176,14 +177,14 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Normalize/sanitize fields
+    // Data is already validated and normalized by Zod, no need for additional sanitization
     const clean = {
-      name: sanitize(name, 120),
+      name: name.trim(),
       email: email.toLowerCase().trim(),
-      phone: sanitize(phone ?? "", 40),
-      projectType: sanitize(projectType, 80),
-      currentWebsite: sanitize(currentWebsite ?? "", 200),
-      projectDescription: sanitize(projectDescription, 2000),
+      phone: phone?.trim() ?? "",
+      projectType: projectType.trim(),
+      currentWebsite: currentWebsite?.trim() ?? "",
+      projectDescription: projectDescription.trim(),
     };
 
     // Basic rate limiting per email: 1 request / 60s

@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { timingSafeEqual } from "https://deno.land/std@0.190.0/crypto/timing_safe_equal.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -168,8 +169,28 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Verify the access key
-    if (accessKey !== ADMIN_ACCESS_KEY) {
+    // Verify the access key using constant-time comparison to prevent timing attacks
+    const encoder = new TextEncoder();
+    const accessKeyBytes = encoder.encode(accessKey);
+    const adminKeyBytes = encoder.encode(ADMIN_ACCESS_KEY);
+    
+    // Check lengths first (this doesn't leak information about the key itself)
+    if (accessKeyBytes.length !== adminKeyBytes.length) {
+      await logSecurityEvent('admin_access_invalid_key', user.id, clientIP, userAgent, {
+        email: user.email,
+        attempted_key_length: accessKey.length
+      }, false);
+      
+      return new Response(JSON.stringify({ 
+        error: 'Invalid access key. Please try again.' 
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Constant-time comparison to prevent timing attacks
+    if (!timingSafeEqual(accessKeyBytes, adminKeyBytes)) {
       await logSecurityEvent('admin_access_invalid_key', user.id, clientIP, userAgent, {
         email: user.email,
         attempted_key_length: accessKey.length
@@ -186,25 +207,48 @@ const handler = async (req: Request): Promise<Response> => {
     // Make sure the profiles table exists
     await supabase.rpc('create_profiles_if_not_exists');
 
-    // Update the user's profile to admin role
-    const { error: updateError } = await supabase
+    // Ensure user profile exists
+    const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
         id: user.id,
-        user_id: user.id,
-        email: user.email,
-        role: 'admin'
+        user_id: user.id
       });
 
-    if (updateError) {
-      console.error('Database error:', updateError);
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
       await logSecurityEvent('admin_access_db_error', user.id, clientIP, userAgent, {
         email: user.email,
-        error: updateError.message
+        error: profileError.message
       }, false);
       
       return new Response(JSON.stringify({ 
-        error: 'Error updating profile in database. Please contact support.' 
+        error: 'Error creating profile. Please contact support.' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Insert admin role into user_roles table
+    const { error: roleError } = await supabase
+      .from('user_roles')
+      .insert({
+        user_id: user.id,
+        role: 'admin'
+      })
+      .select()
+      .single();
+
+    if (roleError) {
+      console.error('Role assignment error:', roleError);
+      await logSecurityEvent('admin_access_db_error', user.id, clientIP, userAgent, {
+        email: user.email,
+        error: roleError.message
+      }, false);
+      
+      return new Response(JSON.stringify({ 
+        error: 'Error assigning admin role. Please contact support.' 
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
