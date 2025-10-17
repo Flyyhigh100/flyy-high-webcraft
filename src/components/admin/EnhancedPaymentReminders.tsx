@@ -25,9 +25,7 @@ interface ClientWebsiteWithReminder {
   next_payment_date: string;
   next_payment_amount: number;
   last_payment_reminder_sent: string | null;
-  profile?: {
-    email: string;
-  };
+  email?: string;
 }
 
 const REMINDER_CONFIGS: PaymentReminderConfig[] = [
@@ -51,18 +49,36 @@ export function EnhancedPaymentReminders() {
 
   const loadData = async () => {
     try {
-      // Load websites with payment info
+      setIsLoading(true);
+      
+      // Fetch websites without profile join
       const { data: websitesData, error: websitesError } = await supabase
         .from('websites')
-        .select(`
-          *,
-          profiles:user_id (email)
-        `)
+        .select('*')
         .order('next_payment_date', { ascending: true });
 
       if (websitesError) throw websitesError;
 
-      // Load email templates
+      // Fetch auth users to get emails (admin only)
+      const { data: authData } = await supabase.auth.admin.listUsers();
+      
+      // Create email lookup map
+      const emailMap = new Map<string, string>();
+      if (authData?.users) {
+        authData.users.forEach((user: any) => {
+          if (user.id && user.email) {
+            emailMap.set(user.id, user.email);
+          }
+        });
+      }
+
+      // Merge email data with websites
+      const websitesWithEmails = (websitesData || []).map(website => ({
+        ...website,
+        email: emailMap.get(website.user_id) || undefined
+      }));
+
+      // Fetch email templates
       const { data: templatesData, error: templatesError } = await supabase
         .from('email_templates')
         .select('*')
@@ -70,7 +86,7 @@ export function EnhancedPaymentReminders() {
 
       if (templatesError) throw templatesError;
 
-      setWebsites(websitesData || []);
+      setWebsites(websitesWithEmails);
       setEmailTemplates(templatesData || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -343,7 +359,7 @@ export function EnhancedPaymentReminders() {
                     <span>Plan: {website.plan_type}</span>
                     <span>Amount: ${website.next_payment_amount}</span>
                     <span>Due: {new Date(website.next_payment_date).toLocaleDateString()}</span>
-                    <span>Email: {website.profile?.email || 'No email'}</span>
+                    <span>Email: {website.email || 'No email'}</span>
                   </div>
                   {website.last_payment_reminder_sent && (
                     <p className="text-xs text-muted-foreground mt-1">
@@ -356,7 +372,7 @@ export function EnhancedPaymentReminders() {
                   variant="outline"
                   size="sm"
                   onClick={() => sendIndividualReminder(website)}
-                  disabled={!website.profile?.email}
+                  disabled={!website.email}
                 >
                   <Send className="h-4 w-4 mr-2" />
                   Send Reminder
