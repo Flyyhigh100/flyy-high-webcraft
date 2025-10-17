@@ -261,7 +261,6 @@ export type Database = {
           id: string
           marketing_opt_in: boolean | null
           marketing_updated_at: string | null
-          role: string | null
           updated_at: string | null
           user_id: string | null
         }
@@ -270,7 +269,6 @@ export type Database = {
           id: string
           marketing_opt_in?: boolean | null
           marketing_updated_at?: string | null
-          role?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -279,7 +277,6 @@ export type Database = {
           id?: string
           marketing_opt_in?: boolean | null
           marketing_updated_at?: string | null
-          role?: string | null
           updated_at?: string | null
           user_id?: string | null
         }

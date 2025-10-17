@@ -163,10 +163,7 @@ export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
   // Fetch websites with user profile information
   const { data: websitesData, error } = await supabase
     .from('websites')
-    .select(`
-      *,
-      profiles!websites_user_id_fkey(role, user_id)
-    `)
+    .select('*')
     .order('name', { ascending: true });
   
   if (error) {
@@ -191,7 +188,6 @@ export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
   }
   
   return (websitesData || []).map(website => {
-    const profile = Array.isArray(website.profiles) ? website.profiles[0] : website.profiles;
     return {
       id: website.id,
       name: website.name,
@@ -204,7 +200,7 @@ export const fetchClientWebsites = async (): Promise<ClientWebsite[]> => {
       gracePeriodEndDate: website.grace_period_end_date || '',
       suspensionDate: website.suspension_date || '',
       clientEmail: emailMap.get(website.user_id) || '',
-      clientRole: profile?.role || ''
+      clientRole: 'user' // Role is now managed in user_roles table, not needed for website display
     };
   });
 };

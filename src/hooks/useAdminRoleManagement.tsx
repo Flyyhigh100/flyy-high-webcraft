@@ -9,12 +9,16 @@ export function useAdminRoleManagement() {
   
   const makeUserAdmin = async (userId: string, users: UserProfile[], setUsers: React.Dispatch<React.SetStateAction<UserProfile[]>>) => {
     try {
+      // Add admin role to user_roles table instead of updating profiles
       const { error } = await supabase
-        .from('profiles')
-        .update({ role: 'admin' })
-        .eq('id', userId);
+        .from('user_roles')
+        .insert({ user_id: userId, role: 'admin' })
+        .select()
+        .single();
         
-      if (error) throw error;
+      if (error && error.code !== '23505') { // Ignore duplicate key errors
+        throw error;
+      }
       
       // Update the local state
       setUsers(users.map(user => 

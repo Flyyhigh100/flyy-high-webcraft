@@ -45,33 +45,19 @@ Deno.serve(async (req) => {
 
     console.log('User verified:', user.email);
 
-    // Check if user is admin (multiple methods for reliability)
-    let isAdmin = false;
+    // Check if user is admin using is_admin RPC
+    const { data: isAdminRpc, error: isAdminError } = await supabaseAdmin
+      .rpc('is_admin', { _user_id: user.id });
 
-    // Method 1: Direct email check
-    if (user.email === 'flyyhigh824@gmail.com') {
-      isAdmin = true;
-      console.log('Admin access granted via email check');
-    } else {
-      // Method 2: Check profile role using service role
-      const { data: profile, error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (!profileError && profile?.role === 'admin') {
-        isAdmin = true;
-        console.log('Admin access granted via profile check');
-      }
-    }
-
-    if (!isAdmin) {
+    if (isAdminError || !isAdminRpc) {
+      console.error('Admin check failed:', isAdminError);
       throw new Error('Admin access required');
     }
 
+    console.log('Admin access verified for:', user.email);
+
     // Fetch all admin data using service role (bypasses RLS)
-    const [profilesResult, paymentsResult, websitesResult, sessionsResult, authUsersResult] = await Promise.all([
+    const [profilesResult, paymentsResult, websitesResult, sessionsResult, authUsersResult, userRolesResult] = await Promise.all([
       // Fetch all profiles with last sign-in information
       supabaseAdmin
         .from('profiles')
@@ -95,7 +81,12 @@ Deno.serve(async (req) => {
         .order('last_sign_in', { ascending: false }),
 
       // Fetch emails from auth.users (profiles table doesn't have email column)
-      supabaseAdmin.auth.admin.listUsers()
+      supabaseAdmin.auth.admin.listUsers(),
+
+      // Fetch user roles from user_roles table
+      supabaseAdmin
+        .from('user_roles')
+        .select('user_id, role')
     ]);
 
     console.log('Data fetch results:', {
@@ -103,7 +94,8 @@ Deno.serve(async (req) => {
       payments: paymentsResult.error ? 'error' : `${paymentsResult.data?.length} records`,
       websites: websitesResult.error ? 'error' : `${websitesResult.data?.length} records`,
       sessions: sessionsResult.error ? 'error' : `${sessionsResult.data?.length} records`,
-      authUsers: authUsersResult.error ? 'error' : `${authUsersResult.data?.users?.length} records`
+      authUsers: authUsersResult.error ? 'error' : `${authUsersResult.data?.users?.length} records`,
+      userRoles: userRolesResult.error ? 'error' : `${userRolesResult.data?.length} records`
     });
 
     // Check for errors
@@ -152,17 +144,28 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Create role lookup map from user_roles table (prioritize admin role)
+    const roleMap = new Map<string, string>();
+    if (userRolesResult.data) {
+      userRolesResult.data.forEach((ur: any) => {
+        const existingRole = roleMap.get(ur.user_id);
+        if (!existingRole || ur.role === 'admin') {
+          roleMap.set(ur.user_id, ur.role);
+        }
+      });
+    }
+
     // Build a profiles map for quick lookups
     const profilesMap = new Map<string, any>();
     (profilesResult.data || []).forEach((p: any) => {
       profilesMap.set(p.id, p);
     });
 
-    // Transform profiles data (fetch email from auth.users)
+    // Transform profiles data with emails and roles
     const profiles = (profilesResult.data || []).map((profile: any) => ({
       id: profile.id,
       email: emailMap.get(profile.id) || 'Unknown',
-      role: profile.role || 'user',
+      role: roleMap.get(profile.id) || 'user',
       created_at: profile.created_at,
       updated_at: profile.updated_at,
       user_id: profile.user_id || profile.id,
