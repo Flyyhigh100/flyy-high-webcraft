@@ -12,6 +12,7 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import GetStarted from "./pages/GetStarted";
+import ProjectIntake from "./pages/ProjectIntake";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ClientOnboarding from "./pages/ClientOnboarding";
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/get-started" element={<GetStarted />} />
+              <Route path="/project-intake" element={<ProjectIntake />} />
               
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
