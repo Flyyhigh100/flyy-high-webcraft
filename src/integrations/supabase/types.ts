@@ -565,6 +565,141 @@ export type Database = {
         }
         Relationships: []
       }
+      website_project_intake: {
+        Row: {
+          additional_notes: string | null
+          admin_notes: string | null
+          brand_colors: string | null
+          budget_range: string
+          business_description: string
+          business_name: string
+          competitors: string | null
+          created_at: string
+          current_website_url: string | null
+          deadline_event: string | null
+          design_dislikes: string | null
+          design_styles: string[]
+          domain_name: string | null
+          email: string
+          estimated_pages: string
+          full_name: string
+          has_brand_guidelines: string
+          has_color_palette: string
+          has_content_ready: string
+          has_domain_registrar_access: string
+          has_existing_website: boolean
+          has_hosting: string
+          has_logo: string
+          has_professional_photos: string
+          id: string
+          industry: string
+          is_new_or_redesign: string
+          needs_content_updates: string
+          needs_ongoing_hosting: string
+          owns_domain: string
+          phone: string | null
+          preferred_contact_method: string
+          reference_websites: string | null
+          referral_source: string | null
+          required_features: string[]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          target_audience: string
+          timeline: string
+          website_goals: string[]
+          website_types: string[]
+        }
+        Insert: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          brand_colors?: string | null
+          budget_range: string
+          business_description: string
+          business_name: string
+          competitors?: string | null
+          created_at?: string
+          current_website_url?: string | null
+          deadline_event?: string | null
+          design_dislikes?: string | null
+          design_styles: string[]
+          domain_name?: string | null
+          email: string
+          estimated_pages: string
+          full_name: string
+          has_brand_guidelines: string
+          has_color_palette: string
+          has_content_ready: string
+          has_domain_registrar_access: string
+          has_existing_website?: boolean
+          has_hosting: string
+          has_logo: string
+          has_professional_photos: string
+          id?: string
+          industry: string
+          is_new_or_redesign: string
+          needs_content_updates: string
+          needs_ongoing_hosting: string
+          owns_domain: string
+          phone?: string | null
+          preferred_contact_method: string
+          reference_websites?: string | null
+          referral_source?: string | null
+          required_features: string[]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_audience: string
+          timeline: string
+          website_goals: string[]
+          website_types: string[]
+        }
+        Update: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          brand_colors?: string | null
+          budget_range?: string
+          business_description?: string
+          business_name?: string
+          competitors?: string | null
+          created_at?: string
+          current_website_url?: string | null
+          deadline_event?: string | null
+          design_dislikes?: string | null
+          design_styles?: string[]
+          domain_name?: string | null
+          email?: string
+          estimated_pages?: string
+          full_name?: string
+          has_brand_guidelines?: string
+          has_color_palette?: string
+          has_content_ready?: string
+          has_domain_registrar_access?: string
+          has_existing_website?: boolean
+          has_hosting?: string
+          has_logo?: string
+          has_professional_photos?: string
+          id?: string
+          industry?: string
+          is_new_or_redesign?: string
+          needs_content_updates?: string
+          needs_ongoing_hosting?: string
+          owns_domain?: string
+          phone?: string | null
+          preferred_contact_method?: string
+          reference_websites?: string | null
+          referral_source?: string | null
+          required_features?: string[]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_audience?: string
+          timeline?: string
+          website_goals?: string[]
+          website_types?: string[]
+        }
+        Relationships: []
+      }
       websites: {
         Row: {
           auto_renew: boolean | null
