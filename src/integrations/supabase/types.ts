@@ -390,7 +390,7 @@ export type Database = {
           details: Json | null
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           success: boolean
           user_agent: string | null
           user_id: string | null
@@ -400,7 +400,7 @@ export type Database = {
           details?: Json | null
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           success?: boolean
           user_agent?: string | null
           user_id?: string | null
@@ -410,7 +410,7 @@ export type Database = {
           details?: Json | null
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           success?: boolean
           user_agent?: string | null
           user_id?: string | null
@@ -542,7 +542,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           last_sign_in: string | null
           user_agent: string | null
           user_id: string | null
@@ -550,7 +550,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           last_sign_in?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -558,7 +558,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           last_sign_in?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -657,35 +657,23 @@ export type Database = {
         }
         Returns: boolean
       }
-      check_invitation_query_rate_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      check_profile_query_rate_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      check_invitation_query_rate_limit: { Args: never; Returns: boolean }
+      check_profile_query_rate_limit: { Args: never; Returns: boolean }
       cleanup_client_data: {
         Args: { client_email_param?: string; website_id_param?: string }
         Returns: Json
       }
-      cleanup_old_rate_limit_records: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_old_rate_limits: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_old_rate_limit_records: { Args: never; Returns: undefined }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       get_monthly_payment_totals: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           month: string
           total: number
         }[]
       }
       get_own_profile: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           id: string
@@ -694,10 +682,7 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_user_email_by_id: {
-        Args: { _user_id: string }
-        Returns: string
-      }
+      get_user_email_by_id: { Args: { _user_id: string }; Returns: string }
       get_user_emails_bulk: {
         Args: { user_ids: string[] }
         Returns: {
@@ -706,7 +691,7 @@ export type Database = {
         }[]
       }
       get_user_invitation_status: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           has_active_invitation: boolean
           invitation_amount: number
@@ -722,26 +707,14 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
-      is_user_email_verified: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_user_email_verified: { Args: never; Returns: boolean }
       table_exists: {
         Args: { schema_name_param?: string; table_name_param: string }
         Returns: boolean
       }
-      update_payment_statuses: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      websites_table_exists: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      update_payment_statuses: { Args: never; Returns: undefined }
+      websites_table_exists: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
