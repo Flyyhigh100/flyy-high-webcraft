@@ -59,7 +59,7 @@ const WebsiteDevelopmentSection = () => {
   ];
   
   const handleGetStarted = () => {
-    navigate('/contact');
+    navigate('/project-intake');
   };
 
   return (

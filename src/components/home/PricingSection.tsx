@@ -52,7 +52,7 @@ const PricingSection = () => {
   ];
   
   const handleGetStarted = () => {
-    navigate('/dashboard');
+    navigate('/project-intake');
   };
 
   return (

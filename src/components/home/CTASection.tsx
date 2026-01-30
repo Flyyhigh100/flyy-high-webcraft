@@ -15,7 +15,7 @@ const CTASection = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button asChild className="bg-background text-foreground hover:bg-muted px-8 py-6 text-lg font-semibold shadow-lg">
-              <Link to="/contact">Get Your Free Consultation</Link>
+              <Link to="/project-intake">Get Your Free Consultation</Link>
             </Button>
           </div>
         </div>
