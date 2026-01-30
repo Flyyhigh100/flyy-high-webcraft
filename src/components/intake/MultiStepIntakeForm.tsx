@@ -18,6 +18,7 @@ import { IntakeFormData, initialFormData, STEP_TITLES } from './types';
 const MultiStepIntakeForm = () => {
   const { toast } = useToast();
   const formRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [formData, setFormData] = useState<IntakeFormData>(initialFormData);
@@ -175,8 +176,12 @@ const MultiStepIntakeForm = () => {
     }
   };
 
-  // Scroll to top of form when step changes
+  // Scroll to top of form when step changes (not on initial load)
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
