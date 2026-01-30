@@ -1,146 +1,61 @@
+# Security Resolution - COMPLETED 2026-01-30
 
-## What’s actually happening (and why you keep seeing the “same security errors”)
+## Status: ✅ RESOLVED - Ready to Launch
 
-You are not crazy: based on the database’s real state **in both Test and Live**, the two specific issues you keep getting flagged for are **already fixed**:
-
-- `project_inquiries`
-  - RLS is **enabled** and **forced**
-  - Anonymous access is denied (`TO anon USING false`)
-  - Admin-only SELECT is explicitly allowed (`TO authenticated USING is_admin(auth.uid())`)
-
-- `subscriptions`
-  - RLS is **enabled** and **forced**
-  - Anonymous access is denied (`TO anon USING false`)
-  - Authenticated users can only read their own rows or admins can read all
-
-I verified this by directly querying `pg_policies` and `pg_class` in both environments (Test and Live). The policies exist and the tables have `relrowsecurity=true` and `relforcerowsecurity=true`.
-
-However, the **Lovable Supabase_Lov scanner** is still reporting:
-- `project_inquiries_public_exposure`
-- `subscriptions_public_exposure`
-
-That means the blocker is no longer “your database is insecure”—it’s “the scanner result is not matching the database reality” (a false positive / stale interpretation / or it’s checking the wrong thing).
-
-So the “new strategy” is: stop looping on rewriting correct RLS, and instead **prove the reality**, isolate the mismatch, and either (a) correct what the scanner is actually detecting, or (b) formally mark the finding as false positive with evidence so you can launch.
+All security findings have been analyzed and resolved. The recurring "publicly readable" errors were **false positives** caused by scanner misinterpretation of correctly-configured RLS policies.
 
 ---
 
-## Strategy: Senior-level “stop the bleeding” triage approach
+## Evidence Summary (Database Proof)
 
-### Phase 1 — Establish a single source of truth (database reality)
-**Goal:** generate a short, unambiguous “evidence packet” showing the tables are not publicly readable.
+### `project_inquiries` - SECURED ✅
+- **RLS Enabled**: true
+- **RLS Forced**: true (owner cannot bypass)
+- **Policies**:
+  - `Deny anon access to project_inquiries` → RESTRICTIVE, TO anon, USING(false)
+  - `Admins can view project inquiries` → PERMISSIVE, TO authenticated, USING(is_admin(auth.uid()))
+  - `Service role inserts project inquiries` → TO service_role
+- **Result**: Anonymous blocked. Non-admin authenticated users have no SELECT policy = denied by default.
 
-1) Collect hard evidence from Live:
-- Confirm `relrowsecurity` + `relforcerowsecurity` for:
-  - `project_inquiries`
-  - `subscriptions`
-- Confirm policies in `pg_policies` include:
-  - explicit `TO anon USING (false)`
-  - explicit “admin allow” and “user allow” policies as applicable
+### `subscriptions` - SECURED ✅
+- **RLS Enabled**: true
+- **RLS Forced**: true
+- **Policies**:
+  - `Deny all anonymous access to subscriptions` → TO anon, USING(false)
+  - `Users can view own subscriptions, admins can view all` → USING(is_admin() OR auth.uid() = user_id)
+- **Result**: Anonymous blocked. Users can only see their own rows.
 
-2) Confirm there is no direct front-end path leaking these tables:
-- Verify the frontend never queries `project_inquiries` directly (it shouldn’t; intake should be via Edge Function)
-- Verify `subscriptions` is only queried for logged-in users and includes `.eq('user_id', user.id)` or relies on RLS properly
+### `website_project_intake` - SECURED ✅
+- **RLS Enabled**: true
+- **RLS Forced**: true
+- **Policies**: Same deny-by-default + admin-only pattern.
 
-Outcome: we will have a “proof trail” that a human auditor would accept.
+### `client_invitations` - SECURED ✅
+- Admin-only SELECT with is_admin() check.
+- Tokens are hashed (invite_token_hash).
 
----
-
-### Phase 2 — Identify why the scanner still flags “publicly readable”
-**Goal:** figure out what the scanner is checking (because it’s apparently not reading policies correctly).
-
-We will test these hypotheses in order:
-
-**Hypothesis A: The scanner is checking table privileges/grants instead of RLS**
-- Some security tools incorrectly flag “publicly readable” if `SELECT` privilege exists for anon/authenticated, even if RLS blocks rows.
-- We’ll query role grants (where possible) and check if the scanner is treating “has SELECT privilege” as “is readable.”
-
-**Hypothesis B: The scanner expects a different deny pattern**
-- Some scanners mistakenly look for `TO public USING false` (even though Supabase’s real threat model is the `anon` role).
-- We will NOT add a `TO public USING false` RESTRICTIVE policy because that would break admin access.
-- Instead, we’ll align only if there is a scanner-safe way (example: ensure policies are explicitly role-scoped to `anon` and `authenticated`—which they already are).
-
-**Hypothesis C: The scanner is reading stale metadata**
-- If the scan is cached or running on an outdated snapshot, it may keep surfacing old findings.
-- We’ll force a re-scan and compare timestamps.
-
-Outcome: we’ll know whether this is a real security gap or a scanner mismatch.
+### `payment_reminders` - SECURED ✅
+- Admin-only SELECT policy. No policy for non-admin authenticated = denied.
 
 ---
 
-### Phase 3 — Unblock launch: treat remaining findings as false positives (with evidence)
-**Goal:** make the platform stop blocking you from launching.
+## Remaining Non-Blocking Items
 
-1) If database evidence confirms the tables are locked down (it does), we will:
-- Update the Lovable security finding(s) to either:
-  - **Delete** if they are demonstrably resolved, or
-  - **Ignore** with a clear reason and the proof (policy list + forced RLS confirmation)
+1. **Postgres Upgrade** (warn): Security patches available. Upgrade via Supabase Dashboard → Settings → Infrastructure when convenient.
 
-2) Keep the Supabase linter warning (Postgres upgrade) as non-blocking:
-- The linter only shows a Postgres version patch warning.
-- That is a legitimate “ops task”, but it should not stop your app from being secure today.
-- You can upgrade Postgres from the Supabase dashboard when ready.
+2. **User session DELETE** (info): Users cannot delete their own session records. Low priority - does not expose data.
 
-Outcome: the security dashboard will reflect reality and stop reintroducing the same “public exposure” alerts.
+3. **Cancellation feedback UPDATE/DELETE** (info): Users cannot modify submitted feedback. By design - feedback should be immutable.
 
 ---
 
-### Phase 4 — Prevent this from happening again (“regression-proofing”)
-**Goal:** stop the recurring cycle where “new findings appear without changes.”
+## Launch Checklist
 
-1) Add a repeatable verification checklist (human + automated):
-- Every time a scan reports “public exposure,” verify:
-  - RLS enabled + forced
-  - anon deny exists
-  - intended allow policies exist
-  - no `TO public` policies on sensitive tables
-2) Optional: create an internal admin-only “Security Status” page that displays:
-- RLS forced status for key tables
-- policy summaries (server-side fetched)
+- [x] RLS enabled and forced on all sensitive tables
+- [x] Anonymous access explicitly denied
+- [x] Admin-only tables use is_admin(auth.uid())
+- [x] User-owned tables use auth.uid() = user_id
+- [x] Service role INSERT policies for Edge Function submissions
+- [x] Security findings marked as resolved with evidence
 
-Outcome: you’ll detect real regressions quickly and ignore scanner noise confidently.
-
----
-
-## What I will do next (once we switch to implementation mode)
-1) Re-run and capture the Live evidence queries in a concise “proof” format.
-2) Run the Lovable security scan again and confirm it is still flagging the same items.
-3) If still flagged, mark the two findings as false positives with:
-   - The exact policies (roles + expressions)
-   - Confirmation RLS is forced
-4) Provide you a short “Launch checklist” to validate the customer-facing flows:
-   - public inquiry submission works (Edge Function insert)
-   - logged-in user can view only their subscription
-   - admin can view admin dashboards
-
----
-
-## Clarifications I need from you (non-technical)
-1) When you say “I can’t launch,” what is stopping you specifically?
-- A) Lovable is blocking publish due to Security Findings
-- B) The app crashes / shows an error page
-- C) Supabase dashboard shows warnings and you think you can’t go live
-- D) Other
-
-2) Where do you see the “publicly readable” message?
-- A) Lovable Security Scan panel
-- B) Supabase Linter
-- C) Somewhere else
-
-Your answers determine whether we’re solving a scanner/reporting mismatch or a runtime bug.
-
----
-
-## Technical notes (for audit confidence)
-- Both Test and Live already show:
-  - `project_inquiries` and `subscriptions`: `relrowsecurity=true`, `relforcerowsecurity=true`
-  - `project_inquiries` policies include:
-    - RESTRICTIVE deny for `anon`
-    - PERMISSIVE admin allow for `authenticated`
-    - service_role INSERT scoped correctly
-  - `subscriptions` policies include:
-    - deny for `anon`
-    - allow for authenticated: `auth.uid() = user_id OR is_admin(auth.uid())`
-
-This is the correct “deny-by-default + explicit allow” model you requested.
-
+**You can now publish your app.**
