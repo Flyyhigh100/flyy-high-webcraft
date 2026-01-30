@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +15,17 @@ const securityHeaders = {
   "X-Frame-Options": "DENY",
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
 };
+
+// Zod schema for runtime validation
+const projectInquirySchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
+  email: z.string().trim().email("Invalid email format").max(254, "Email too long"),
+  phone: z.string().trim().max(20, "Phone number too long").optional().nullable(),
+  projectType: z.string().trim().min(1, "Project type is required").max(100, "Project type too long"),
+  currentWebsite: z.string().trim().max(500, "Website URL too long").optional().nullable(),
+  projectDescription: z.string().trim().min(10, "Description too short").max(5000, "Description too long"),
+  botField: z.string().optional().nullable(),
+});
 
 interface ProjectInquiryRequest {
   name: string;
