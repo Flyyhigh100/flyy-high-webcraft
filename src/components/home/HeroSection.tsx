@@ -1,4 +1,4 @@
-
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Rocket, Search, ShieldCheck } from 'lucide-react';
 
@@ -23,7 +23,7 @@ const HeroSection = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Button asChild className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
-                <a href="/get-started">Get Started</a>
+                <Link to="/project-intake">Get Started</Link>
               </Button>
               <Button asChild variant="outline" className="border-primary text-primary hover:bg-secondary px-8 py-6 text-lg">
                 <a href="#portfolio">View Portfolio</a>
