@@ -1,61 +1,36 @@
-# Security Resolution - COMPLETED 2026-01-30
 
-## Status: ✅ RESOLVED - Ready to Launch
+# Fix Hero Section "Get Started" Button
 
-All security findings have been analyzed and resolved. The recurring "publicly readable" errors were **false positives** caused by scanner misinterpretation of correctly-configured RLS policies.
+## Problem
+The "Get Started" button in the Hero section links to `/get-started` instead of `/project-intake`. You want users to go to the multi-step intake form.
 
----
+## Solution
+Update the Hero section button to navigate to `/project-intake` and use React Router's `Link` component for proper client-side navigation (matching the pattern used elsewhere in the app).
 
-## Evidence Summary (Database Proof)
+## Change Required
 
-### `project_inquiries` - SECURED ✅
-- **RLS Enabled**: true
-- **RLS Forced**: true (owner cannot bypass)
-- **Policies**:
-  - `Deny anon access to project_inquiries` → RESTRICTIVE, TO anon, USING(false)
-  - `Admins can view project inquiries` → PERMISSIVE, TO authenticated, USING(is_admin(auth.uid()))
-  - `Service role inserts project inquiries` → TO service_role
-- **Result**: Anonymous blocked. Non-admin authenticated users have no SELECT policy = denied by default.
+**File: `src/components/home/HeroSection.tsx`**
 
-### `subscriptions` - SECURED ✅
-- **RLS Enabled**: true
-- **RLS Forced**: true
-- **Policies**:
-  - `Deny all anonymous access to subscriptions` → TO anon, USING(false)
-  - `Users can view own subscriptions, admins can view all` → USING(is_admin() OR auth.uid() = user_id)
-- **Result**: Anonymous blocked. Users can only see their own rows.
+Change line 25-27 from:
+```tsx
+<Button asChild className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
+  <a href="/get-started">Get Started</a>
+</Button>
+```
 
-### `website_project_intake` - SECURED ✅
-- **RLS Enabled**: true
-- **RLS Forced**: true
-- **Policies**: Same deny-by-default + admin-only pattern.
+To:
+```tsx
+<Button asChild className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
+  <Link to="/project-intake">Get Started</Link>
+</Button>
+```
 
-### `client_invitations` - SECURED ✅
-- Admin-only SELECT with is_admin() check.
-- Tokens are hashed (invite_token_hash).
+Also add the import at the top:
+```tsx
+import { Link } from 'react-router-dom';
+```
 
-### `payment_reminders` - SECURED ✅
-- Admin-only SELECT policy. No policy for non-admin authenticated = denied.
-
----
-
-## Remaining Non-Blocking Items
-
-1. **Postgres Upgrade** (warn): Security patches available. Upgrade via Supabase Dashboard → Settings → Infrastructure when convenient.
-
-2. **User session DELETE** (info): Users cannot delete their own session records. Low priority - does not expose data.
-
-3. **Cancellation feedback UPDATE/DELETE** (info): Users cannot modify submitted feedback. By design - feedback should be immutable.
-
----
-
-## Launch Checklist
-
-- [x] RLS enabled and forced on all sensitive tables
-- [x] Anonymous access explicitly denied
-- [x] Admin-only tables use is_admin(auth.uid())
-- [x] User-owned tables use auth.uid() = user_id
-- [x] Service role INSERT policies for Edge Function submissions
-- [x] Security findings marked as resolved with evidence
-
-**You can now publish your app.**
+## Why This Matters
+- Users clicking "Get Started" in the hero will now see the comprehensive multi-step intake form
+- Using `Link` instead of `<a>` provides smooth client-side navigation without full page reload
+- This aligns with the established user onboarding flow where all primary CTAs direct to `/project-intake`
