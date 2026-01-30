@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
       role: roleMap.get(profile.id) || 'user',
       created_at: profile.created_at,
       updated_at: profile.updated_at,
-      user_id: profile.user_id || profile.id,
+      user_id: profile.id, // user_id column removed - id is the canonical user identifier
       last_sign_in: sessionsMap.get(profile.id) || null
     }));
 
