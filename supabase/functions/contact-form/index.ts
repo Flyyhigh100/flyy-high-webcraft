@@ -92,7 +92,11 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     // Get client IP and user agent for logging and rate limiting
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    // Parse x-forwarded-for to extract first IP (handles proxy chains)
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const clientIP = forwardedFor 
+      ? forwardedFor.split(',')[0].trim() 
+      : (req.headers.get('x-real-ip') || '127.0.0.1');
     const userAgent = req.headers.get('user-agent') || 'Unknown';
     
     // Rate limiting check - max 3 contact form submissions per 10 minutes per IP
@@ -230,7 +234,10 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("Error in contact-form function:", error);
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const clientIP = forwardedFor 
+      ? forwardedFor.split(',')[0].trim() 
+      : (req.headers.get('x-real-ip') || '127.0.0.1');
     const userAgent = req.headers.get('user-agent') || 'Unknown';
     
     await logSecurityEvent('contact_form_server_error', clientIP, userAgent, {
