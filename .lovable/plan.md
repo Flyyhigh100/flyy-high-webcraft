@@ -1,36 +1,69 @@
 
-# Fix Hero Section "Get Started" Button
+# Update Email Routing for Contact & Intake Forms
 
-## Problem
-The "Get Started" button in the Hero section links to `/get-started` instead of `/project-intake`. You want users to go to the multi-step intake form.
+## Summary
+Update both edge functions to send notification emails to `kofi@sydevault.com` and use proper "from" labels with your verified domain.
 
-## Solution
-Update the Hero section button to navigate to `/project-intake` and use React Router's `Link` component for proper client-side navigation (matching the pattern used elsewhere in the app).
+---
 
-## Change Required
+## Resend Setup Verification ✅
 
-**File: `src/components/home/HeroSection.tsx`**
+Your Resend account is properly configured:
+- **Domain**: `notifications.sydevault.com` is verified
+- **API Keys**: Two keys exist with full access
+- **DNS Records**: Already set up in GoDaddy (verification passed)
 
-Change line 25-27 from:
-```tsx
-<Button asChild className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
-  <a href="/get-started">Get Started</a>
-</Button>
-```
+**One thing to verify**: Make sure the `RESEND_API_KEY` secret in Supabase matches one of the API keys shown in your Resend dashboard. The "No activity" status suggests either:
+- No emails have been sent yet (normal if you haven't tested), OR
+- The key in Supabase is different from these two
 
-To:
-```tsx
-<Button asChild className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg">
-  <Link to="/project-intake">Get Started</Link>
-</Button>
-```
+---
 
-Also add the import at the top:
-```tsx
-import { Link } from 'react-router-dom';
-```
+## Changes Required
 
-## Why This Matters
-- Users clicking "Get Started" in the hero will now see the comprehensive multi-step intake form
-- Using `Link` instead of `<a>` provides smooth client-side navigation without full page reload
-- This aligns with the established user onboarding flow where all primary CTAs direct to `/project-intake`
+### 1. Contact Form Edge Function
+**File**: `supabase/functions/contact-form/index.ts`
+
+| Setting | Current | New |
+|---------|---------|-----|
+| Admin notification recipient | `operations@sydevault.com` | `kofi@sydevault.com` |
+| Admin notification "from" | `Contact Form <onboarding@resend.dev>` | `Contact Form <no-reply@notifications.sydevault.com>` |
+| User confirmation "from" | `SydeVault Support <support@sydevault.com>` | `SydeVault <no-reply@notifications.sydevault.com>` |
+
+**Lines to change**:
+- Line 163: Update "from" address
+- Line 164: Update "to" address
+- Line 191: Update "from" address for user confirmation
+
+### 2. Intake Form Edge Function
+**File**: `supabase/functions/submit-website-intake/index.ts`
+
+| Setting | Current | New |
+|---------|---------|-----|
+| Admin notification recipient | Uses `ADMIN_NOTIFICATION_EMAIL` env var (defaults to `support@sydevault.com`) | `kofi@sydevault.com` (hardcoded for now) |
+| Admin notification "from" | `SydeVault <no-reply@notifications.sydevault.com>` | `Intake Form <no-reply@notifications.sydevault.com>` |
+| User confirmation "from" | `SydeVault <no-reply@notifications.sydevault.com>` | Same (already correct) |
+
+**Lines to change**:
+- Line 59: Remove fallback and hardcode `kofi@sydevault.com`
+- Line 220: Update "from" to say "Intake Form"
+
+---
+
+## Technical Summary
+
+All emails will use your verified subdomain `notifications.sydevault.com` which ensures deliverability. The "from" display names will clearly identify which form generated the email:
+
+- **Contact Form submissions**: From "Contact Form"
+- **Intake Form submissions**: From "Intake Form"
+
+Both go to: `kofi@sydevault.com`
+
+---
+
+## After Implementation
+
+1. **Test the contact form** by submitting a message on the website
+2. **Test the intake form** by completing the multi-step form
+3. Check your `kofi@sydevault.com` inbox for both emails
+4. Verify the "from" labels show correctly
