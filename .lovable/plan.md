@@ -1,69 +1,63 @@
 
-# Update Email Routing for Contact & Intake Forms
+# Fix Contact Form IP Address Parsing Error
 
-## Summary
-Update both edge functions to send notification emails to `kofi@sydevault.com` and use proper "from" labels with your verified domain.
+## Problem Identified
+The contact form fails with "unable to send message" because:
 
----
+1. The `x-forwarded-for` header contains multiple comma-separated IP addresses: `"104.136.70.243,104.136.70.243, 3.2.52.21"`
+2. The code tries to insert this entire string into the `ip_address` column
+3. PostgreSQL's `inet` type rejects the multi-IP string, causing a database error
+4. The error cascades and the form submission fails
 
-## Resend Setup Verification ✅
+## Root Cause
+When HTTP requests pass through multiple proxies (load balancers, CDNs, etc.), the `x-forwarded-for` header accumulates IP addresses in the format: `client_ip, proxy1_ip, proxy2_ip`. The current code doesn't parse this correctly.
 
-Your Resend account is properly configured:
-- **Domain**: `notifications.sydevault.com` is verified
-- **API Keys**: Two keys exist with full access
-- **DNS Records**: Already set up in GoDaddy (verification passed)
-
-**One thing to verify**: Make sure the `RESEND_API_KEY` secret in Supabase matches one of the API keys shown in your Resend dashboard. The "No activity" status suggests either:
-- No emails have been sent yet (normal if you haven't tested), OR
-- The key in Supabase is different from these two
+## Solution
+Extract only the **first IP address** from the header (which represents the original client). This is a simple string parsing fix.
 
 ---
 
-## Changes Required
+## Technical Changes
 
-### 1. Contact Form Edge Function
-**File**: `supabase/functions/contact-form/index.ts`
+**File: `supabase/functions/contact-form/index.ts`**
 
-| Setting | Current | New |
-|---------|---------|-----|
-| Admin notification recipient | `operations@sydevault.com` | `kofi@sydevault.com` |
-| Admin notification "from" | `Contact Form <onboarding@resend.dev>` | `Contact Form <no-reply@notifications.sydevault.com>` |
-| User confirmation "from" | `SydeVault Support <support@sydevault.com>` | `SydeVault <no-reply@notifications.sydevault.com>` |
+Update line 95 to parse the IP correctly:
 
-**Lines to change**:
-- Line 163: Update "from" address
-- Line 164: Update "to" address
-- Line 191: Update "from" address for user confirmation
+```typescript
+// Current (broken):
+const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
 
-### 2. Intake Form Edge Function
-**File**: `supabase/functions/submit-website-intake/index.ts`
+// Fixed:
+const forwardedFor = req.headers.get('x-forwarded-for');
+const clientIP = forwardedFor 
+  ? forwardedFor.split(',')[0].trim() 
+  : (req.headers.get('x-real-ip') || '127.0.0.1');
+```
 
-| Setting | Current | New |
-|---------|---------|-----|
-| Admin notification recipient | Uses `ADMIN_NOTIFICATION_EMAIL` env var (defaults to `support@sydevault.com`) | `kofi@sydevault.com` (hardcoded for now) |
-| Admin notification "from" | `SydeVault <no-reply@notifications.sydevault.com>` | `Intake Form <no-reply@notifications.sydevault.com>` |
-| User confirmation "from" | `SydeVault <no-reply@notifications.sydevault.com>` | Same (already correct) |
+Also update line 233 (in the catch block) with the same fix:
 
-**Lines to change**:
-- Line 59: Remove fallback and hardcode `kofi@sydevault.com`
-- Line 220: Update "from" to say "Intake Form"
+```typescript
+// Current (broken):
+const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+
+// Fixed:
+const forwardedFor = req.headers.get('x-forwarded-for');
+const clientIP = forwardedFor 
+  ? forwardedFor.split(',')[0].trim() 
+  : (req.headers.get('x-real-ip') || '127.0.0.1');
+```
 
 ---
 
-## Technical Summary
-
-All emails will use your verified subdomain `notifications.sydevault.com` which ensures deliverability. The "from" display names will clearly identify which form generated the email:
-
-- **Contact Form submissions**: From "Contact Form"
-- **Intake Form submissions**: From "Intake Form"
-
-Both go to: `kofi@sydevault.com`
+## Why This Works
+- The first IP in `x-forwarded-for` is always the original client IP
+- `.split(',')[0]` extracts just the first IP
+- `.trim()` removes any whitespace
+- PostgreSQL's `inet` type will now receive a valid single IP address
 
 ---
 
 ## After Implementation
-
-1. **Test the contact form** by submitting a message on the website
-2. **Test the intake form** by completing the multi-step form
-3. Check your `kofi@sydevault.com` inbox for both emails
-4. Verify the "from" labels show correctly
+1. The edge function will be redeployed automatically
+2. Test the contact form by submitting a message
+3. Verify the email arrives at kofi@sydevault.com
