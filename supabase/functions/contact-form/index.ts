@@ -160,8 +160,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to admin
     const adminEmailResponse = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>",
-      to: ["operations@sydevault.com"],
+      from: "Contact Form <no-reply@notifications.sydevault.com>",
+      to: ["kofi@sydevault.com"],
       subject: `New Contact Form Submission: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -188,7 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to user
     const confirmationEmailResponse = await resend.emails.send({
-      from: "SydeVault Support <support@sydevault.com>",
+      from: "SydeVault <no-reply@notifications.sydevault.com>",
       to: [email],
       subject: "Thank you for contacting us!",
       html: `

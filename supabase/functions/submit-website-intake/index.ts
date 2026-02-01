@@ -56,7 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const adminEmail = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "support@sydevault.com";
+    const adminEmail = "kofi@sydevault.com";
 
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error("Missing Supabase configuration");
@@ -217,7 +217,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       try {
         await resend.emails.send({
-          from: "SydeVault <no-reply@notifications.sydevault.com>",
+          from: "Intake Form <no-reply@notifications.sydevault.com>",
           to: [adminEmail],
           subject: `New Project Intake: ${formData.businessName}`,
           html: adminEmailContent,
