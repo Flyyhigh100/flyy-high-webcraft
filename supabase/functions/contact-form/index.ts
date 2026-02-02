@@ -165,7 +165,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to admin
     const adminEmailResponse = await resend.emails.send({
       from: "Contact Form <no-reply@notifications.sydevault.com>",
-      to: ["kofi@sydevault.com"],
+      to: ["kofi@sydevault.com", "chris.d.conley@gmail.com"],
       subject: `New Contact Form Submission: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
