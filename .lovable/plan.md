@@ -1,107 +1,105 @@
 
-# Update Hosting Options in Intake Form
 
-## Summary
-Modify the hosting-related questions to align with your business model where all clients must use your hosting. The "keep existing hosting" option will be removed, and the ongoing hosting question will be simplified since hosting with you is essentially required.
+## Fix: Intake Form Submission Rate Limit Bug
+
+### Problem Identified
+When you submit the intake form, you get a "Too many submissions" error even though you haven't exceeded the limit. The root cause is a **bug in the `check_edge_function_rate_limit` database function**.
+
+The function has a variable named `request_count` that conflicts with the column name `request_count` in the `rate_limits` table. This causes a PostgreSQL error:
+```
+column reference "request_count" is ambiguous
+```
+
+When this error occurs, the function fails and effectively blocks all submissions.
 
 ---
 
-## Current Issue
+### Solution
 
-The hosting question offers options that don't match your service model:
-- "Yes, and I want to keep using it" - **Not possible** (you can't use client's existing hosting)
-- "No, I can manage it myself" - **Potentially misleading** (if all sites need your hosting)
+I'll update the database function to use table-qualified column names (prefixing with `rate_limits.`) to avoid the ambiguity. This is a simple fix that will resolve the error.
 
 ---
 
-## Proposed Changes
+### Changes Required
 
-### 1. Update Current Hosting Question
+**Database Migration:**
+Update the `check_edge_function_rate_limit` function to qualify the ambiguous column references:
 
-**From:**
-```
-Do you currently have web hosting? *
-- Yes, and I want to keep using it
-- Yes, but I'm open to switching
-- No, I need hosting set up
-- I'm not sure what hosting is
+```sql
+CREATE OR REPLACE FUNCTION public.check_edge_function_rate_limit(
+  ip_addr text, 
+  endpoint_name text, 
+  max_requests integer, 
+  window_minutes integer
+)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  current_count integer;  -- Renamed from request_count
+BEGIN
+  IF ip_addr IS NULL OR ip_addr = 'unknown' THEN
+    RETURN true;
+  END IF;
+  
+  -- Qualify column references with table name
+  SELECT COALESCE(SUM(rate_limits.request_count), 0) INTO current_count
+  FROM public.rate_limits
+  WHERE rate_limits.ip_address = ip_addr::inet
+    AND rate_limits.endpoint = endpoint_name
+    AND rate_limits.window_start > (now() - (window_minutes || ' minutes')::interval);
+  
+  IF current_count >= max_requests THEN
+    INSERT INTO public.security_logs (
+      event_type, ip_address, success, details
+    ) VALUES (
+      'edge_function_rate_limit_exceeded',
+      ip_addr::inet,
+      false,
+      jsonb_build_object(
+        'endpoint', endpoint_name,
+        'count', current_count,
+        'limit', max_requests,
+        'window_minutes', window_minutes
+      )
+    );
+    RETURN false;
+  END IF;
+  
+  INSERT INTO public.rate_limits (ip_address, endpoint, request_count, window_start)
+  VALUES (ip_addr::inet, endpoint_name, 1, now())
+  ON CONFLICT (ip_address, endpoint) 
+  DO UPDATE SET 
+    request_count = rate_limits.request_count + 1,
+    updated_at = now();
+  
+  RETURN true;
+END;
+$function$
 ```
 
-**To:**
-```
-Do you currently have web hosting? *
-- Yes (we'll help you transition to our hosting)
-- No, I need hosting set up
-- I'm not sure what hosting is
-```
-
-This simplifies the options and sets the expectation that existing hosting won't be used.
-
-### 2. Update Ongoing Hosting Question
-
-**From:**
-```
-Do you need ongoing hosting and maintenance services? *
-- Yes, I want a fully managed solution
-- Yes, but just basic hosting
-- No, I can manage it myself
-- I'd like to discuss options
-```
-
-**To:**
-```
-Which hosting plan interests you? *
-- Fully managed hosting (includes updates & support)
-- Basic hosting only
-- I'd like to discuss options
-```
-
-Removes "manage it myself" since hosting is included with your service, and reframes the question as a plan preference.
+Key changes:
+1. Renamed local variable from `request_count` to `current_count` to avoid naming collision
+2. Qualified all column references with `rate_limits.` table prefix
+3. No changes needed to the edge function code
 
 ---
 
-## Technical Changes
+### Technical Details
 
-**File: `src/components/intake/steps/DomainHostingStep.tsx`**
-
-1. **Lines 20-25**: Update `hostingOptions` array:
-   - Remove `yes_keep` option
-   - Update `yes_open_switch` to just `yes_transition` with clearer label
-   - Keep `need_setup` and `not_sure`
-
-2. **Lines 27-32**: Update `ongoingHostingOptions` array:
-   - Keep `yes_managed` and `yes_basic`
-   - Remove `no_self_manage` option
-   - Keep `discuss` option
-
-3. **Lines 118-119**: Update the label text to add context:
-   - Add helper text explaining that all projects are hosted on your platform
-
-4. **Lines 143-146**: Update the ongoing hosting question label to reflect it's about plan preference
+| Component | Status |
+|-----------|--------|
+| Database function | Needs fix (ambiguous column reference) |
+| Edge function | No changes needed |
+| Frontend form | No changes needed |
 
 ---
 
-## Updated Options
+### After the Fix
+Once approved and applied, the intake form will:
+- Properly track rate limits per IP address
+- Allow 2 submissions per 15 minutes per user
+- Stop incorrectly blocking all submissions
 
-```typescript
-const hostingOptions = [
-  { value: 'yes_transition', label: 'Yes (we will help transition to our hosting)' },
-  { value: 'need_setup', label: 'No, I need hosting set up' },
-  { value: 'not_sure', label: "I'm not sure what hosting is" },
-];
-
-const ongoingHostingOptions = [
-  { value: 'yes_managed', label: 'Fully managed (includes updates & support)' },
-  { value: 'yes_basic', label: 'Basic hosting only' },
-  { value: 'discuss', label: "I'd like to discuss options" },
-];
-```
-
----
-
-## Benefits
-
-1. Sets clear expectations upfront that clients will use your hosting
-2. Removes confusion about keeping existing hosting
-3. Simplifies decision-making for clients
-4. Reframes ongoing hosting as a plan choice rather than yes/no
