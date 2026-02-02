@@ -4,36 +4,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { StepProps } from '../types';
 
 const budgetOptions = [
-  { 
-    value: 'starting_out', 
-    label: 'Just getting started',
-    description: 'Looking for an affordable solution to get online'
-  },
-  { 
-    value: 'under_1000', 
-    label: 'Under $1,000',
-    description: 'Simple site with essential features'
-  },
-  { 
-    value: '1000_2500', 
-    label: '$1,000 – $2,500',
-    description: 'Custom design with more functionality'
-  },
-  { 
-    value: '2500_5000', 
-    label: '$2,500 – $5,000',
-    description: 'Full-featured site with advanced capabilities'
-  },
-  { 
-    value: '5000_plus', 
-    label: '$5,000+',
-    description: 'Complex projects with extensive requirements'
-  },
-  { 
-    value: 'flexible', 
-    label: 'Flexible / Not sure',
-    description: "Let's discuss what works best for my goals"
-  },
+  { value: 'under_500', label: 'Under $500' },
+  { value: '500_1000', label: '$500 – $1,000' },
+  { value: '1000_2500', label: '$1,000 – $2,500' },
+  { value: '2500_5000', label: '$2,500 – $5,000' },
+  { value: '5000_10000', label: '$5,000 – $10,000' },
+  { value: '10000_plus', label: '$10,000+' },
+  { value: 'not_sure', label: 'Not sure yet' },
 ];
 
 const timelineOptions = [
@@ -58,38 +35,25 @@ const BudgetTimelineStep = ({ data, updateData, errors }: StepProps) => {
       <div className="space-y-6">
         <div>
           <Label className="text-foreground">
-            What's your ideal investment range? <span className="text-destructive">*</span>
+            What is your budget range for this project? <span className="text-destructive">*</span>
           </Label>
-          <p className="text-xs text-muted-foreground mb-1">
-            Don't worry — we'll tailor a solution that fits your needs and budget
+          <p className="text-xs text-muted-foreground mb-2">
+            We work with every budget — let us know where you're starting and we'll find the right solution for you.
           </p>
           <RadioGroup
             value={data.budgetRange}
             onValueChange={(value) => updateData({ budgetRange: value })}
-            className="mt-3 space-y-3"
+            className="mt-2 grid grid-cols-2 gap-2"
           >
             {budgetOptions.map((option) => (
-              <div 
-                key={option.value} 
-                className="flex items-start space-x-3 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer"
-                onClick={() => updateData({ budgetRange: option.value })}
-              >
-                <RadioGroupItem 
-                  value={option.value} 
-                  id={`budget-${option.value}`}
-                  className="mt-0.5"
-                />
-                <div className="flex-1">
-                  <Label
-                    htmlFor={`budget-${option.value}`}
-                    className="text-foreground font-medium cursor-pointer"
-                  >
-                    {option.label}
-                  </Label>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {option.description}
-                  </p>
-                </div>
+              <div key={option.value} className="flex items-center space-x-2">
+                <RadioGroupItem value={option.value} id={`budget-${option.value}`} />
+                <Label
+                  htmlFor={`budget-${option.value}`}
+                  className="text-foreground font-normal cursor-pointer text-sm"
+                >
+                  {option.label}
+                </Label>
               </div>
             ))}
           </RadioGroup>
