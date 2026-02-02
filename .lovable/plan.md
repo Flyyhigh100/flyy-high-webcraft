@@ -1,63 +1,107 @@
 
-# Fix Contact Form IP Address Parsing Error
+# Update Hosting Options in Intake Form
 
-## Problem Identified
-The contact form fails with "unable to send message" because:
+## Summary
+Modify the hosting-related questions to align with your business model where all clients must use your hosting. The "keep existing hosting" option will be removed, and the ongoing hosting question will be simplified since hosting with you is essentially required.
 
-1. The `x-forwarded-for` header contains multiple comma-separated IP addresses: `"104.136.70.243,104.136.70.243, 3.2.52.21"`
-2. The code tries to insert this entire string into the `ip_address` column
-3. PostgreSQL's `inet` type rejects the multi-IP string, causing a database error
-4. The error cascades and the form submission fails
+---
 
-## Root Cause
-When HTTP requests pass through multiple proxies (load balancers, CDNs, etc.), the `x-forwarded-for` header accumulates IP addresses in the format: `client_ip, proxy1_ip, proxy2_ip`. The current code doesn't parse this correctly.
+## Current Issue
 
-## Solution
-Extract only the **first IP address** from the header (which represents the original client). This is a simple string parsing fix.
+The hosting question offers options that don't match your service model:
+- "Yes, and I want to keep using it" - **Not possible** (you can't use client's existing hosting)
+- "No, I can manage it myself" - **Potentially misleading** (if all sites need your hosting)
+
+---
+
+## Proposed Changes
+
+### 1. Update Current Hosting Question
+
+**From:**
+```
+Do you currently have web hosting? *
+- Yes, and I want to keep using it
+- Yes, but I'm open to switching
+- No, I need hosting set up
+- I'm not sure what hosting is
+```
+
+**To:**
+```
+Do you currently have web hosting? *
+- Yes (we'll help you transition to our hosting)
+- No, I need hosting set up
+- I'm not sure what hosting is
+```
+
+This simplifies the options and sets the expectation that existing hosting won't be used.
+
+### 2. Update Ongoing Hosting Question
+
+**From:**
+```
+Do you need ongoing hosting and maintenance services? *
+- Yes, I want a fully managed solution
+- Yes, but just basic hosting
+- No, I can manage it myself
+- I'd like to discuss options
+```
+
+**To:**
+```
+Which hosting plan interests you? *
+- Fully managed hosting (includes updates & support)
+- Basic hosting only
+- I'd like to discuss options
+```
+
+Removes "manage it myself" since hosting is included with your service, and reframes the question as a plan preference.
 
 ---
 
 ## Technical Changes
 
-**File: `supabase/functions/contact-form/index.ts`**
+**File: `src/components/intake/steps/DomainHostingStep.tsx`**
 
-Update line 95 to parse the IP correctly:
+1. **Lines 20-25**: Update `hostingOptions` array:
+   - Remove `yes_keep` option
+   - Update `yes_open_switch` to just `yes_transition` with clearer label
+   - Keep `need_setup` and `not_sure`
+
+2. **Lines 27-32**: Update `ongoingHostingOptions` array:
+   - Keep `yes_managed` and `yes_basic`
+   - Remove `no_self_manage` option
+   - Keep `discuss` option
+
+3. **Lines 118-119**: Update the label text to add context:
+   - Add helper text explaining that all projects are hosted on your platform
+
+4. **Lines 143-146**: Update the ongoing hosting question label to reflect it's about plan preference
+
+---
+
+## Updated Options
 
 ```typescript
-// Current (broken):
-const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+const hostingOptions = [
+  { value: 'yes_transition', label: 'Yes (we will help transition to our hosting)' },
+  { value: 'need_setup', label: 'No, I need hosting set up' },
+  { value: 'not_sure', label: "I'm not sure what hosting is" },
+];
 
-// Fixed:
-const forwardedFor = req.headers.get('x-forwarded-for');
-const clientIP = forwardedFor 
-  ? forwardedFor.split(',')[0].trim() 
-  : (req.headers.get('x-real-ip') || '127.0.0.1');
-```
-
-Also update line 233 (in the catch block) with the same fix:
-
-```typescript
-// Current (broken):
-const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
-
-// Fixed:
-const forwardedFor = req.headers.get('x-forwarded-for');
-const clientIP = forwardedFor 
-  ? forwardedFor.split(',')[0].trim() 
-  : (req.headers.get('x-real-ip') || '127.0.0.1');
+const ongoingHostingOptions = [
+  { value: 'yes_managed', label: 'Fully managed (includes updates & support)' },
+  { value: 'yes_basic', label: 'Basic hosting only' },
+  { value: 'discuss', label: "I'd like to discuss options" },
+];
 ```
 
 ---
 
-## Why This Works
-- The first IP in `x-forwarded-for` is always the original client IP
-- `.split(',')[0]` extracts just the first IP
-- `.trim()` removes any whitespace
-- PostgreSQL's `inet` type will now receive a valid single IP address
+## Benefits
 
----
-
-## After Implementation
-1. The edge function will be redeployed automatically
-2. Test the contact form by submitting a message
-3. Verify the email arrives at kofi@sydevault.com
+1. Sets clear expectations upfront that clients will use your hosting
+2. Removes confusion about keeping existing hosting
+3. Simplifies decision-making for clients
+4. Reframes ongoing hosting as a plan choice rather than yes/no
