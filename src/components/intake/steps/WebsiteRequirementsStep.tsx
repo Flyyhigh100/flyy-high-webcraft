@@ -37,7 +37,6 @@ const features = [
 const newOrRedesignOptions = [
   { value: 'new', label: 'Brand new website' },
   { value: 'redesign', label: 'Redesign of existing website' },
-  { value: 'adding_features', label: 'Adding features to existing website' },
 ];
 
 const pagesOptions = [
