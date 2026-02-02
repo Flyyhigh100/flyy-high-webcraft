@@ -18,16 +18,14 @@ const registrarAccessOptions = [
 ];
 
 const hostingOptions = [
-  { value: 'yes_keep', label: 'Yes, and I want to keep using it' },
-  { value: 'yes_open_switch', label: "Yes, but I'm open to switching" },
+  { value: 'yes_transition', label: 'Yes (we will help transition to our hosting)' },
   { value: 'need_setup', label: 'No, I need hosting set up' },
   { value: 'not_sure', label: "I'm not sure what hosting is" },
 ];
 
 const ongoingHostingOptions = [
-  { value: 'yes_managed', label: 'Yes, I want a fully managed solution' },
-  { value: 'yes_basic', label: 'Yes, but just basic hosting' },
-  { value: 'no_self_manage', label: 'No, I can manage it myself' },
+  { value: 'yes_managed', label: 'Fully managed (includes updates & support)' },
+  { value: 'yes_basic', label: 'Basic hosting only' },
   { value: 'discuss', label: "I'd like to discuss options" },
 ];
 
@@ -118,6 +116,9 @@ const DomainHostingStep = ({ data, updateData, errors }: StepProps) => {
           <Label className="text-foreground">
             Do you currently have web hosting? <span className="text-destructive">*</span>
           </Label>
+          <p className="text-xs text-muted-foreground mb-2">
+            All projects are hosted on our platform for optimal performance and support
+          </p>
           <RadioGroup
             value={data.hasHosting}
             onValueChange={(value) => updateData({ hasHosting: value })}
@@ -142,7 +143,7 @@ const DomainHostingStep = ({ data, updateData, errors }: StepProps) => {
 
         <div>
           <Label className="text-foreground">
-            Do you need ongoing hosting and maintenance services? <span className="text-destructive">*</span>
+            Which hosting plan interests you? <span className="text-destructive">*</span>
           </Label>
           <RadioGroup
             value={data.needsOngoingHosting}
