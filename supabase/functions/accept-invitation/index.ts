@@ -56,11 +56,18 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Fetch invitation securely
+    // Hash the token for secure lookup (never query by plaintext)
+    const encoder = new TextEncoder();
+    const data = encoder.encode(inviteToken);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const tokenHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    // Fetch invitation securely using hash
     const { data: invitation, error: invErr } = await supabaseAdmin
       .from('client_invitations')
       .select('*')
-      .eq('invite_token', inviteToken)
+      .eq('invite_token_hash', tokenHash)
       .maybeSingle();
 
     if (invErr) {

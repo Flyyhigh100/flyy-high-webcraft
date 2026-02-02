@@ -81,8 +81,8 @@ serve(async (req) => {
     const { error: updateError } = await supabaseClient
       .from('client_invitations')
       .update({
-        invite_token: newToken,
-        invite_token_hash: tokenHash, // Phase 3: Store hashed token
+        invite_token: '[REDACTED]', // Plaintext no longer stored - only hash used
+        invite_token_hash: tokenHash,
         expires_at: newExpiry.toISOString(),
         status: 'pending',
         invitation_version: (invitation.invitation_version || 1) + 1

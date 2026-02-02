@@ -66,9 +66,10 @@ serve(async (req) => {
 
     // Get invitation using service role - bypassing RLS
     // Phase 3: Query by token hash for security
+    // Query by hash only - no plaintext token needed
     const { data: invitation, error } = await supabaseServiceClient
       .from('client_invitations')
-      .select('id, email, client_name, website_name, website_url, plan_type, site_id, expires_at, invite_token')
+      .select('id, email, client_name, website_name, website_url, plan_type, site_id, expires_at')
       .eq('invite_token_hash', tokenHash)
       .eq('status', 'pending')
       .maybeSingle();
@@ -100,18 +101,6 @@ serve(async (req) => {
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 410,
-      });
-    }
-
-    // Verify the plain token matches (double-check security)
-    if (invitation.invite_token !== token) {
-      logStep("Token hash collision or tampering detected");
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: "Invalid invitation token" 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 403,
       });
     }
 
