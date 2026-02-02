@@ -124,8 +124,8 @@ serve(async (req) => {
         plan_type: planType,
         next_payment_amount: nextPaymentAmount,
         site_id: siteId,
-        invite_token: inviteToken,
-        invite_token_hash: tokenHash, // Phase 3: Store hashed token
+        invite_token: '[REDACTED]', // Plaintext no longer stored - only hash used
+        invite_token_hash: tokenHash,
         invited_by: user.id,
         invitation_version: newVersion,
         created_by_name: adminProfile?.email || 'Admin',
