@@ -36,7 +36,7 @@ const MultiStepIntakeForm = () => {
     setErrors((prev) => ({ ...prev, ...clearedErrors }));
   }, []);
 
-  const validateStep = (step: number): boolean => {
+  const getStepErrors = (step: number): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     switch (step) {
@@ -118,16 +118,34 @@ const MultiStepIntakeForm = () => {
         break;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
+  };
+
+  const validateStep = (step: number): boolean => {
+    const stepErrors = getStepErrors(step);
+    setErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep)) {
+    const stepErrors = getStepErrors(currentStep);
+    setErrors(stepErrors);
+    
+    if (Object.keys(stepErrors).length === 0) {
       setCompletedSteps((prev) => 
         prev.includes(currentStep) ? prev : [...prev, currentStep]
       );
       setCurrentStep((prev) => Math.min(prev + 1, STEP_TITLES.length - 1));
+    } else {
+      const errorMessages = Object.values(stepErrors).filter(Boolean);
+      const missingFields = errorMessages.length;
+      toast({
+        title: 'Required fields missing',
+        description: missingFields === 1 
+          ? errorMessages[0] 
+          : `Please complete ${missingFields} required fields before continuing.`,
+        variant: 'destructive',
+      });
     }
   };
 
