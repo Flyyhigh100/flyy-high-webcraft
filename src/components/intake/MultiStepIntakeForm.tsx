@@ -184,9 +184,23 @@ const MultiStepIntakeForm = () => {
       });
     } catch (error: any) {
       console.error('Error submitting form:', error);
+      
+      // Extract a user-friendly message from the error
+      let errorMessage = 'There was an error submitting your form. Please try again.';
+      
+      // Check for rate limit (429) or explicit rate limit message
+      if (error?.message?.includes('Too many submissions') || 
+          error?.message?.includes('rate limit') ||
+          error?.status === 429) {
+        errorMessage = error.message || 'Too many submissions. Please wait a few minutes and try again.';
+      } else if (error?.message) {
+        // Use the server's error message if available
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Submission failed',
-        description: 'There was an error submitting your form. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
