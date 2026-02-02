@@ -5,39 +5,34 @@ import { StepProps } from '../types';
 
 const budgetOptions = [
   { 
-    value: 'under_500', 
-    label: 'Under $500',
-    description: 'Basic template customization, minimal pages'
+    value: 'starting_out', 
+    label: 'Just getting started',
+    description: 'Looking for an affordable solution to get online'
   },
   { 
-    value: '500_1000', 
-    label: '$500 – $1,000',
-    description: 'Simple brochure site (3-5 pages), light customization'
+    value: 'under_1000', 
+    label: 'Under $1,000',
+    description: 'Simple site with essential features'
   },
   { 
     value: '1000_2500', 
     label: '$1,000 – $2,500',
-    description: 'Custom design, more pages, contact forms, gallery'
+    description: 'Custom design with more functionality'
   },
   { 
     value: '2500_5000', 
     label: '$2,500 – $5,000',
-    description: 'Full custom site, blog, booking systems, more features'
+    description: 'Full-featured site with advanced capabilities'
   },
   { 
-    value: '5000_10000', 
-    label: '$5,000 – $10,000',
-    description: 'E-commerce, advanced functionality, integrations'
+    value: '5000_plus', 
+    label: '$5,000+',
+    description: 'Complex projects with extensive requirements'
   },
   { 
-    value: '10000_plus', 
-    label: '$10,000+',
-    description: 'Complex builds, custom development, ongoing support'
-  },
-  { 
-    value: 'not_sure', 
-    label: 'Not sure',
-    description: "I'd like guidance based on my needs"
+    value: 'flexible', 
+    label: 'Flexible / Not sure',
+    description: "Let's discuss what works best for my goals"
   },
 ];
 
@@ -56,15 +51,18 @@ const BudgetTimelineStep = ({ data, updateData, errors }: StepProps) => {
       <div>
         <h2 className="text-2xl font-bold text-foreground">Budget & Timeline</h2>
         <p className="text-muted-foreground mt-1">
-          Help us understand your investment and timeframe.
+          We work with every budget — let us know where you're starting so we can find the right solution for you.
         </p>
       </div>
 
       <div className="space-y-6">
         <div>
           <Label className="text-foreground">
-            What is your budget range for this project? <span className="text-destructive">*</span>
+            What's your ideal investment range? <span className="text-destructive">*</span>
           </Label>
+          <p className="text-xs text-muted-foreground mb-1">
+            Don't worry — we'll tailor a solution that fits your needs and budget
+          </p>
           <RadioGroup
             value={data.budgetRange}
             onValueChange={(value) => updateData({ budgetRange: value })}
