@@ -24,9 +24,9 @@ const hostingOptions = [
 ];
 
 const ongoingHostingOptions = [
-  { value: 'yes_managed', label: 'Fully managed (includes updates & support)' },
-  { value: 'yes_basic', label: 'Basic hosting only' },
-  { value: 'discuss', label: "I'd like to discuss options" },
+  { value: 'yes_managed', label: 'Yes, I want a fully managed solution' },
+  { value: 'no_self_manage', label: 'No, I prefer to manage it myself' },
+  { value: 'discuss', label: 'What are my options?' },
 ];
 
 const DomainHostingStep = ({ data, updateData, errors }: StepProps) => {
@@ -143,7 +143,7 @@ const DomainHostingStep = ({ data, updateData, errors }: StepProps) => {
 
         <div>
           <Label className="text-foreground">
-            Which hosting plan interests you? <span className="text-destructive">*</span>
+            Do you need ongoing website maintenance? <span className="text-destructive">*</span>
           </Label>
           <RadioGroup
             value={data.needsOngoingHosting}
