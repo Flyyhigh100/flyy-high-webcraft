@@ -8,6 +8,29 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const normalizeClientIp = (xForwardedFor: string | null): string => {
+  if (!xForwardedFor) return "unknown";
+
+  // Take the first hop (original client)
+  let ip = xForwardedFor.split(",")[0]?.trim() ?? "";
+
+  // Strip common IPv6 bracket+port form: [::1]:1234
+  if (ip.startsWith("[") && ip.includes("]")) {
+    ip = ip.slice(1, ip.indexOf("]"));
+  }
+
+  // Strip IPv4+port form: 1.2.3.4:1234
+  if (ip.includes(".") && ip.includes(":")) {
+    ip = ip.split(":")[0] ?? ip;
+  }
+
+  // Very lightweight validation to prevent inet cast errors
+  const ipv4Ok = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(ip);
+  const ipv6Ok = /^[0-9a-fA-F:]+$/.test(ip) && ip.includes(":");
+
+  return ipv4Ok || ipv6Ok ? ip : "unknown";
+};
+
 interface IntakeFormData {
   fullName: string;
   email: string;
@@ -74,13 +97,21 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Check rate limit
-    const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const { data: rateLimitOk } = await supabase.rpc("check_edge_function_rate_limit", {
+    const clientIP = normalizeClientIp(req.headers.get("x-forwarded-for"));
+    const { data: rateLimitOk, error: rateLimitError } = await supabase.rpc(
+      "check_edge_function_rate_limit",
+      {
       ip_addr: clientIP,
       endpoint_name: "website_intake",
       max_requests: 2,
       window_minutes: 15,
-    });
+      }
+    );
+
+    if (rateLimitError) {
+      console.error("Rate limit RPC error:", rateLimitError);
+      throw new Error("Rate limit check failed");
+    }
 
     if (!rateLimitOk) {
       return new Response(
