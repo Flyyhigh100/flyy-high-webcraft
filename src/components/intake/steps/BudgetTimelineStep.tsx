@@ -37,9 +37,6 @@ const BudgetTimelineStep = ({ data, updateData, errors }: StepProps) => {
           <Label className="text-foreground">
             What is your budget range for this project? <span className="text-destructive">*</span>
           </Label>
-          <p className="text-xs text-muted-foreground mb-2">
-            We work with every budget — let us know where you're starting and we'll find the right solution for you.
-          </p>
           <RadioGroup
             value={data.budgetRange}
             onValueChange={(value) => updateData({ budgetRange: value })}
