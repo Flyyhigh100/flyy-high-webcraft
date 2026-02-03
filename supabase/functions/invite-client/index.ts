@@ -114,6 +114,7 @@ serve(async (req) => {
       .single();
 
     // Store invitation in database with payment details and tracking info
+    // Security: Only store the hash, never the plaintext token
     const { error: inviteError } = await supabaseClient
       .from('client_invitations')
       .insert({
@@ -124,7 +125,7 @@ serve(async (req) => {
         plan_type: planType,
         next_payment_amount: nextPaymentAmount,
         site_id: siteId,
-        invite_token: '[REDACTED]', // Plaintext no longer stored - only hash used
+        invite_token: null, // Plaintext tokens are never stored - only hash is used for lookups
         invite_token_hash: tokenHash,
         invited_by: user.id,
         invitation_version: newVersion,

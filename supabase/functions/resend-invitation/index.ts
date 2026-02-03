@@ -77,11 +77,12 @@ serve(async (req) => {
 
     const inviteUrl = `https://sydevault.com/invite?token=${newToken}&site=${invitation.site_id}`;
 
-    // Update invitation with new token, hash, and expiry
+    // Update invitation with new token hash and expiry
+    // Security: Only store the hash, never the plaintext token
     const { error: updateError } = await supabaseClient
       .from('client_invitations')
       .update({
-        invite_token: '[REDACTED]', // Plaintext no longer stored - only hash used
+        invite_token: null, // Plaintext tokens are never stored - only hash is used for lookups
         invite_token_hash: tokenHash,
         expires_at: newExpiry.toISOString(),
         status: 'pending',

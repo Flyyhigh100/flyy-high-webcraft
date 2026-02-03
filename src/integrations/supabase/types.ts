@@ -53,7 +53,7 @@ export type Database = {
           expires_at: string
           id: string
           invitation_version: number | null
-          invite_token: string
+          invite_token: string | null
           invite_token_hash: string | null
           invited_by: string | null
           next_payment_amount: number | null
@@ -75,7 +75,7 @@ export type Database = {
           expires_at: string
           id?: string
           invitation_version?: number | null
-          invite_token: string
+          invite_token?: string | null
           invite_token_hash?: string | null
           invited_by?: string | null
           next_payment_amount?: number | null
@@ -97,7 +97,7 @@ export type Database = {
           expires_at?: string
           id?: string
           invitation_version?: number | null
-          invite_token?: string
+          invite_token?: string | null
           invite_token_hash?: string | null
           invited_by?: string | null
           next_payment_amount?: number | null
