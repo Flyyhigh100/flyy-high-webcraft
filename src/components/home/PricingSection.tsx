@@ -1,24 +1,16 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const PricingSection = () => {
-  const [isYearly, setIsYearly] = useState(false);
   const navigate = useNavigate();
-  
-  // Calculate savings percentage
-  const monthlyCost = 15;
-  const yearlyCost = 10;
-  const savingsPercentage = Math.round(((monthlyCost - yearlyCost) / monthlyCost) * 100);
   
   const plans = [
     {
       name: "Hosting Basic",
       description: "Everything you need to keep your website online and performing well.",
-      monthlyPrice: monthlyCost,
-      yearlyPrice: yearlyCost,
+      price: 15,
       features: [
         "Modern deployment platform",
         "Cloud database integration", 
@@ -34,8 +26,7 @@ const PricingSection = () => {
     {
       name: "Hosting Pro",
       description: "Enhanced features for growing businesses with higher traffic needs.",
-      monthlyPrice: monthlyCost * 2,
-      yearlyPrice: yearlyCost * 2,
+      price: 30,
       features: [
         "Everything in Basic",
         "Priority deployment builds",
@@ -65,30 +56,6 @@ const PricingSection = () => {
           <p className="text-gray-700 text-lg mb-8">
             Reliable hosting with all the essential features you need.
           </p>
-          
-          <div className="flex items-center justify-center mb-8">
-            <span className={`mr-3 ${!isYearly ? "font-medium text-flyy-800" : "text-gray-500"}`}>
-              Monthly
-            </span>
-            <div className="relative inline-flex">
-              <div className="w-12 h-6 transition duration-200 ease-linear rounded-full bg-gray-300">
-                <label 
-                  htmlFor="toggle"
-                  className={`absolute left-0 w-6 h-6 transition-transform duration-200 ease-linear transform bg-white border-2 rounded-full cursor-pointer ${isYearly ? "translate-x-full border-flyy-600" : "border-gray-300"}`}
-                ></label>
-                <input 
-                  type="checkbox"
-                  id="toggle"
-                  className="w-full h-full appearance-none focus:outline-none cursor-pointer"
-                  checked={isYearly}
-                  onChange={() => setIsYearly(!isYearly)}
-                />
-              </div>
-            </div>
-            <span className={`ml-3 ${isYearly ? "font-medium text-flyy-800" : "text-gray-500"}`}>
-              Yearly <span className="text-flyy-600 font-medium">(Save {savingsPercentage}%)</span>
-            </span>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -111,12 +78,9 @@ const PricingSection = () => {
                 <p className="text-gray-600 mb-6">{plan.description}</p>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">
-                    ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                    ${plan.price}
                   </span>
                   <span className="text-gray-600 ml-2">/month</span>
-                  {isYearly && (
-                    <p className="text-flyy-600 font-medium mt-1">Billed annually</p>
-                  )}
                 </div>
                 <Button 
                   className={`w-full mb-8 ${plan.featured ? "bg-flyy-600 hover:bg-flyy-700" : "bg-gray-800 hover:bg-gray-900"}`}
