@@ -7,11 +7,11 @@ import { ExternalLink } from "lucide-react";
 const portfolioProjects = [
   {
     id: 1,
-    title: "1 Million Strong Fight Club",
-    category: "Healthcare Technology & Investment Platform",
-    description: "Comprehensive platform showcasing affordable cancer treatments and investment opportunities in medical innovation with token-based funding.",
-    imageUrl: "/lovable-uploads/f78b96dc-5cfb-4143-a508-fec500284300.png",
-    websiteUrl: "https://1millionstrongfightclub.com/",
+    title: "Across The King's River",
+    category: "Spiritual & Cultural Platform",
+    description: "Inspirational website merging African wisdom traditions with modern spiritual growth, featuring books, meditations, and cultural storytelling to empower personal transformation.",
+    imageUrl: "/lovable-uploads/ba8be40b-5e1c-47c8-a4bf-6b416c87fad8.png",
+    websiteUrl: "https://acrossthekingsriver.com/",
   },
   {
     id: 2,
@@ -39,11 +39,11 @@ const portfolioProjects = [
   },
   {
     id: 5,
-    title: "Across The King's River",
-    category: "Spiritual & Cultural Platform",
-    description: "Inspirational website merging African wisdom traditions with modern spiritual growth, featuring books, meditations, and cultural storytelling to empower personal transformation.",
-    imageUrl: "/lovable-uploads/ba8be40b-5e1c-47c8-a4bf-6b416c87fad8.png",
-    websiteUrl: "https://acrossthekingsriver.com/",
+    title: "1 Million Strong Fight Club",
+    category: "Healthcare Technology & Investment Platform",
+    description: "Comprehensive platform showcasing affordable cancer treatments and investment opportunities in medical innovation with token-based funding.",
+    imageUrl: "/lovable-uploads/f78b96dc-5cfb-4143-a508-fec500284300.png",
+    websiteUrl: "https://1millionstrongfightclub.com/",
   },
   {
     id: 6,
