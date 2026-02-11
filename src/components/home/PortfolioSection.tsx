@@ -10,7 +10,7 @@ const portfolioProjects = [
     title: "Across The King's River",
     category: "Spiritual & Cultural Platform",
     description: "Inspirational website merging African wisdom traditions with modern spiritual growth, featuring books, meditations, and cultural storytelling to empower personal transformation.",
-    imageUrl: "/lovable-uploads/ba8be40b-5e1c-47c8-a4bf-6b416c87fad8.png",
+    imageUrl: "/lovable-uploads/kings-river.jpg",
     websiteUrl: "https://acrossthekingsriver.com/",
   },
   {
