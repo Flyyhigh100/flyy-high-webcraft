@@ -38,8 +38,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     setLoading(true);
 
     try {
-      // Parse combined plan
-      const [planType, billingCycle] = formData.plan.split('-') as [string, 'monthly' | 'yearly'];
+      // Plan type only — billing cycle is chosen by the client at checkout
+      const planType = formData.plan;
       
       // Extract site name from URL for database storage
       const websiteName = formData.websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
