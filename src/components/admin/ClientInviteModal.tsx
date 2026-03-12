@@ -87,7 +87,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           name: websiteName,
           url: formData.websiteUrl,
           plan_type: planType,
-          billing_cycle: billingCycle,
           next_payment_amount: formData.nextPaymentAmount,
           payment_status: 'pending_initial_payment',
           initial_payment_received: false
