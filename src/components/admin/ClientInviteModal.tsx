@@ -120,7 +120,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         email: '',
         clientName: '',
         websiteUrl: '',
-        plan: 'basic-monthly',
+        plan: 'basic',
         nextPaymentAmount: 15.00
       });
       setOpen(false);
