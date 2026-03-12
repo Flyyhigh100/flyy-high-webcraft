@@ -104,7 +104,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           websiteName,
           websiteUrl: formData.websiteUrl,
           planType: planType,
-          billingCycle: billingCycle,
           nextPaymentAmount: formData.nextPaymentAmount,
           siteId: websiteData.id
         }
