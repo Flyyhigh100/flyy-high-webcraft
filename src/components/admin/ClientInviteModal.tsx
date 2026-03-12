@@ -209,10 +209,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic-monthly">Basic - $15/month</SelectItem>
-                  <SelectItem value="basic-yearly">Basic - $120/year ($10/month equivalent)</SelectItem>
-                  <SelectItem value="pro-monthly">Pro - $30/month</SelectItem>
-                  <SelectItem value="pro-yearly">Pro - $240/year ($20/month equivalent)</SelectItem>
+                  <SelectItem value="basic">Basic - $15/month</SelectItem>
+                  <SelectItem value="pro">Pro - $30/month</SelectItem>
                 </SelectContent>
               </Select>
             </div>
