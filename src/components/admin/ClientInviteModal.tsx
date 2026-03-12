@@ -22,19 +22,14 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     email: '',
     clientName: '',
     websiteUrl: '',
-    plan: 'basic-monthly', // Combined format: planType-billingCycle
+    plan: 'basic',
     nextPaymentAmount: 15.00
   });
   const { toast } = useToast();
 
-  // Update payment amount based on combined plan selection
+  // Update payment amount based on plan selection (monthly rate only — client chooses billing cycle at checkout)
   const handlePlanChange = (value: string) => {
-    let amount = 15.00;
-    if (value === 'basic-monthly') amount = 15.00;
-    else if (value === 'basic-yearly') amount = 120.00;
-    else if (value === 'pro-monthly') amount = 30.00;
-    else if (value === 'pro-yearly') amount = 240.00;
-    
+    const amount = value === 'pro' ? 30.00 : 15.00;
     setFormData({ ...formData, plan: value, nextPaymentAmount: amount });
   };
 
