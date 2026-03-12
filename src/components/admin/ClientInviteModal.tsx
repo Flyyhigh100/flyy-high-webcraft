@@ -22,19 +22,14 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     email: '',
     clientName: '',
     websiteUrl: '',
-    plan: 'basic-monthly', // Combined format: planType-billingCycle
+    plan: 'basic',
     nextPaymentAmount: 15.00
   });
   const { toast } = useToast();
 
-  // Update payment amount based on combined plan selection
+  // Update payment amount based on plan selection (monthly rate only — client chooses billing cycle at checkout)
   const handlePlanChange = (value: string) => {
-    let amount = 15.00;
-    if (value === 'basic-monthly') amount = 15.00;
-    else if (value === 'basic-yearly') amount = 120.00;
-    else if (value === 'pro-monthly') amount = 30.00;
-    else if (value === 'pro-yearly') amount = 240.00;
-    
+    const amount = value === 'pro' ? 30.00 : 15.00;
     setFormData({ ...formData, plan: value, nextPaymentAmount: amount });
   };
 
@@ -43,8 +38,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
     setLoading(true);
 
     try {
-      // Parse combined plan
-      const [planType, billingCycle] = formData.plan.split('-') as [string, 'monthly' | 'yearly'];
+      // Plan type only — billing cycle is chosen by the client at checkout
+      const planType = formData.plan;
       
       // Extract site name from URL for database storage
       const websiteName = formData.websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
@@ -92,7 +87,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           name: websiteName,
           url: formData.websiteUrl,
           plan_type: planType,
-          billing_cycle: billingCycle,
           next_payment_amount: formData.nextPaymentAmount,
           payment_status: 'pending_initial_payment',
           initial_payment_received: false
@@ -110,7 +104,6 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
           websiteName,
           websiteUrl: formData.websiteUrl,
           planType: planType,
-          billingCycle: billingCycle,
           nextPaymentAmount: formData.nextPaymentAmount,
           siteId: websiteData.id
         }
@@ -127,7 +120,7 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
         email: '',
         clientName: '',
         websiteUrl: '',
-        plan: 'basic-monthly',
+        plan: 'basic',
         nextPaymentAmount: 15.00
       });
       setOpen(false);
@@ -216,10 +209,8 @@ export function ClientInviteModal({ onRefresh }: ClientInviteModalProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic-monthly">Basic - $15/month</SelectItem>
-                  <SelectItem value="basic-yearly">Basic - $120/year ($10/month equivalent)</SelectItem>
-                  <SelectItem value="pro-monthly">Pro - $30/month</SelectItem>
-                  <SelectItem value="pro-yearly">Pro - $240/year ($20/month equivalent)</SelectItem>
+                  <SelectItem value="basic">Basic - $15/month</SelectItem>
+                  <SelectItem value="pro">Pro - $30/month</SelectItem>
                 </SelectContent>
               </Select>
             </div>
