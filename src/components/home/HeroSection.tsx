@@ -24,14 +24,14 @@ const HeroSection = () => {
     window.addEventListener('resize', resize);
 
     // Create particles
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 80; i++) {
       particles.push({
         x: Math.random() * canvas.offsetWidth,
         y: Math.random() * canvas.offsetHeight,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        size: Math.random() * 2.5 + 0.5,
+        opacity: Math.random() * 0.6 + 0.15,
         pulse: Math.random() * Math.PI * 2,
       });
     }
@@ -42,7 +42,7 @@ const HeroSection = () => {
       particles.forEach((p, i) => {
         p.x += p.vx;
         p.y += p.vy;
-        p.pulse += 0.01;
+        p.pulse += 0.03;
 
         if (p.x < 0) p.x = canvas.offsetWidth;
         if (p.x > canvas.offsetWidth) p.x = 0;
@@ -62,11 +62,11 @@ const HeroSection = () => {
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < 150) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.06 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.1 * (1 - dist / 150)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -94,8 +94,8 @@ const HeroSection = () => {
 
       {/* Gradient orbs */}
       <div className="absolute inset-0 overflow-hidden z-0">
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-primary/15 rounded-full filter blur-[100px] animate-float" />
-        <div className="absolute top-1/3 -left-32 w-[400px] h-[400px] bg-primary/8 rounded-full filter blur-[80px] animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-primary/15 rounded-full filter blur-[100px] animate-float" style={{ animationDuration: '4s' }} />
+        <div className="absolute top-1/3 -left-32 w-[400px] h-[400px] bg-primary/10 rounded-full filter blur-[80px] animate-float" style={{ animationDelay: '1s', animationDuration: '5s' }} />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full filter blur-[100px]" />
         {/* Grid overlay */}
         <div
