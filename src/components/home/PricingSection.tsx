@@ -44,10 +44,44 @@ import { useEffect, useRef, useState } from "react";
     navigate('/project-intake');
   };
 
+const PricingSection = () => {
+  const navigate = useNavigate();
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const [visibleCards, setVisibleCards] = useState<number[]>([]);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
+  // ... keep existing code
+
+  useEffect(() => {
+    const headerObserver = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsHeaderVisible(true); },
+      { threshold: 0.2 }
+    );
+    const cardsObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          plans.forEach((_, index) => {
+            setTimeout(() => setVisibleCards(prev => [...prev, index]), index * 150);
+          });
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (headerRef.current) headerObserver.observe(headerRef.current);
+    if (cardsRef.current) cardsObserver.observe(cardsRef.current);
+    return () => { headerObserver.disconnect(); cardsObserver.disconnect(); };
+  }, []);
+
   return (
     <section className="section">
       <div className="container mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-500 ease-out ${
+            isHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">Hosting Plans</span>, Keep Your Site Running Smoothly
           </h2>
@@ -56,7 +90,7 @@ import { useEffect, useRef, useState } from "react";
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <div 
               key={index} 
