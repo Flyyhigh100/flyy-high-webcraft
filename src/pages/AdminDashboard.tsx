@@ -109,6 +109,10 @@ export default function AdminDashboard() {
                 <User className="mr-2 h-4 w-4" />
                 Admin Users
               </TabsTrigger>
+              <TabsTrigger value="newsletter">
+                <Newspaper className="mr-2 h-4 w-4" />
+                Newsletter
+              </TabsTrigger>
               <TabsTrigger value="marketing">
                 <Megaphone className="mr-2 h-4 w-4" />
                 Marketing
