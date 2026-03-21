@@ -72,7 +72,7 @@ export default function AdminDashboard() {
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-      <p className="text-gray-500 mb-8">Manage users, monitor payments, and view analytics</p>
+      <p className="text-muted-foreground mb-8">Manage users, monitor payments, and view analytics</p>
       
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
