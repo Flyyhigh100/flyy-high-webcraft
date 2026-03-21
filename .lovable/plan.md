@@ -1,86 +1,113 @@
 
-Goal: Stop the intake form from failing on submit by fixing the underlying rate-limiting database design bug that’s causing the edge function to error out (and often present as “Too many submissions” or a generic submission failure).
 
-What’s actually happening (root cause)
-- Your edge function `submit-website-intake` calls the Postgres function `check_edge_function_rate_limit`.
-- That function writes to `public.rate_limits` using:
-  - `INSERT ... ON CONFLICT (ip_address, endpoint) DO UPDATE ...`
-- But the `rate_limits` table currently has:
-  - a normal (non-unique) index on `(ip_address, endpoint)` (idx_rate_limits_ip_endpoint)
-  - no UNIQUE constraint or UNIQUE index matching `(ip_address, endpoint)`
-- Postgres therefore throws:
-  - `42P10: there is no unique or exclusion constraint matching the ON CONFLICT specification`
-- The edge function catches that as “Rate limit check failed” and returns an error, so the form submission fails even when you haven’t exceeded limits.
+# Plan: Dark Theme Redesign + Blog & Newsletter
 
-Additionally: even if we “just add a unique constraint”, the current single-row-per-(ip,endpoint) upsert logic is incomplete because it never resets `window_start`, which can make rate limiting behave incorrectly over time. So we should fix both:
-1) The missing uniqueness constraint
-2) The rate-limit “window” reset behavior
+This is a significant redesign touching the entire site's visual identity plus two new features. Based on the reference screenshots (right side = target), the goal is a dark, professional theme with gold accents, a Blog page, and newsletter signup with admin visibility.
 
-Proposed fix (high confidence)
-A) Database schema: enforce the ON CONFLICT target
-1. Add a UNIQUE constraint (or unique index) on `public.rate_limits(ip_address, endpoint)`.
-2. Before adding it, safely remove any existing duplicate rows that would violate the new uniqueness constraint (keep the newest row per ip+endpoint).
+---
 
-B) Database functions: make the upsert window-aware
-Update these functions so when the existing row is “outside the window”, the counter resets and `window_start` is refreshed:
-- `public.check_edge_function_rate_limit(ip_addr text, endpoint_name text, max_requests int, window_minutes int)`
-- `public.check_profile_query_rate_limit()` (uses 1 minute window)
-- `public.check_invitation_query_rate_limit()` (uses 5 minute window)
+## 1. Dark Theme Overhaul
 
-Implementation behavior we want:
-- For a given (ip_address, endpoint):
-  - If now - window_start > window:
-    - set request_count = 1
-    - set window_start = now()
-  - Else:
-    - increment request_count
-  - Always update updated_at = now()
+**CSS Variables (`src/index.css`)**: Replace the light `:root` values with dark defaults matching the reference:
+- Background: dark navy/charcoal (~`#0a0b14`)
+- Card: slightly lighter dark (`#111827`)
+- Foreground: light gray/white
+- Primary/accent: gold (`#F59E0B` / `#FBBF24`)
+- Border/input: dark gray tones
+- Remove the `.dark` block (dark IS the default now)
 
-C) Edge function + UI: improve error transparency and avoid “mystery failures”
-1. Keep the existing IP normalization in `submit-website-intake` (already correct).
-2. Improve the frontend toast in `MultiStepIntakeForm.tsx` to display a more helpful message:
-   - If the edge function returns `{ error: "Too many submissions..." }`, show that.
-   - If it returns a generic server error, show a friendlier “Something went wrong, please try again” but also log the full error for debugging.
-   - This doesn’t replace the backend fix, but it prevents the “constant issue” from feeling opaque when something else goes wrong later.
+**Components to restyle** (remove hardcoded `bg-white`, `text-gray-600`, etc. and use theme tokens):
+- `Header.tsx` — dark background, gold accents, add "Blog" nav link
+- `Footer.tsx` — dark background, gold accents, add Blog + Newsletter signup
+- `HeroSection.tsx` — dark gradient background, updated copy to match reference ("Websites That Turn Visitors Into Customers"), "Now accepting new projects" badge, stats row (8+, 100%, 2-4wk)
+- `ServicesSection.tsx` — dark cards with gold icons, updated heading ("How We Help Your Business Grow Online")
+- `PortfolioSection.tsx` — dark card backgrounds
+- `PricingSection.tsx` — dark cards
+- `CTASection.tsx` — keep gold gradient, adjust text contrast
+- `ContactHero.tsx`, `ContactForm.tsx`, `ContactInfo.tsx` — dark theme
+- `About.tsx` — dark theme
+- `Services.tsx` — dark theme
+- `Pricing.tsx` — dark theme
+- `Layout.tsx` — no changes needed (uses theme tokens)
+- `Navbar.tsx` — dark styling (if still used)
 
-Step-by-step execution plan
-1) Confirm current database state (read-only verification during implementation)
-- Query rate_limits for duplicates by (ip_address, endpoint).
-- Confirm which functions reference `ON CONFLICT (ip_address, endpoint)`.
+**Tailwind config**: No structural changes needed; the gold color scale already exists.
 
-2) Apply DB migration (schema + function fixes)
-Migration contents:
-- Deduplicate `rate_limits`:
-  - Keep the most recently updated/created row per (ip_address, endpoint), delete the rest.
-- Add a UNIQUE constraint:
-  - `ALTER TABLE public.rate_limits ADD CONSTRAINT rate_limits_ip_endpoint_key UNIQUE (ip_address, endpoint);`
-- Replace the three functions with updated “window-aware upsert” logic described above.
+---
 
-3) Validate with logs
-- Submit the intake form once.
-- Confirm `submit-website-intake` logs no longer show the `42P10` ON CONFLICT error.
-- Confirm DB is inserting/updating `rate_limits` correctly.
+## 2. Blog & Resources Page
 
-4) Improve frontend error display (small UI change)
-- Update `MultiStepIntakeForm.tsx` catch block to display the error message returned by the function when present (especially 429).
-- Keep the existing success path unchanged.
+**New files**:
+- `src/pages/Blog.tsx` — Blog listing page with hero ("Blog & Resources") and card grid
+- `src/lib/blog-data.ts` — Static blog post data (title, excerpt, category, date, read time, slug, content)
+- `src/pages/BlogPost.tsx` — Individual blog post page
 
-5) End-to-end test checklist (what you’ll verify in Preview)
-- Submit intake with normal data: should succeed and show SuccessStep.
-- Submit again immediately: should hit the 2-per-15-min limit and show “Too many submissions…” (expected).
-- Wait (or temporarily reduce limits for test) to confirm it resets after the window.
-- Try from a different browser/incognito: should behave per-IP as designed.
+**Blog posts** (matching reference screenshots):
+- "5 Signs Your Website Needs a Redesign" (Web Design, Feb 1 2026)
+- "Why Website Speed Matters More Than Ever in 2026" (Performance, Jan 15 2026)
+- "How Much Does a Small Business Website Cost in 2026?" (Business)
+- Plus 2-3 more articles
 
-Risk & rollback
-- Risk: Adding the unique constraint could fail if duplicates exist and aren’t removed first. We mitigate by deduping in the same migration.
-- Risk: Changing rate-limit behavior could affect other endpoints (profile/invitation) since they share the same table. We mitigate by updating those functions in the same migration, keeping their intended limits.
-- Rollback: If needed, we can drop the unique constraint and revert the functions, but that would reintroduce the ON CONFLICT failure. The correct rollback is adjusting function logic, not removing uniqueness.
+**Route**: Add `/blog` and `/blog/:slug` to `App.tsx`
 
-Technical notes (for future reliability)
-- The current `rate_limits` approach is a “single rolling window row” per endpoint+ip. That’s fine as long as window_start resets appropriately.
-- Alternative architecture (not required now): insert-only event rows and sum in-window counts, with periodic cleanup. More storage, simpler semantics. We’ll avoid this unless you want more analytics later.
+**Navigation**: Add "Blog" link to Header desktop + mobile nav
 
-Expected outcome
-- Intake form submissions will stop failing due to rate limit RPC errors.
-- The “Too many submissions” message will only appear when you actually exceed the limit.
-- When something else fails, the UI will show a more meaningful message instead of a generic error that feels “constant” and unfixable.
+---
+
+## 3. Newsletter Signup
+
+**Database**: Create a `newsletter_subscribers` table via Supabase migration:
+- `id` (uuid), `email` (text, unique), `subscribed_at` (timestamptz), `source` (text — e.g. "footer", "blog")
+- RLS: allow anonymous inserts, admin-only selects
+
+**UI Components**:
+- `src/components/home/NewsletterSignup.tsx` — email input + subscribe button, placed in Footer and optionally on Blog page
+- Uses `supabase.from('newsletter_subscribers').insert(...)` directly
+
+**Admin View**:
+- `src/components/admin/NewsletterSubscribersTable.tsx` — table showing subscribers with email, date, source
+- Add a "Newsletter" tab/section to `AdminDashboard.tsx`
+- Future: admin can compose and forward emails to subscribers (noted but not built in this pass — marketing email restrictions apply)
+
+---
+
+## 4. Routing Updates (`App.tsx`)
+
+Add within the Layout routes:
+```
+<Route path="/blog" element={<Blog />} />
+<Route path="/blog/:slug" element={<BlogPost />} />
+```
+
+---
+
+## Files to Create
+- `src/pages/Blog.tsx`
+- `src/pages/BlogPost.tsx`
+- `src/lib/blog-data.ts`
+- `src/components/home/NewsletterSignup.tsx`
+- `src/components/admin/NewsletterSubscribersTable.tsx`
+- Supabase migration for `newsletter_subscribers` table
+
+## Files to Edit
+- `src/index.css` — dark theme variables
+- `src/App.tsx` — add blog routes
+- `src/components/layout/Header.tsx` — dark styling + Blog link
+- `src/components/layout/Footer.tsx` — dark styling + newsletter signup + Blog link
+- `src/components/home/HeroSection.tsx` — dark theme + updated copy/layout
+- `src/components/home/ServicesSection.tsx` — dark theme + updated copy
+- `src/components/home/PortfolioSection.tsx` — dark theme
+- `src/components/home/PricingSection.tsx` — dark theme
+- `src/components/home/CTASection.tsx` — minor adjustments
+- `src/components/contact/ContactHero.tsx` — dark theme
+- `src/pages/About.tsx` — dark theme
+- `src/pages/Services.tsx` — dark theme
+- `src/pages/Pricing.tsx` — dark theme
+- `src/pages/AdminDashboard.tsx` — add newsletter subscribers section
+- `src/components/layout/Navbar.tsx` — dark styling (if used)
+
+## Technical Notes
+- All hardcoded `bg-white`, `text-gray-600/700`, `bg-gray-50/100` references across components will be replaced with semantic theme tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `bg-card`, etc.)
+- Newsletter admin view is read-only (viewing subscribers). Sending emails to subscribers would be marketing and is not included.
+- Blog content is static (no CMS) — stored as TypeScript data for now
+
