@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail, Megaphone, RefreshCw } from "lucide-react";
+import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail, Megaphone, RefreshCw, Newspaper } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useAdminData } from "@/hooks/useAdminData";
