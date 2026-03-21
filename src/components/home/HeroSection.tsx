@@ -24,14 +24,14 @@ const HeroSection = () => {
     window.addEventListener('resize', resize);
 
     // Create particles
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 80; i++) {
       particles.push({
         x: Math.random() * canvas.offsetWidth,
         y: Math.random() * canvas.offsetHeight,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        size: Math.random() * 2.5 + 0.5,
+        opacity: Math.random() * 0.6 + 0.15,
         pulse: Math.random() * Math.PI * 2,
       });
     }
