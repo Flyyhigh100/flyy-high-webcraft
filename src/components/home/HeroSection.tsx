@@ -66,7 +66,7 @@ const HeroSection = () => {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.06 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.1 * (1 - dist / 150)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
