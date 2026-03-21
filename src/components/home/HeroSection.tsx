@@ -35,11 +35,13 @@ const HeroSection = () => {
     canvas.parentElement?.addEventListener('mouseleave', handleMouseLeave);
 
     for (let i = 0; i < 80; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 1.5 + 0.8;
       particles.push({
         x: Math.random() * canvas.offsetWidth,
         y: Math.random() * canvas.offsetHeight,
-        vx: (Math.random() - 0.5) * 1.6,
-        vy: (Math.random() - 0.5) * 1.6,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
         size: Math.random() * 2.5 + 0.5,
         opacity: Math.random() * 0.6 + 0.15,
         pulse: Math.random() * Math.PI * 2,
