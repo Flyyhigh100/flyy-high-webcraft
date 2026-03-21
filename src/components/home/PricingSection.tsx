@@ -94,11 +94,14 @@ const PricingSection = () => {
           {plans.map((plan, index) => (
             <div 
               key={index} 
-              className={`rounded-xl overflow-hidden ${
+              className={`rounded-xl overflow-hidden transition-all duration-500 ease-out ${
+                visibleCards.includes(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              } ${
                 plan.featured 
                   ? "border-2 border-primary shadow-xl shadow-primary/10 relative" 
                   : "border border-border"
               } bg-card`}
+              style={{ transitionDelay: `${index * 150}ms` }}
             >
               {plan.featured && (
                 <div className="bg-primary text-primary-foreground text-center py-2">
