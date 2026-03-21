@@ -225,6 +225,19 @@ export default function AdminDashboard() {
               </Card>
             </TabsContent>
 
+            {/* Newsletter Tab */}
+            <TabsContent value="newsletter">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Newsletter Subscribers</CardTitle>
+                  <CardDescription>View and manage newsletter signups</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <NewsletterSubscribersTable />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             {/* Marketing Tab */}
             <TabsContent value="marketing">
               <div className="space-y-6">
