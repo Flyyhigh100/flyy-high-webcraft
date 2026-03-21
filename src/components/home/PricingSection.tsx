@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-  
+
+const PricingSection = () => {
+  const navigate = useNavigate();
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const [visibleCards, setVisibleCards] = useState<number[]>([]);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
   const plans = [
     {
       name: "Hosting Basic",
@@ -44,15 +51,25 @@ import { useEffect, useRef, useState } from "react";
     navigate('/project-intake');
   };
 
-const PricingSection = () => {
-  const navigate = useNavigate();
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
-  const [visibleCards, setVisibleCards] = useState<number[]>([]);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
-
-  // ... keep existing code
-
+  useEffect(() => {
+    const headerObserver = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsHeaderVisible(true); },
+      { threshold: 0.2 }
+    );
+    const cardsObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          plans.forEach((_, index) => {
+            setTimeout(() => setVisibleCards(prev => [...prev, index]), index * 150);
+          });
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (headerRef.current) headerObserver.observe(headerRef.current);
+    if (cardsRef.current) cardsObserver.observe(cardsRef.current);
+    return () => { headerObserver.disconnect(); cardsObserver.disconnect(); };
+  }, []);
   useEffect(() => {
     const headerObserver = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setIsHeaderVisible(true); },
