@@ -132,6 +132,9 @@ const HeroSection = () => {
         style={{ pointerEvents: 'none' }}
       />
 
+      {/* Bottom gradient fade for smooth transition */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-background z-[5] pointer-events-none" />
+
       {/* Gradient orbs */}
       <div className="absolute inset-0 overflow-hidden z-0">
         <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-primary/15 rounded-full filter blur-[100px] animate-float" style={{ animationDuration: '4s' }} />
