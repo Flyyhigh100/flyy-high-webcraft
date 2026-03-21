@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 
 const HeroSection = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -23,7 +24,16 @@ const HeroSection = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    // Create particles
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+    const handleMouseLeave = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+    canvas.parentElement?.addEventListener('mousemove', handleMouseMove);
+    canvas.parentElement?.addEventListener('mouseleave', handleMouseLeave);
+
     for (let i = 0; i < 80; i++) {
       particles.push({
         x: Math.random() * canvas.offsetWidth,
@@ -38,8 +48,20 @@ const HeroSection = () => {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+      const mouse = mouseRef.current;
 
       particles.forEach((p, i) => {
+        const dxm = mouse.x - p.x;
+        const dym = mouse.y - p.y;
+        const distMouse = Math.sqrt(dxm * dxm + dym * dym);
+        if (distMouse < 200) {
+          const force = (200 - distMouse) / 200 * 0.015;
+          p.vx += dxm * force;
+          p.vy += dym * force;
+        }
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+
         p.x += p.vx;
         p.y += p.vy;
         p.pulse += 0.03;
@@ -51,12 +73,28 @@ const HeroSection = () => {
 
         const glow = Math.sin(p.pulse) * 0.3 + 0.7;
 
+        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
+        gradient.addColorStop(0, `hsla(43, 96%, 56%, ${p.opacity * glow * 0.4})`);
+        gradient.addColorStop(1, `hsla(43, 96%, 56%, 0)`);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = `hsla(43, 96%, 56%, ${p.opacity * glow})`;
         ctx.fill();
 
-        // Draw connections
+        if (distMouse < 200) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.2 * (1 - distMouse / 200)})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+
         particles.forEach((p2, j) => {
           if (j <= i) return;
           const dx = p.x - p2.x;
@@ -66,8 +104,8 @@ const HeroSection = () => {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.1 * (1 - dist / 150)})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.18 * (1 - dist / 150)})`;
+            ctx.lineWidth = 0.7;
             ctx.stroke();
           }
         });
@@ -80,6 +118,8 @@ const HeroSection = () => {
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', resize);
+      canvas.parentElement?.removeEventListener('mousemove', handleMouseMove);
+      canvas.parentElement?.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, []);
 

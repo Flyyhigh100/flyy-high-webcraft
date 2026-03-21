@@ -7,12 +7,11 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 const testimonials = [
   {
     id: 1,
-    text: "Syde Vault transformed our outdated website into a modern, conversion-focused platform. Sales have increased since the redesign!",
-    name: "Sarah Johnson",
-    role: "CEO, Retail Solutions Inc.",
-    // These would be real images from your project in production
-    avatarUrl: "https://randomuser.me/api/portraits/women/32.jpg",
-    company: "Retail Solutions Inc.",
+    text: "Syde Vault has been providing Website services for PFC for about a year, and we have been very happy with the results we are seeing. Previously we had zero responses to our website and now we are seeing regular inquiries for our services. Syde Vault provides an excellent service at a very reasonable cost.",
+    name: "Eric Hoffman",
+    role: "President, Precision Fabricated Components",
+    avatarUrl: "https://randomuser.me/api/portraits/men/52.jpg",
+    company: "Precision Fabricated Components",
   },
   {
     id: 2,
