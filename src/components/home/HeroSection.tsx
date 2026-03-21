@@ -38,8 +38,8 @@ const HeroSection = () => {
       particles.push({
         x: Math.random() * canvas.offsetWidth,
         y: Math.random() * canvas.offsetHeight,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
+        vx: (Math.random() - 0.5) * 1.6,
+        vy: (Math.random() - 0.5) * 1.6,
         size: Math.random() * 2.5 + 0.5,
         opacity: Math.random() * 0.6 + 0.15,
         pulse: Math.random() * Math.PI * 2,
