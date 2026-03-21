@@ -14,6 +14,7 @@ import { ClientWebsiteList } from "@/components/admin/ClientWebsiteList";
 import { AdminSummaryCards } from "@/components/admin/AdminSummaryCards";
 import { ClientInvitationsTable } from "@/components/admin/ClientInvitationsTable";
 import { MarketingEmailManager } from "@/components/admin/MarketingEmailManager";
+import { NewsletterSubscribersTable } from "@/components/admin/NewsletterSubscribersTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
