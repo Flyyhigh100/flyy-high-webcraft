@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
@@ -73,15 +73,44 @@ const portfolioProjects = [
 
 const PortfolioSection = () => {
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const [visibleCards, setVisibleCards] = useState<number[]>([]);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   const handleImageError = (projectId: number) => {
     setImageErrors(prev => ({ ...prev, [projectId]: true }));
   };
 
+  useEffect(() => {
+    const headerObserver = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsHeaderVisible(true); },
+      { threshold: 0.2 }
+    );
+    const cardsObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          portfolioProjects.forEach((_, index) => {
+            setTimeout(() => setVisibleCards(prev => [...prev, index]), index * 80);
+          });
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (headerRef.current) headerObserver.observe(headerRef.current);
+    if (cardsRef.current) cardsObserver.observe(cardsRef.current);
+    return () => { headerObserver.disconnect(); cardsObserver.disconnect(); };
+  }, []);
+
   return (
     <section id="portfolio" className="section">
       <div className="container mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-500 ease-out ${
+            isHeaderVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">Our Portfolio</span>
           </h2>
@@ -90,9 +119,15 @@ const PortfolioSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-          {portfolioProjects.map((project) => (
-            <div key={project.id} className="rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-300">
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+          {portfolioProjects.map((project, index) => (
+            <div
+              key={project.id}
+              className={`rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-500 ease-out ${
+                visibleCards.includes(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: `${index * 80}ms` }}
+            >
               <div className="h-48 overflow-hidden bg-secondary">
                 {imageErrors[project.id] ? (
                   <div className="w-full h-full flex items-center justify-center">
