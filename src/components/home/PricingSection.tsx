@@ -2,9 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const PricingSection = () => {
-  const navigate = useNavigate();
+import { useEffect, useRef, useState } from "react";
   
   const plans = [
     {
