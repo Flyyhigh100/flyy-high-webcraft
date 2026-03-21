@@ -61,8 +61,15 @@ const HeroSection = () => {
           p.vx += dxm * force;
           p.vy += dym * force;
         }
-        p.vx *= 0.98;
-        p.vy *= 0.98;
+        p.vx *= 0.995;
+        p.vy *= 0.995;
+        const currentSpeed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        const minSpeed = 0.6;
+        if (currentSpeed < minSpeed) {
+          const boost = minSpeed / (currentSpeed || 0.01);
+          p.vx *= boost;
+          p.vy *= boost;
+        }
 
         p.x += p.vx;
         p.y += p.vy;
