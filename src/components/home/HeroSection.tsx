@@ -42,7 +42,7 @@ const HeroSection = () => {
       particles.forEach((p, i) => {
         p.x += p.vx;
         p.y += p.vy;
-        p.pulse += 0.01;
+        p.pulse += 0.03;
 
         if (p.x < 0) p.x = canvas.offsetWidth;
         if (p.x > canvas.offsetWidth) p.x = 0;
