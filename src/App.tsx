@@ -22,6 +22,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -53,6 +55,8 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/get-started" element={<GetStarted />} />
               <Route path="/project-intake" element={<ProjectIntake />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
@@ -65,7 +69,6 @@ const App = () => (
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                {/* Add more protected routes here */}
               </Route>
             </Route>
             
@@ -73,7 +76,6 @@ const App = () => (
             <Route element={<AdminRoute />}>
               <Route element={<Layout />}>
                 <Route path="/admin" element={<AdminDashboard />} />
-                {/* Add more admin routes here */}
               </Route>
             </Route>
             

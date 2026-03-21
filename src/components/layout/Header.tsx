@@ -19,23 +19,24 @@ export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Debug log to track admin status in the Header
-  useEffect(() => {
-    if (user) {
-      console.log("Header: Current user:", user.email, "isAdmin:", isAdmin);
-    }
-  }, [user, isAdmin]);
-
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
 
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/services", label: "Services" },
+    { to: "/portfolio", label: "Portfolio" },
+    { to: "/pricing", label: "Pricing" },
+    { to: "/blog", label: "Blog" },
+    { to: "/contact", label: "Contact" },
+  ];
+
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-background border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
               src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
@@ -44,30 +45,24 @@ export function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-600 hover:text-yellow-600">
-              Home
-            </Link>
-            <Link to="/services" className="text-gray-600 hover:text-yellow-600">
-              Services
-            </Link>
-            <Link to="/portfolio" className="text-gray-600 hover:text-yellow-600">
-              Portfolio
-            </Link>
-            <Link to="/pricing" className="text-gray-600 hover:text-yellow-600">
-              Pricing
-            </Link>
-            <Link to="/contact" className="text-gray-600 hover:text-yellow-600">
-              Contact
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`text-muted-foreground hover:text-primary transition-colors ${
+                  location.pathname === link.to ? 'text-primary' : ''
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
             
-            {/* Admin Dashboard Link - Always visible for admins */}
             {isAdmin && (
               <Link 
                 to="/admin" 
-                className={`flex items-center text-purple-600 hover:text-purple-800 font-semibold ${
-                  location.pathname === '/admin' ? 'border-b-2 border-purple-600' : ''
+                className={`flex items-center text-primary hover:text-accent font-semibold ${
+                  location.pathname === '/admin' ? 'border-b-2 border-primary' : ''
                 }`}
               >
                 <Shield className="mr-1 h-4 w-4" />
@@ -75,7 +70,6 @@ export function Header() {
               </Link>
             )}
             
-            {/* Auth Links - show different options based on authentication state */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -115,100 +109,54 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-4">
-                <Link to="/login">
-                  <Button variant="ghost">Sign In</Button>
-                </Link>
-              </div>
+              <Link to="/login">
+                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  Sign In
+                </Button>
+              </Link>
             )}
           </nav>
 
-          {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-gray-600 focus:outline-none"
+            className="md:hidden text-foreground focus:outline-none"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
-        {/* Mobile Navigation */}
         {menuOpen && (
           <nav className="md:hidden pt-4 pb-2 space-y-4">
-            <Link
-              to="/"
-              className="block py-2 text-gray-600 hover:text-yellow-600"
-              onClick={() => setMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/services"
-              className="block py-2 text-gray-600 hover:text-yellow-600"
-              onClick={() => setMenuOpen(false)}
-            >
-              Services
-            </Link>
-            <Link
-              to="/portfolio"
-              className="block py-2 text-gray-600 hover:text-yellow-600"
-              onClick={() => setMenuOpen(false)}
-            >
-              Portfolio
-            </Link>
-            <Link
-              to="/pricing"
-              className="block py-2 text-gray-600 hover:text-yellow-600"
-              onClick={() => setMenuOpen(false)}
-            >
-              Pricing
-            </Link>
-            <Link
-              to="/contact"
-              className="block py-2 text-gray-600 hover:text-yellow-600"
-              onClick={() => setMenuOpen(false)}
-            >
-              Contact
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="block py-2 text-muted-foreground hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             
-            {/* Auth Links - Mobile */}
             {user ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className="block py-2 text-gray-600 hover:text-yellow-600"
-                  onClick={() => setMenuOpen(false)}
-                >
+                <Link to="/dashboard" className="block py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>
                   Dashboard
                 </Link>
                 {isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="flex items-center py-2 text-purple-600 hover:text-purple-800 font-medium"
-                    onClick={() => setMenuOpen(false)}
-                  >
+                  <Link to="/admin" className="flex items-center py-2 text-primary hover:text-accent font-medium" onClick={() => setMenuOpen(false)}>
                     <Shield className="mr-2 h-4 w-4" />
                     Admin Dashboard
                   </Link>
                 )}
-                <button
-                  onClick={() => {
-                    handleSignOut();
-                    setMenuOpen(false);
-                  }}
-                  className="block w-full text-left py-2 text-gray-600 hover:text-yellow-600"
-                >
+                <button onClick={() => { handleSignOut(); setMenuOpen(false); }} className="block w-full text-left py-2 text-muted-foreground hover:text-primary">
                   Log Out
                 </button>
               </>
             ) : (
-              <div className="flex flex-col space-y-2 pt-2">
-                <Link to="/login" onClick={() => setMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">
-                    Sign In
-                  </Button>
-                </Link>
-              </div>
+              <Link to="/login" onClick={() => setMenuOpen(false)}>
+                <Button variant="outline" className="w-full border-primary text-primary">Sign In</Button>
+              </Link>
             )}
           </nav>
         )}

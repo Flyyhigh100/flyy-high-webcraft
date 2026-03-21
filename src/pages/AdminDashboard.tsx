@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail, Megaphone, RefreshCw } from "lucide-react";
+import { User, UserCircle, DollarSign, CalendarClock, BarChart4, Globe, Mail, Megaphone, RefreshCw, Newspaper } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useAdminData } from "@/hooks/useAdminData";
@@ -14,6 +14,7 @@ import { ClientWebsiteList } from "@/components/admin/ClientWebsiteList";
 import { AdminSummaryCards } from "@/components/admin/AdminSummaryCards";
 import { ClientInvitationsTable } from "@/components/admin/ClientInvitationsTable";
 import { MarketingEmailManager } from "@/components/admin/MarketingEmailManager";
+import { NewsletterSubscribersTable } from "@/components/admin/NewsletterSubscribersTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
@@ -71,7 +72,7 @@ export default function AdminDashboard() {
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-      <p className="text-gray-500 mb-8">Manage users, monitor payments, and view analytics</p>
+      <p className="text-muted-foreground mb-8">Manage users, monitor payments, and view analytics</p>
       
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
@@ -107,6 +108,10 @@ export default function AdminDashboard() {
               <TabsTrigger value="admin-users">
                 <User className="mr-2 h-4 w-4" />
                 Admin Users
+              </TabsTrigger>
+              <TabsTrigger value="newsletter">
+                <Newspaper className="mr-2 h-4 w-4" />
+                Newsletter
               </TabsTrigger>
               <TabsTrigger value="marketing">
                 <Megaphone className="mr-2 h-4 w-4" />
@@ -216,6 +221,19 @@ export default function AdminDashboard() {
                     users={users.filter(user => user.role === 'admin')} 
                     setUsers={setUsers} 
                   />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Newsletter Tab */}
+            <TabsContent value="newsletter">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Newsletter Subscribers</CardTitle>
+                  <CardDescription>View and manage newsletter signups</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <NewsletterSubscribersTable />
                 </CardContent>
               </Card>
             </TabsContent>

@@ -75,57 +75,51 @@ const PortfolioSection = () => {
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   const handleImageError = (projectId: number) => {
-    console.error(`Failed to load image for project ${projectId}`);
     setImageErrors(prev => ({ ...prev, [projectId]: true }));
   };
 
-  const handleImageLoad = (projectId: number) => {
-    console.log(`Successfully loaded image for project ${projectId}`);
-  };
-
   return (
-    <section id="portfolio" className="section bg-secondary/30">
+    <section id="portfolio" className="section">
       <div className="container mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">Our Portfolio</span>
           </h2>
-          <p className="text-gray-700 text-lg">
+          <p className="text-muted-foreground text-lg">
             Explore our latest projects and see how we help businesses transform their online presence.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           {portfolioProjects.map((project) => (
-            <div key={project.id} className="rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="h-48 overflow-hidden bg-gray-100">
+            <div key={project.id} className="rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-300">
+              <div className="h-48 overflow-hidden bg-secondary">
                 {imageErrors[project.id] ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div className="w-full h-full flex items-center justify-center">
                     <div className="text-center">
                       <div className="text-4xl mb-2">🌐</div>
-                      <p className="text-gray-600 text-sm">{project.title}</p>
+                      <p className="text-muted-foreground text-sm">{project.title}</p>
                     </div>
                   </div>
                 ) : (
                   <img
                     src={project.imageUrl}
                     alt={project.title}
-                    className="w-full h-full object-contain bg-white"
+                    className="w-full h-full object-contain bg-card"
                     onError={() => handleImageError(project.id)}
-                    onLoad={() => handleImageLoad(project.id)}
                     loading="lazy"
                   />
                 )}
               </div>
               <div className="p-6">
-                <span className="text-flyy-600 text-sm font-medium">{project.category}</span>
+                <span className="text-primary text-sm font-medium">{project.category}</span>
                 <h3 className="text-xl font-bold mt-1 mb-2">{project.title}</h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
+                <p className="text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
                 <a 
                   href={project.websiteUrl} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="flex items-center text-flyy-600 font-medium hover:underline"
+                  className="flex items-center text-primary font-medium hover:underline"
                 >
                   Visit Website <ExternalLink className="ml-2 w-4 h-4" />
                 </a>
@@ -135,7 +129,7 @@ const PortfolioSection = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Button asChild variant="outline" className="border-flyy-600 text-flyy-600 hover:bg-flyy-50">
+          <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/10">
             <Link to="/portfolio">View All Projects</Link>
           </Button>
         </div>
