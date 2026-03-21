@@ -47,13 +47,13 @@ const PricingSection = () => {
   };
 
   return (
-    <section className="section bg-white">
+    <section className="section">
       <div className="container mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">Hosting Plans</span>, Keep Your Site Running Smoothly
           </h2>
-          <p className="text-gray-700 text-lg mb-8">
+          <p className="text-muted-foreground text-lg mb-8">
             Reliable hosting with all the essential features you need.
           </p>
         </div>
@@ -64,26 +64,24 @@ const PricingSection = () => {
               key={index} 
               className={`rounded-xl overflow-hidden ${
                 plan.featured 
-                  ? "border-2 border-flyy-500 shadow-xl relative" 
-                  : "border border-gray-200 shadow-md"
-              }`}
+                  ? "border-2 border-primary shadow-xl shadow-primary/10 relative" 
+                  : "border border-border"
+              } bg-card`}
             >
               {plan.featured && (
-                <div className="bg-flyy-500 text-white text-center py-2">
+                <div className="bg-primary text-primary-foreground text-center py-2">
                   <span className="font-medium">Most Popular</span>
                 </div>
               )}
               <div className="p-6 md:p-8">
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p className="text-gray-600 mb-6">{plan.description}</p>
+                <p className="text-muted-foreground mb-6">{plan.description}</p>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">
-                    ${plan.price}
-                  </span>
-                  <span className="text-gray-600 ml-2">/month</span>
+                  <span className="text-4xl font-bold">${plan.price}</span>
+                  <span className="text-muted-foreground ml-2">/month</span>
                 </div>
                 <Button 
-                  className={`w-full mb-8 ${plan.featured ? "bg-flyy-600 hover:bg-flyy-700" : "bg-gray-800 hover:bg-gray-900"}`}
+                  className={`w-full mb-8 ${plan.featured ? "" : "bg-secondary text-secondary-foreground hover:bg-muted"}`}
                   onClick={handleGetStarted}
                 >
                   {plan.cta}
@@ -91,8 +89,8 @@ const PricingSection = () => {
                 <ul className="space-y-4">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start">
-                      <Check className="text-green-500 mr-3 h-5 w-5 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
+                      <Check className="text-primary mr-3 h-5 w-5 mt-0.5 flex-shrink-0" />
+                      <span className="text-muted-foreground">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -102,11 +100,11 @@ const PricingSection = () => {
         </div>
         
         <div className="text-center mt-16 max-w-2xl mx-auto">
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-muted-foreground">
             Need a custom hosting solution for your business?
           </p>
           <Button 
-            className="mt-4 px-8 py-6 text-lg bg-flyy-800 hover:bg-flyy-900"
+            className="mt-4 px-8 py-6 text-lg"
             onClick={() => navigate('/contact')}
           >
             Contact Us for Custom Pricing
