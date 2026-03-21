@@ -119,9 +119,15 @@ const PortfolioSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-          {portfolioProjects.map((project) => (
-            <div key={project.id} className="rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-300">
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+          {portfolioProjects.map((project, index) => (
+            <div
+              key={project.id}
+              className={`rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-500 ease-out ${
+                visibleCards.includes(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: `${index * 80}ms` }}
+            >
               <div className="h-48 overflow-hidden bg-secondary">
                 {imageErrors[project.id] ? (
                   <div className="w-full h-full flex items-center justify-center">
