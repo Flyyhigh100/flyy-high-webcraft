@@ -53,7 +53,7 @@ export function Header() {
           </Link>
 
           <div className="flex flex-1 justify-center">
-            <Link to="/" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-widest text-foreground uppercase">
+            <Link to="/" className={`font-bold tracking-widest text-foreground uppercase transition-all duration-300 ${scrolled ? 'text-xl sm:text-2xl md:text-3xl lg:text-4xl' : 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl'}`}>
               Syde Vault
             </Link>
           </div>
