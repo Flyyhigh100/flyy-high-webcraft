@@ -38,11 +38,9 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <img 
-              src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
-              alt="Syde Vault" 
-              className="h-24 w-auto md:h-32 lg:h-36"
-            />
+            <span className="syde-vault-logo text-2xl md:text-3xl lg:text-4xl" style={{ fontFamily: "'Cinzel', serif" }}>
+              SydeVault
+            </span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">

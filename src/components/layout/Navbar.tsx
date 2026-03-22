@@ -67,11 +67,9 @@ const Navbar = () => {
     <nav className="py-4 border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center">
-          <img 
-            src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
-            alt="Syde Vault" 
-            className="h-24 w-auto md:h-32 lg:h-36"
-          />
+          <span className="syde-vault-logo text-2xl md:text-3xl lg:text-4xl" style={{ fontFamily: "'Cinzel', serif" }}>
+            SydeVault
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
