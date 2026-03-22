@@ -41,14 +41,14 @@ export function Header() {
   ];
 
   return (
-    <header className="bg-background border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+    <header className={`bg-background border-b border-border sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'py-0' : ''}`}>
+      <div className={`container mx-auto px-4 transition-all duration-300 ${scrolled ? 'py-1' : 'py-4'}`}>
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center shrink-0">
             <img 
               src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
               alt="Syde Vault" 
-              className="h-32 w-auto md:h-40 lg:h-44"
+              className={`w-auto transition-all duration-300 ${scrolled ? 'h-16 md:h-20 lg:h-24' : 'h-32 md:h-40 lg:h-44'}`}
             />
           </Link>
 
