@@ -70,16 +70,7 @@ const TestimonialsSection = () => {
                 "{testimonials[activeIndex].text}"
               </p>
               
-              <div className="mb-8">
-                <div 
-                  className="w-16 h-16 rounded-full overflow-hidden mb-4 mx-auto"
-                  style={{
-                    backgroundImage: `url(${testimonials[activeIndex].avatarUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                ></div>
-                <div>
+              <div>
                   <h4 className="font-bold text-lg">{testimonials[activeIndex].name}</h4>
                   <p className="text-gray-500">{testimonials[activeIndex].role}</p>
                   <p className="text-flyy-600">{testimonials[activeIndex].company}</p>
