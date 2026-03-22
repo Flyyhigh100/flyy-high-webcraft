@@ -37,13 +37,19 @@ export function Header() {
     <header className="bg-background border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center shrink-0">
             <img 
               src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
               alt="Syde Vault" 
-              className="h-24 w-auto md:h-32 lg:h-36"
+              className="h-32 w-auto md:h-40 lg:h-44"
             />
           </Link>
+
+          <div className="hidden md:flex flex-1 justify-center">
+            <Link to="/" className="text-3xl lg:text-5xl font-bold tracking-widest text-foreground uppercase">
+              Syde Vault
+            </Link>
+          </div>
 
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
