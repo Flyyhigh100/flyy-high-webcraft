@@ -15,9 +15,16 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -34,19 +41,19 @@ export function Header() {
   ];
 
   return (
-    <header className="bg-background border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+    <header className={`bg-background border-b border-border sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'py-0' : ''}`}>
+      <div className={`container mx-auto px-4 transition-all duration-300 ${scrolled ? 'py-1' : 'py-4'}`}>
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center shrink-0">
             <img 
               src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
               alt="Syde Vault" 
-              className="h-32 w-auto md:h-40 lg:h-44"
+              className={`w-auto transition-all duration-300 ${scrolled ? 'h-16 md:h-20 lg:h-24' : 'h-32 md:h-40 lg:h-44'}`}
             />
           </Link>
 
           <div className="flex flex-1 justify-center">
-            <Link to="/" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-widest text-foreground uppercase">
+            <Link to="/" className={`font-bold tracking-widest text-foreground uppercase transition-all duration-300 ${scrolled ? 'text-xl sm:text-2xl md:text-3xl lg:text-4xl' : 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl'}`}>
               Syde Vault
             </Link>
           </div>
