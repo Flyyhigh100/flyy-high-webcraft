@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,45 +35,33 @@ export function Header() {
 
   return (
     <header className="bg-background border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3">
-        {/* Desktop: 3-column layout */}
-        <div className="hidden md:grid md:grid-cols-3 items-center">
-          {/* Left: Nav links */}
-          <nav className="flex items-center space-x-6">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" 
+              alt="Syde Vault" 
+              className="h-24 w-auto md:h-32 lg:h-36"
+            />
+          </Link>
+
+          <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`text-sm text-muted-foreground hover:text-primary transition-colors ${
-                  location.pathname === link.to ? 'text-primary font-medium' : ''
+                className={`text-muted-foreground hover:text-primary transition-colors ${
+                  location.pathname === link.to ? 'text-primary' : ''
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-          </nav>
-
-          {/* Center: Logo + Brand Name */}
-          <Link to="/" className="flex flex-col items-center justify-center gap-1">
-            <img
-              src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png"
-              alt="SydeVault Logo"
-              className="h-12 md:h-16 w-auto"
-            />
-            <span
-              className="syde-vault-logo text-3xl md:text-4xl lg:text-5xl"
-              style={{ fontFamily: "'Cinzel', serif" }}
-            >
-              SydeVault
-            </span>
-          </Link>
-
-          {/* Right: Auth controls */}
-          <div className="flex items-center justify-end space-x-4">
+            
             {isAdmin && (
-              <Link
-                to="/admin"
-                className={`flex items-center text-primary hover:text-accent font-semibold text-sm ${
+              <Link 
+                to="/admin" 
+                className={`flex items-center text-primary hover:text-accent font-semibold ${
                   location.pathname === '/admin' ? 'border-b-2 border-primary' : ''
                 }`}
               >
@@ -81,7 +69,7 @@ export function Header() {
                 Admin
               </Link>
             )}
-
+            
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -127,72 +115,51 @@ export function Header() {
                 </Button>
               </Link>
             )}
-          </div>
+          </nav>
+
+          <button
+            className="md:hidden text-foreground focus:outline-none"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
 
-        {/* Mobile layout */}
-        <div className="md:hidden">
-          <div className="flex items-center justify-between">
-            <button
-              className="text-foreground focus:outline-none"
-              onClick={() => setMenuOpen(!menuOpen)}
-            >
-              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-
-            <Link to="/" className="flex flex-col items-center gap-1">
-              <img
-                src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png"
-                alt="SydeVault Logo"
-                className="h-10 w-auto"
-              />
-              <span
-                className="syde-vault-logo text-2xl"
-                style={{ fontFamily: "'Cinzel', serif" }}
+        {menuOpen && (
+          <nav className="md:hidden pt-4 pb-2 space-y-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="block py-2 text-muted-foreground hover:text-primary"
+                onClick={() => setMenuOpen(false)}
               >
-                SydeVault
-              </span>
-            </Link>
-
-            <div className="w-6" /> {/* Spacer for centering */}
-          </div>
-
-          {menuOpen && (
-            <nav className="pt-4 pb-2 space-y-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="block py-2 text-muted-foreground hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.label}
+                {link.label}
+              </Link>
+            ))}
+            
+            {user ? (
+              <>
+                <Link to="/dashboard" className="block py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>
+                  Dashboard
                 </Link>
-              ))}
-
-              {user ? (
-                <>
-                  <Link to="/dashboard" className="block py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>
-                    Dashboard
+                {isAdmin && (
+                  <Link to="/admin" className="flex items-center py-2 text-primary hover:text-accent font-medium" onClick={() => setMenuOpen(false)}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin Dashboard
                   </Link>
-                  {isAdmin && (
-                    <Link to="/admin" className="flex items-center py-2 text-primary hover:text-accent font-medium" onClick={() => setMenuOpen(false)}>
-                      <Shield className="mr-2 h-4 w-4" />
-                      Admin Dashboard
-                    </Link>
-                  )}
-                  <button onClick={() => { handleSignOut(); setMenuOpen(false); }} className="block w-full text-left py-2 text-muted-foreground hover:text-primary">
-                    Log Out
-                  </button>
-                </>
-              ) : (
-                <Link to="/login" onClick={() => setMenuOpen(false)}>
-                  <Button variant="outline" className="w-full border-primary text-primary">Sign In</Button>
-                </Link>
-              )}
-            </nav>
-          )}
-        </div>
+                )}
+                <button onClick={() => { handleSignOut(); setMenuOpen(false); }} className="block w-full text-left py-2 text-muted-foreground hover:text-primary">
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <Link to="/login" onClick={() => setMenuOpen(false)}>
+                <Button variant="outline" className="w-full border-primary text-primary">Sign In</Button>
+              </Link>
+            )}
+          </nav>
+        )}
       </div>
     </header>
   );
