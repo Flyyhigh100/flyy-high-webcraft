@@ -70,11 +70,10 @@ const TestimonialsSection = () => {
                 "{testimonials[activeIndex].text}"
               </p>
               
-              <div>
+              <div className="mb-8">
                   <h4 className="font-bold text-lg">{testimonials[activeIndex].name}</h4>
                   <p className="text-gray-500">{testimonials[activeIndex].role}</p>
                   <p className="text-flyy-600">{testimonials[activeIndex].company}</p>
-                </div>
               </div>
               
               <div className="flex space-x-4">
