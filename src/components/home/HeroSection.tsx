@@ -102,11 +102,11 @@ const HeroSection = () => {
         ctx.fillStyle = `hsla(43, 96%, 56%, ${p.opacity * glow})`;
         ctx.fill();
 
-        if (distMouse < 200) {
+        if (mouseDist > 0 && distMouse < mouseDist) {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.2 * (1 - distMouse / 200)})`;
+          ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.2 * (1 - distMouse / mouseDist)})`;
           ctx.lineWidth = 0.8;
           ctx.stroke();
         }
@@ -116,11 +116,11 @@ const HeroSection = () => {
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
+          if (dist < connectionDist) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.18 * (1 - dist / 150)})`;
+            ctx.strokeStyle = `hsla(43, 96%, 56%, ${(isMobile ? 0.1 : 0.18) * (1 - dist / connectionDist)})`;
             ctx.lineWidth = 0.7;
             ctx.stroke();
           }
