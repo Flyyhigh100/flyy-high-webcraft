@@ -34,16 +34,23 @@ const HeroSection = () => {
     canvas.parentElement?.addEventListener('mousemove', handleMouseMove);
     canvas.parentElement?.addEventListener('mouseleave', handleMouseLeave);
 
-    for (let i = 0; i < 80; i++) {
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 25 : 80;
+    const maxSpeed = isMobile ? 0.5 : 1.5;
+    const baseSpeed = isMobile ? 0.2 : 0.8;
+    const connectionDist = isMobile ? 100 : 150;
+    const mouseDist = isMobile ? 0 : 200;
+
+    for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 1.5 + 0.8;
+      const speed = Math.random() * maxSpeed + baseSpeed;
       particles.push({
         x: Math.random() * canvas.offsetWidth,
         y: Math.random() * canvas.offsetHeight,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         size: Math.random() * 2.5 + 0.5,
-        opacity: Math.random() * 0.6 + 0.15,
+        opacity: Math.random() * (isMobile ? 0.4 : 0.6) + 0.15,
         pulse: Math.random() * Math.PI * 2,
       });
     }
@@ -56,15 +63,15 @@ const HeroSection = () => {
         const dxm = mouse.x - p.x;
         const dym = mouse.y - p.y;
         const distMouse = Math.sqrt(dxm * dxm + dym * dym);
-        if (distMouse < 200) {
-          const force = (200 - distMouse) / 200 * 0.015;
+        if (mouseDist > 0 && distMouse < mouseDist) {
+          const force = (mouseDist - distMouse) / mouseDist * 0.015;
           p.vx += dxm * force;
           p.vy += dym * force;
         }
         p.vx *= 0.995;
         p.vy *= 0.995;
         const currentSpeed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        const minSpeed = 0.6;
+        const minSpeed = isMobile ? 0.2 : 0.6;
         if (currentSpeed < minSpeed) {
           const boost = minSpeed / (currentSpeed || 0.01);
           p.vx *= boost;
@@ -95,11 +102,11 @@ const HeroSection = () => {
         ctx.fillStyle = `hsla(43, 96%, 56%, ${p.opacity * glow})`;
         ctx.fill();
 
-        if (distMouse < 200) {
+        if (mouseDist > 0 && distMouse < mouseDist) {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.2 * (1 - distMouse / 200)})`;
+          ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.2 * (1 - distMouse / mouseDist)})`;
           ctx.lineWidth = 0.8;
           ctx.stroke();
         }
@@ -109,11 +116,11 @@ const HeroSection = () => {
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
+          if (dist < connectionDist) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `hsla(43, 96%, 56%, ${0.18 * (1 - dist / 150)})`;
+            ctx.strokeStyle = `hsla(43, 96%, 56%, ${(isMobile ? 0.1 : 0.18) * (1 - dist / connectionDist)})`;
             ctx.lineWidth = 0.7;
             ctx.stroke();
           }
