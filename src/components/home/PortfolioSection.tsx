@@ -1,8 +1,8 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 const portfolioProjects = [
   {
@@ -75,12 +75,33 @@ const PortfolioSection = () => {
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [visibleCards, setVisibleCards] = useState<number[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const headerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const handleImageError = (projectId: number) => {
     setImageErrors(prev => ({ ...prev, [projectId]: true }));
   };
+
+  const scrollTo = useCallback((direction: 'left' | 'right') => {
+    const container = cardsRef.current;
+    if (!container) return;
+    const cardWidth = container.querySelector('div')?.offsetWidth ?? 340;
+    const scrollAmount = cardWidth + 24; // card width + gap
+    container.scrollBy({ left: direction === 'right' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    const container = cardsRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const cardWidth = container.querySelector('div')?.offsetWidth ?? 340;
+      const index = Math.round(container.scrollLeft / (cardWidth + 24));
+      setActiveIndex(Math.min(index, portfolioProjects.length - 1));
+    };
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const headerObserver = new IntersectionObserver(
@@ -119,51 +140,98 @@ const PortfolioSection = () => {
           </p>
         </div>
 
-        <div
-          ref={cardsRef}
-          className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent -mx-4 px-4"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          {portfolioProjects.map((project, index) => (
-            <div
-              key={project.id}
-              className={`min-w-[300px] sm:min-w-[340px] max-w-[340px] flex-shrink-0 snap-start rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-500 ease-out ${
-                visibleCards.includes(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-              style={{ transitionDelay: `${index * 80}ms` }}
-            >
-              <div className="h-48 overflow-hidden bg-secondary">
-                {imageErrors[project.id] ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-4xl mb-2">🌐</div>
-                      <p className="text-muted-foreground text-sm">{project.title}</p>
+        {/* Carousel with arrows */}
+        <div className="relative group">
+          {/* Left arrow */}
+          <button
+            onClick={() => scrollTo('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border border-border rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-primary/10 hover:border-primary/40 -translate-x-1/2 hidden sm:flex"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-5 w-5 text-foreground" />
+          </button>
+
+          {/* Right arrow */}
+          <button
+            onClick={() => scrollTo('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border border-border rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-primary/10 hover:border-primary/40 translate-x-1/2 hidden sm:flex"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-5 w-5 text-foreground" />
+          </button>
+
+          {/* Swipe hint for mobile */}
+          <div className="flex items-center justify-center gap-2 mb-4 sm:hidden text-muted-foreground text-sm animate-pulse">
+            <ChevronLeft className="h-4 w-4" />
+            <span>Swipe to explore</span>
+            <ChevronRight className="h-4 w-4" />
+          </div>
+
+          <div
+            ref={cardsRef}
+            className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent -mx-4 px-4"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            {portfolioProjects.map((project, index) => (
+              <div
+                key={project.id}
+                className={`min-w-[300px] sm:min-w-[340px] max-w-[340px] flex-shrink-0 snap-start rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-500 ease-out ${
+                  visibleCards.includes(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}
+                style={{ transitionDelay: `${index * 80}ms` }}
+              >
+                <div className="h-48 overflow-hidden bg-secondary">
+                  {imageErrors[project.id] ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">🌐</div>
+                        <p className="text-muted-foreground text-sm">{project.title}</p>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <img
-                    src={project.imageUrl}
-                    alt={project.title}
-                    className="w-full h-full object-contain bg-card"
-                    onError={() => handleImageError(project.id)}
-                    loading="lazy"
-                  />
-                )}
+                  ) : (
+                    <img
+                      src={project.imageUrl}
+                      alt={project.title}
+                      className="w-full h-full object-contain bg-card"
+                      onError={() => handleImageError(project.id)}
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+                <div className="p-6">
+                  <span className="text-primary text-sm font-medium">{project.category}</span>
+                  <h3 className="text-xl font-bold mt-1 mb-2">{project.title}</h3>
+                  <p className="text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
+                  <a 
+                    href={project.websiteUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex items-center text-primary font-medium hover:underline"
+                  >
+                    Visit Website <ExternalLink className="ml-2 w-4 h-4" />
+                  </a>
+                </div>
               </div>
-              <div className="p-6">
-                <span className="text-primary text-sm font-medium">{project.category}</span>
-                <h3 className="text-xl font-bold mt-1 mb-2">{project.title}</h3>
-                <p className="text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
-                <a 
-                  href={project.websiteUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="flex items-center text-primary font-medium hover:underline"
-                >
-                  Visit Website <ExternalLink className="ml-2 w-4 h-4" />
-                </a>
-              </div>
-            </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Dot indicators */}
+        <div className="flex justify-center gap-2 mt-4">
+          {portfolioProjects.map((_, index) => (
+            <button
+              key={index}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                activeIndex === index ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30'
+              }`}
+              onClick={() => {
+                const container = cardsRef.current;
+                if (!container) return;
+                const cardWidth = container.querySelector('div')?.offsetWidth ?? 340;
+                container.scrollTo({ left: index * (cardWidth + 24), behavior: 'smooth' });
+              }}
+              aria-label={`Go to project ${index + 1}`}
+            />
           ))}
         </div>
 
