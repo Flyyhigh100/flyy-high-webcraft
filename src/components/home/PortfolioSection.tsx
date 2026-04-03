@@ -119,11 +119,15 @@ const PortfolioSection = () => {
           </p>
         </div>
 
-        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+        <div
+          ref={cardsRef}
+          className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent -mx-4 px-4"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {portfolioProjects.map((project, index) => (
             <div
               key={project.id}
-              className={`rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-500 ease-out ${
+              className={`min-w-[300px] sm:min-w-[340px] max-w-[340px] flex-shrink-0 snap-start rounded-xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all duration-500 ease-out ${
                 visibleCards.includes(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
               style={{ transitionDelay: `${index * 80}ms` }}
