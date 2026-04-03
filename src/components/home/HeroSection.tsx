@@ -63,15 +63,15 @@ const HeroSection = () => {
         const dxm = mouse.x - p.x;
         const dym = mouse.y - p.y;
         const distMouse = Math.sqrt(dxm * dxm + dym * dym);
-        if (distMouse < 200) {
-          const force = (200 - distMouse) / 200 * 0.015;
+        if (mouseDist > 0 && distMouse < mouseDist) {
+          const force = (mouseDist - distMouse) / mouseDist * 0.015;
           p.vx += dxm * force;
           p.vy += dym * force;
         }
         p.vx *= 0.995;
         p.vy *= 0.995;
         const currentSpeed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        const minSpeed = 0.6;
+        const minSpeed = isMobile ? 0.2 : 0.6;
         if (currentSpeed < minSpeed) {
           const boost = minSpeed / (currentSpeed || 0.01);
           p.vx *= boost;
