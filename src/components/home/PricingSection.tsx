@@ -36,7 +36,7 @@ const PricingSection = () => {
         "Everything in Basic",
         "Priority deployment builds",
         "Advanced cloud features",
-        "Priority email support",
+        "Priority support",
         "Performance optimization",
         "Multiple backups",
         "5 GB cloud storage",

@@ -12,7 +12,7 @@ const Pricing = () => {
     { question: "How do you determine project pricing?", answer: "Every project is unique, so we create custom quotes based on your specific needs, timeline, and budget. After our free consultation, we'll provide a detailed proposal with transparent pricing and clear deliverables." },
     { question: "What's the consultation process like?", answer: "We start with a free discovery call to understand your goals, target audience, and requirements. We'll discuss your budget range and create a tailored solution that maximizes value within your parameters." },
     { question: "Can you work with smaller budgets?", answer: "Absolutely! We believe every business deserves a great web presence. We'll find creative solutions to deliver maximum impact within your budget." },
-    { question: "What's included in the hosting plans?", answer: "Our hosting plans include modern deployment infrastructure, cloud database integration, automatic backups, SSL certificates, custom domain support, website monitoring, and email support." },
+    { question: "What's included in the hosting plans?", answer: "Our hosting plans include modern deployment infrastructure, cloud database integration, automatic backups, SSL certificates, custom domain support, and website monitoring." },
     { question: "How long does development take?", answer: "Timeline depends on project scope and complexity. During our consultation, we'll provide realistic timelines with milestone dates." },
     { question: "Do you offer payment plans?", answer: "Yes, for larger projects we offer flexible payment options including milestone-based payments and extended payment plans." },
     { question: "What happens after my website is built?", answer: "You own your website completely. We provide training on how to manage it, offer ongoing hosting services, and are available for future updates." },
@@ -27,7 +27,7 @@ const Pricing = () => {
     { name: "Automated Backups", basic: "Daily", pro: "Multiple" },
     { name: "SEO Optimization", basic: "Basic", pro: "Advanced" },
     { name: "Build Performance", basic: "Standard", pro: "Optimized" },
-    { name: "Email Support", basic: true, pro: true },
+    { name: "Priority Support", basic: false, pro: true },
     { name: "Website Monitoring", basic: "Basic", pro: "Enhanced" },
   ];
 
