@@ -34,16 +34,23 @@ const HeroSection = () => {
     canvas.parentElement?.addEventListener('mousemove', handleMouseMove);
     canvas.parentElement?.addEventListener('mouseleave', handleMouseLeave);
 
-    for (let i = 0; i < 80; i++) {
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 25 : 80;
+    const maxSpeed = isMobile ? 0.5 : 1.5;
+    const baseSpeed = isMobile ? 0.2 : 0.8;
+    const connectionDist = isMobile ? 100 : 150;
+    const mouseDist = isMobile ? 0 : 200;
+
+    for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 1.5 + 0.8;
+      const speed = Math.random() * maxSpeed + baseSpeed;
       particles.push({
         x: Math.random() * canvas.offsetWidth,
         y: Math.random() * canvas.offsetHeight,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         size: Math.random() * 2.5 + 0.5,
-        opacity: Math.random() * 0.6 + 0.15,
+        opacity: Math.random() * (isMobile ? 0.4 : 0.6) + 0.15,
         pulse: Math.random() * Math.PI * 2,
       });
     }
