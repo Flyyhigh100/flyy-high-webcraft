@@ -27,7 +27,7 @@ const Pricing = () => {
     { name: "Automated Backups", basic: "Daily", pro: "Multiple" },
     { name: "SEO Optimization", basic: "Basic", pro: "Advanced" },
     { name: "Build Performance", basic: "Standard", pro: "Optimized" },
-    { name: "Email Support", basic: true, pro: true },
+    { name: "Priority Support", basic: false, pro: true },
     { name: "Website Monitoring", basic: "Basic", pro: "Enhanced" },
   ];
 
