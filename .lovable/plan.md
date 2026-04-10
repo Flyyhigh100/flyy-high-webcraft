@@ -1,43 +1,41 @@
 
 
-## Problem Analysis
+## Two Issues Found
 
-I found **3 critical bugs** causing the errors you're seeing across the admin payment tools:
+### Issue 1: "Failed to load subscriber emails" on Marketing tab
+The `MarketingEmailManager` component calls `get_user_emails_bulk` RPC immediately on mount via `useEffect`. If the auth session isn't fully ready (e.g., token is being refreshed after tab switch), the RPC fails because `is_admin(auth.uid())` returns false with a null/stale token. This is a race condition.
 
-### Bug 1: SQL Type Mismatch in `update_payment_statuses` (the error in your screenshot)
-The database function `update_payment_statuses` compares `CURRENT_DATE - next_payment_date` with integers (e.g., `BETWEEN 1 AND 3`). Since `next_payment_date` is a `timestamp with time zone`, this subtraction produces an `interval`, not an integer. PostgreSQL cannot compare an `interval` to an `integer`, causing the error: **"operator does not exist: interval >= integer"**.
+**Fix:** Add an auth readiness check before fetching. Pass the current user from the parent or check session before calling the RPC. Wrap the fetch in a guard that waits for a valid session.
 
-This breaks both "Update Payment Statuses" and "Run Payment Check & Send Reminders" (which calls this function first).
+### Issue 2: Dashboard reloads and loses tab position
+Two causes:
+1. **Tab state resets**: `<Tabs defaultValue="websites">` is uncontrolled. Every re-render resets to the "websites" tab. When `onAuthStateChange` fires a `TOKEN_REFRESHED` event (happens when returning from another browser tab), it triggers state updates (`setSession`, `setUser`, `checkAdminStatus`), which cause the entire admin dashboard to re-render, resetting the tab.
+2. **Data re-fetches**: The `useAdminData` hook re-runs `fetchData` on every mount/re-render cycle triggered by auth state changes, showing the loading spinner and losing your place.
 
-**Fix:** Cast `next_payment_date` to `DATE` so the subtraction produces an integer (number of days):
-```sql
-WHEN CURRENT_DATE - next_payment_date::DATE BETWEEN 1 AND 3 THEN 'overdue_3d'
-```
-Apply the same `::DATE` cast to all comparisons in the function, including the `domain_live_date` grace period check.
-
-### Bug 2: `send-payment-reminder` Edge Function References Non-Existent Column
-The function joins `profiles!websites_user_id_fkey(email)` but the `profiles` table has **no `email` column** (only `id`, `created_at`, `updated_at`, `marketing_opt_in`). This causes every reminder send to fail.
-
-**Fix:** Fetch the user's email from `auth.users` via the admin API instead of joining profiles. Use `supabaseClient.auth.admin.getUserById(website.user_id)` to get the email.
-
-### Bug 3: Client-Side Admin API Calls in `EnhancedPaymentReminders`
-The component calls `supabase.auth.admin.listUsers()` from the browser. The admin API requires the service role key and **does not work from client-side code**. This causes the email lookup to silently fail, showing "No email" for all clients.
-
-**Fix:** Use the existing `admin-service` edge function (which already fetches auth users with the service role key) or call `get_user_emails_bulk` RPC (which already exists and is security-definer).
+**Fix:**
+- Make the `Tabs` component **controlled** with `useState` so the active tab persists across re-renders.
+- In `AuthContext`, skip redundant state updates on `TOKEN_REFRESHED` if the user hasn't changed -- avoid triggering re-renders that cascade into data re-fetches.
+- In `useAdminData`, don't re-fetch if data is already loaded and the user hasn't changed.
 
 ---
 
-## Implementation Plan
+## Implementation
 
-### Step 1: Fix `update_payment_statuses` SQL function
-Create a migration that replaces the function, casting `next_payment_date` to `DATE` in all arithmetic comparisons so `CURRENT_DATE - next_payment_date::DATE` returns an integer.
+### Step 1: Make admin dashboard tabs controlled
+In `src/pages/AdminDashboard.tsx`:
+- Add `const [activeTab, setActiveTab] = useState("websites")`
+- Change `<Tabs defaultValue="websites">` to `<Tabs value={activeTab} onValueChange={setActiveTab}>`
 
-### Step 2: Fix `send-payment-reminder` Edge Function
-Remove the broken `profiles` join. Instead, look up the user email using `supabaseClient.auth.admin.getUserById(website.user_id)` and extract the email from the response.
+### Step 2: Prevent unnecessary auth re-renders
+In `src/contexts/AuthContext.tsx`:
+- In the `onAuthStateChange` callback, check if the user ID actually changed before updating state. For `TOKEN_REFRESHED` events, only update the session/token without re-running admin checks if the user is the same.
 
-### Step 3: Fix `EnhancedPaymentReminders` component
-Replace the client-side `supabase.auth.admin.listUsers()` call with a call to the existing `get_user_emails_bulk` RPC function, which runs as security definer and is accessible to admins.
+### Step 3: Prevent unnecessary data re-fetches
+In `src/hooks/useAdminData.tsx`:
+- Add a `dataLoaded` ref to skip re-fetching when data is already present.
+- Only re-fetch when `refreshData()` is explicitly called.
 
-### Step 4: Deploy and verify
-Deploy the updated edge function and run the migration.
+### Step 4: Fix marketing subscriber auth timing
+In `src/components/admin/MarketingEmailManager.tsx`:
+- Before calling `get_user_emails_bulk`, verify there's an active session with `supabase.auth.getSession()`. If no session, skip and retry after auth is ready.
 
