@@ -1,39 +1,54 @@
 
 
-## Timed Engagement Widget Plan
+## Inline Engagement Widget with Data Capture
 
-A subtle slide-in widget that appears after a visitor has been browsing for ~45 seconds. Not a modal/popup — a small card that slides up from the bottom-right corner, easy to dismiss, and doesn't block content.
+Replace the current "link-only" widget with a two-step inline form that captures visitor info without navigating away.
 
-### Design
-- Small card (max ~320px wide) slides up from bottom-right after 45 seconds on site
-- Only shows once per session (tracked via `sessionStorage`)
-- Dismissed with an X button; smooth slide-out animation
-- Dark card matching the site's `bg-card` / `border-border` theme with gold accent
-- Does NOT show on admin/dashboard routes or for logged-in users
+### User Flow
 
-### Content Options (rotating or single)
-The widget asks a friendly, low-commitment question:
+```text
+Step 1 (Initial view):
+┌──────────────────────────────┐
+│ ● Have a project in mind?  X │
+│                              │
+│  Name:    [____________]     │
+│  Email:   [____________]     │
+│  Interest: [ Select ▼  ]     │
+│                              │
+│  [ Send It Over →  ]        │
+│                              │
+│  Or: Quick Question | Quote  │
+└──────────────────────────────┘
 
-> **"Have a project in mind?"**
-> Tell us what you're looking for and we'll get back to you within 24 hours.
->
-> [Quick Question] [Get a Free Quote]
+Step 2 (After submit):
+┌──────────────────────────────┐
+│ ✓ Thanks! We'll be in touch. │
+│   (auto-dismiss after 3s)    │
+└──────────────────────────────┘
+```
 
-- **"Quick Question"** → links to `/contact`
-- **"Get a Free Quote"** → links to `/get-started`
-- Alternatively, a simple email capture field: "Drop your email and we'll reach out" (reuses newsletter subscriber insert)
+### What We Capture
+- **Name** (text input)
+- **Email** (text input)
+- **Interest** (select dropdown): New Website, Redesign, E-Commerce, Other
+
+### Where Data Goes
+- Inserted into the existing `newsletter_subscribers` table with `source: 'engagement_widget'` for the email (lightweight, already has anon INSERT RLS)
+- Also calls the existing `submit-project-inquiry` Edge Function to store the full inquiry in `project_inquiries` and trigger admin notification emails to the SydeVault team (kofi@sydevault.com / chris.d.conley@gmail.com)
+
+This reuses existing infrastructure -- no new tables or Edge Functions needed. The `submit-project-inquiry` function already handles rate limiting, validation, and sends both a confirmation email to the visitor and a notification to the admin.
 
 ### Implementation
 
 | File | Change |
 |------|--------|
-| New: `src/components/home/EngagementWidget.tsx` | Slide-in card component with 45s timer, sessionStorage check, dismiss logic |
-| `src/components/layout/Layout.tsx` | Render `<EngagementWidget />` for non-authenticated users only |
+| `src/components/home/EngagementWidget.tsx` | Replace link buttons with inline form (name, email, interest dropdown). Add form state, validation, submit handler that calls `supabase.functions.invoke('submit-project-inquiry')`. Show success state after submission. Keep the "Quick Question" and "Free Quote" links as secondary options below the form. |
 
-### Behavior Details
-- Timer starts on `Layout` mount; after 45s, widget slides in
-- `sessionStorage.setItem('engagementShown', 'true')` prevents repeat
-- Skip rendering if `user` is logged in (from `useAuth`)
-- Slide-in via CSS transform transition (`translate-y-0` from `translate-y-full`)
-- Fixed position: `bottom-4 right-4`, z-index below modals
+### Details
+- Client-side validation: name required, email format check
+- Loading state on submit button
+- On success: show checkmark + "We'll be in touch" message, auto-dismiss after 3 seconds
+- On error: toast notification, form stays open
+- The interest dropdown value maps to `projectType` in the Edge Function payload
+- `projectDescription` will be auto-filled as "Submitted via engagement widget - interested in [selection]"
 
