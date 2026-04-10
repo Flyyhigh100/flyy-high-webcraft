@@ -21,6 +21,7 @@ import { useState } from "react";
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [reconciliationLoading, setReconciliationLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("websites");
   const {
     users,
     setUsers,
@@ -87,7 +88,7 @@ export default function AdminDashboard() {
             upcomingPayments={upcomingPayments} 
           />
           
-          <Tabs defaultValue="websites" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-8">
               <TabsTrigger value="clients">
                 <UserCircle className="mr-2 h-4 w-4" />

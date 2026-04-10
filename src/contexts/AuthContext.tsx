@@ -107,12 +107,19 @@ setIsLoading(false);
     
 // Set up listener for auth state changes
 const { data: { subscription } } = supabase.auth.onAuthStateChange(
-  async (_event, session) => {
+  async (_event, newSession) => {
     console.log("Auth state change detected:", _event);
-    setSession(session);
-    setUser(session?.user ?? null);
     
-    if (session?.user) {
+    // For TOKEN_REFRESHED, skip heavy re-checks if user hasn't changed
+    if (_event === 'TOKEN_REFRESHED' && newSession?.user?.id === user?.id) {
+      setSession(newSession);
+      return;
+    }
+    
+    setSession(newSession);
+    setUser(newSession?.user ?? null);
+    
+    if (newSession?.user) {
       console.log("User authenticated, checking admin and MFA status");
       await checkAdminStatus();
       await checkMfaStatus();

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Payment, UserProfile, RevenueData, ClientWebsite } from "@/types/admin";
 import { 
@@ -33,6 +33,7 @@ export function useAdminData() {
     ],
   });
   const [isLoading, setIsLoading] = useState(true);
+  const dataLoadedRef = useRef(false);
   const { makeUserAdmin: adminRoleMutation } = useAdminRoleManagement();
   
   const fetchData = useCallback(async () => {
@@ -106,17 +107,14 @@ export function useAdminData() {
       setClientWebsites([]);
     } finally {
       setIsLoading(false);
+      dataLoadedRef.current = true;
     }
   }, [toast]);
   
   useEffect(() => {
-    // Only fetch data if authentication is loaded
-    const initializeFetch = async () => {
-      // Wait a bit for auth context to initialize
+    if (!dataLoadedRef.current) {
       setTimeout(fetchData, 100);
-    };
-    
-    initializeFetch();
+    }
   }, [fetchData]);
   
   const makeUserAdmin = async (userId: string) => {
