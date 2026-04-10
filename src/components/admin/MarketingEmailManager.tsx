@@ -36,6 +36,14 @@ export const MarketingEmailManager = () => {
     try {
       setLoading(true);
       
+      // Ensure auth session is ready before making admin RPC calls
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session) {
+        console.warn('No active session, skipping subscriber fetch');
+        setLoading(false);
+        return;
+      }
+      
       // First get profiles with marketing opt-in
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
