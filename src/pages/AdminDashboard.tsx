@@ -21,6 +21,7 @@ import { useState } from "react";
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [reconciliationLoading, setReconciliationLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("websites");
   const {
     users,
     setUsers,
