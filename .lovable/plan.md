@@ -1,41 +1,63 @@
 
 
-## Two Issues Found
+## Site Design Overhaul Plan
 
-### Issue 1: "Failed to load subscriber emails" on Marketing tab
-The `MarketingEmailManager` component calls `get_user_emails_bulk` RPC immediately on mount via `useEffect`. If the auth session isn't fully ready (e.g., token is being refreshed after tab switch), the RPC fails because `is_admin(auth.uid())` returns false with a null/stale token. This is a race condition.
-
-**Fix:** Add an auth readiness check before fetching. Pass the current user from the parent or check session before calling the RPC. Wrap the fetch in a guard that waits for a valid session.
-
-### Issue 2: Dashboard reloads and loses tab position
-Two causes:
-1. **Tab state resets**: `<Tabs defaultValue="websites">` is uncontrolled. Every re-render resets to the "websites" tab. When `onAuthStateChange` fires a `TOKEN_REFRESHED` event (happens when returning from another browser tab), it triggers state updates (`setSession`, `setUser`, `checkAdminStatus`), which cause the entire admin dashboard to re-render, resetting the tab.
-2. **Data re-fetches**: The `useAdminData` hook re-runs `fetchData` on every mount/re-render cycle triggered by auth state changes, showing the loading spinner and losing your place.
-
-**Fix:**
-- Make the `Tabs` component **controlled** with `useState` so the active tab persists across re-renders.
-- In `AuthContext`, skip redundant state updates on `TOKEN_REFRESHED` if the user hasn't changed -- avoid triggering re-renders that cascade into data re-fetches.
-- In `useAdminData`, don't re-fetch if data is already loaded and the user hasn't changed.
+After a thorough review of every section on the home page, I found several significant design issues that undermine credibility for a web design agency. Here's what needs fixing:
 
 ---
 
-## Implementation
+### Issue 1: Testimonials Section Uses Light Theme (Critical)
+The testimonials section uses hardcoded light colors (`bg-gray-50`, `bg-white`, `text-gray-600`, `text-gray-500`, `border-gray-300`) that clash violently with the dark theme. It also references non-existent `flyy-*` color classes. This makes it look broken and unprofessional.
 
-### Step 1: Make admin dashboard tabs controlled
-In `src/pages/AdminDashboard.tsx`:
-- Add `const [activeTab, setActiveTab] = useState("websites")`
-- Change `<Tabs defaultValue="websites">` to `<Tabs value={activeTab} onValueChange={setActiveTab}>`
+**Fix:** Restyle entirely using the dark theme design tokens (`bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`). Add a quote icon in gold, smooth slide transitions between testimonials, and use left/right arrows instead of up/down.
 
-### Step 2: Prevent unnecessary auth re-renders
-In `src/contexts/AuthContext.tsx`:
-- In the `onAuthStateChange` callback, check if the user ID actually changed before updating state. For `TOKEN_REFRESHED` events, only update the session/token without re-running admin checks if the user is the same.
+---
 
-### Step 3: Prevent unnecessary data re-fetches
-In `src/hooks/useAdminData.tsx`:
-- Add a `dataLoaded` ref to skip re-fetching when data is already present.
-- Only re-fetch when `refreshData()` is explicitly called.
+### Issue 2: Duplicate useEffect in PricingSection
+`PricingSection.tsx` has the exact same `useEffect` for IntersectionObserver duplicated twice (lines 54-72 and 73-91). This creates double observers.
 
-### Step 4: Fix marketing subscriber auth timing
-In `src/components/admin/MarketingEmailManager.tsx`:
-- Before calling `get_user_emails_bulk`, verify there's an active session with `supabase.auth.getSession()`. If no session, skip and retry after auth is ready.
+**Fix:** Remove the duplicate useEffect block.
+
+---
+
+### Issue 3: Services Section Lacks Visual Polish
+The service cards use plain inline SVGs and basic hover effects. For a web design agency, these should feel more premium.
+
+**Fix:** Add subtle gradient backgrounds to the icon containers, improve hover states with a gold glow effect, and add a subtle border-bottom accent on hover.
+
+---
+
+### Issue 4: CTA Section is Flat
+The CTA section is a plain gold gradient block with a single button. It doesn't create urgency or premium feel.
+
+**Fix:** Add a subtle pattern overlay, improve typography hierarchy, and add a secondary "View Portfolio" link.
+
+---
+
+### Issue 5: Footer Lacks Brand Presence
+The footer is functional but generic. No social links, no brand personality.
+
+**Fix:** Add the logo image to the footer, add social media icon links (placeholder hrefs), and improve spacing.
+
+---
+
+### Issue 6: Missing "Process" / "How It Works" Section
+Potential clients want to know how working with you goes. Adding a simple 3-4 step process section between Services and Portfolio would build confidence.
+
+**Fix:** Add a new `ProcessSection` component with numbered steps (Discovery, Design, Development, Launch) with connecting lines and icons.
+
+---
+
+### Implementation Summary
+
+| File | Change |
+|------|--------|
+| `TestimonialsSection.tsx` | Full dark-theme restyle with slide animation |
+| `PricingSection.tsx` | Remove duplicate useEffect |
+| `ServicesSection.tsx` | Enhanced icon containers and hover glow |
+| `CTASection.tsx` | Pattern overlay, improved typography |
+| `Footer.tsx` | Add logo and social links |
+| New: `ProcessSection.tsx` | 4-step "How It Works" section |
+| `Index.tsx` | Add ProcessSection between Services and Portfolio |
+| `tailwind.config.ts` | Add any needed keyframes for new animations |
 
