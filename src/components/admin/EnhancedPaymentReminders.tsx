@@ -59,17 +59,21 @@ export function EnhancedPaymentReminders() {
 
       if (websitesError) throw websitesError;
 
-      // Fetch auth users to get emails (admin only)
-      const { data: authData } = await supabase.auth.admin.listUsers();
+      // Fetch user emails via secure RPC (admin only)
+      const userIds = (websitesData || [])
+        .map(w => w.user_id)
+        .filter((id): id is string => !!id);
       
-      // Create email lookup map
       const emailMap = new Map<string, string>();
-      if (authData?.users) {
-        authData.users.forEach((user: any) => {
-          if (user.id && user.email) {
-            emailMap.set(user.id, user.email);
-          }
+      if (userIds.length > 0) {
+        const { data: emailData } = await supabase.rpc('get_user_emails_bulk', {
+          user_ids: userIds
         });
+        if (emailData) {
+          emailData.forEach((row: { user_id: string; email: string }) => {
+            emailMap.set(row.user_id, row.email);
+          });
+        }
       }
 
       // Merge email data with websites

@@ -209,16 +209,28 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { siteId, reminderType, manualSend = false }: PaymentReminderRequest = await req.json();
 
-    // Get website details
+    // Get website details (without profiles join)
     const { data: website, error: websiteError } = await supabaseClient
       .from('websites')
-      .select('*, profiles!websites_user_id_fkey(email)')
+      .select('*')
       .eq('id', siteId)
       .single();
 
     if (websiteError || !website) {
       throw new Error(`Website not found: ${websiteError?.message}`);
     }
+
+    // Get user email from auth.users via admin API
+    if (!website.user_id) {
+      throw new Error('Website has no associated user');
+    }
+
+    const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(website.user_id);
+    if (userError || !userData?.user?.email) {
+      throw new Error(`Could not fetch user email: ${userError?.message || 'No email found'}`);
+    }
+
+    const userEmail = userData.user.email;
 
     // Calculate days overdue
     const nextPaymentDate = new Date(website.next_payment_date);
@@ -237,7 +249,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email
     const emailResponse = await resend.emails.send({
       from: emailTemplate.from,
-      to: [website.profiles.email],
+      to: [userEmail],
       subject: emailTemplate.subject,
       html: emailTemplate.html,
     });
