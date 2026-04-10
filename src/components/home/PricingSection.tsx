@@ -70,25 +70,6 @@ const PricingSection = () => {
     if (cardsRef.current) cardsObserver.observe(cardsRef.current);
     return () => { headerObserver.disconnect(); cardsObserver.disconnect(); };
   }, []);
-  useEffect(() => {
-    const headerObserver = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsHeaderVisible(true); },
-      { threshold: 0.2 }
-    );
-    const cardsObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          plans.forEach((_, index) => {
-            setTimeout(() => setVisibleCards(prev => [...prev, index]), index * 150);
-          });
-        }
-      },
-      { threshold: 0.1 }
-    );
-    if (headerRef.current) headerObserver.observe(headerRef.current);
-    if (cardsRef.current) cardsObserver.observe(cardsRef.current);
-    return () => { headerObserver.disconnect(); cardsObserver.disconnect(); };
-  }, []);
 
   return (
     <section className="section">
