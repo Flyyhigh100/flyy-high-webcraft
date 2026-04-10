@@ -1,63 +1,39 @@
 
 
-## Site Design Overhaul Plan
+## Timed Engagement Widget Plan
 
-After a thorough review of every section on the home page, I found several significant design issues that undermine credibility for a web design agency. Here's what needs fixing:
+A subtle slide-in widget that appears after a visitor has been browsing for ~45 seconds. Not a modal/popup — a small card that slides up from the bottom-right corner, easy to dismiss, and doesn't block content.
 
----
+### Design
+- Small card (max ~320px wide) slides up from bottom-right after 45 seconds on site
+- Only shows once per session (tracked via `sessionStorage`)
+- Dismissed with an X button; smooth slide-out animation
+- Dark card matching the site's `bg-card` / `border-border` theme with gold accent
+- Does NOT show on admin/dashboard routes or for logged-in users
 
-### Issue 1: Testimonials Section Uses Light Theme (Critical)
-The testimonials section uses hardcoded light colors (`bg-gray-50`, `bg-white`, `text-gray-600`, `text-gray-500`, `border-gray-300`) that clash violently with the dark theme. It also references non-existent `flyy-*` color classes. This makes it look broken and unprofessional.
+### Content Options (rotating or single)
+The widget asks a friendly, low-commitment question:
 
-**Fix:** Restyle entirely using the dark theme design tokens (`bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`). Add a quote icon in gold, smooth slide transitions between testimonials, and use left/right arrows instead of up/down.
+> **"Have a project in mind?"**
+> Tell us what you're looking for and we'll get back to you within 24 hours.
+>
+> [Quick Question] [Get a Free Quote]
 
----
+- **"Quick Question"** → links to `/contact`
+- **"Get a Free Quote"** → links to `/get-started`
+- Alternatively, a simple email capture field: "Drop your email and we'll reach out" (reuses newsletter subscriber insert)
 
-### Issue 2: Duplicate useEffect in PricingSection
-`PricingSection.tsx` has the exact same `useEffect` for IntersectionObserver duplicated twice (lines 54-72 and 73-91). This creates double observers.
-
-**Fix:** Remove the duplicate useEffect block.
-
----
-
-### Issue 3: Services Section Lacks Visual Polish
-The service cards use plain inline SVGs and basic hover effects. For a web design agency, these should feel more premium.
-
-**Fix:** Add subtle gradient backgrounds to the icon containers, improve hover states with a gold glow effect, and add a subtle border-bottom accent on hover.
-
----
-
-### Issue 4: CTA Section is Flat
-The CTA section is a plain gold gradient block with a single button. It doesn't create urgency or premium feel.
-
-**Fix:** Add a subtle pattern overlay, improve typography hierarchy, and add a secondary "View Portfolio" link.
-
----
-
-### Issue 5: Footer Lacks Brand Presence
-The footer is functional but generic. No social links, no brand personality.
-
-**Fix:** Add the logo image to the footer, add social media icon links (placeholder hrefs), and improve spacing.
-
----
-
-### Issue 6: Missing "Process" / "How It Works" Section
-Potential clients want to know how working with you goes. Adding a simple 3-4 step process section between Services and Portfolio would build confidence.
-
-**Fix:** Add a new `ProcessSection` component with numbered steps (Discovery, Design, Development, Launch) with connecting lines and icons.
-
----
-
-### Implementation Summary
+### Implementation
 
 | File | Change |
 |------|--------|
-| `TestimonialsSection.tsx` | Full dark-theme restyle with slide animation |
-| `PricingSection.tsx` | Remove duplicate useEffect |
-| `ServicesSection.tsx` | Enhanced icon containers and hover glow |
-| `CTASection.tsx` | Pattern overlay, improved typography |
-| `Footer.tsx` | Add logo and social links |
-| New: `ProcessSection.tsx` | 4-step "How It Works" section |
-| `Index.tsx` | Add ProcessSection between Services and Portfolio |
-| `tailwind.config.ts` | Add any needed keyframes for new animations |
+| New: `src/components/home/EngagementWidget.tsx` | Slide-in card component with 45s timer, sessionStorage check, dismiss logic |
+| `src/components/layout/Layout.tsx` | Render `<EngagementWidget />` for non-authenticated users only |
+
+### Behavior Details
+- Timer starts on `Layout` mount; after 45s, widget slides in
+- `sessionStorage.setItem('engagementShown', 'true')` prevents repeat
+- Skip rendering if `user` is logged in (from `useAuth`)
+- Slide-in via CSS transform transition (`translate-y-0` from `translate-y-full`)
+- Fixed position: `bottom-4 right-4`, z-index below modals
 
