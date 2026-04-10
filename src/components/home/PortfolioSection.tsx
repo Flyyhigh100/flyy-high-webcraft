@@ -17,7 +17,7 @@ const portfolioProjects = [
     id: 2,
     title: "Precision Fabricated",
     category: "Industrial Manufacturing Website",
-    description: "Professional website for a DeLand-based family-owned fabrication business dedicated to delivering quality precision components and metal fabrication solutions.",
+    description: "Professional website for a Florida-based precision metal fabrication company specializing in punching, bending, welding, and custom component manufacturing with over 30 years of industry expertise.",
     imageUrl: "/lovable-uploads/da2a20ea-3bc6-448d-a5c5-ff2b68b40cd3.png",
     websiteUrl: "https://precisionfabricated.com/",
   },
