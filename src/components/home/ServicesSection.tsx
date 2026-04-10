@@ -7,7 +7,7 @@ const services = [
     title: "Website Development",
     description: "Custom-built websites that are fast, responsive, and designed to convert visitors into customers.",
     icon: (
-      <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
       </svg>
     ),
@@ -16,7 +16,7 @@ const services = [
     title: "UI/UX Design",
     description: "Beautiful, intuitive designs that provide an exceptional user experience across all devices.",
     icon: (
-      <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
       </svg>
     ),
@@ -25,7 +25,7 @@ const services = [
     title: "AI Integration",
     description: "Leverage the power of AI to create smart websites that adapt to your users' needs and preferences.",
     icon: (
-      <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
     ),
@@ -34,7 +34,7 @@ const services = [
     title: "E-Commerce Solutions",
     description: "Fully-featured online stores with secure payment processing, inventory management, and more.",
     icon: (
-      <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
       </svg>
     ),
@@ -43,7 +43,7 @@ const services = [
     title: "SEO Optimization",
     description: "Improve your search engine rankings to drive more organic traffic to your website.",
     icon: (
-      <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
       </svg>
     ),
@@ -52,7 +52,7 @@ const services = [
     title: "Maintenance & Support",
     description: "Ongoing support to keep your website secure, up-to-date, and performing at its best.",
     icon: (
-      <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
@@ -110,16 +110,21 @@ const ServicesSection = () => {
             <Card 
               key={index} 
               className={`
-                border border-border bg-card cursor-pointer
-                transition-all duration-200 ease-in-out
-                md:hover:scale-105 md:hover:shadow-lg md:hover:border-primary/30
+                group border border-border bg-card cursor-pointer overflow-hidden relative
+                transition-all duration-300 ease-in-out
+                md:hover:scale-[1.03] md:hover:shadow-xl md:hover:shadow-primary/10 md:hover:border-primary/40
                 ${visibleCards.includes(index) ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
               `}
               style={{ transitionDelay: visibleCards.includes(index) ? '0ms' : `${index * 100}ms`, willChange: 'transform, opacity' }}
             >
+              {/* Bottom accent bar on hover */}
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary to-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              
               <CardHeader>
-                <div className="mb-4">{service.icon}</div>
-                <CardTitle>{service.title}</CardTitle>
+                <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
+                  {service.icon}
+                </div>
+                <CardTitle className="group-hover:text-primary transition-colors duration-300">{service.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-muted-foreground">{service.description}</CardDescription>

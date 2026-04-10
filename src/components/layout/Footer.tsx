@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import NewsletterSignup from '@/components/home/NewsletterSignup';
+import { Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -9,10 +10,31 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Syde Vault</h3>
-            <p className="text-muted-foreground text-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <img src="/lovable-uploads/d26f7842-8e43-4e34-adf5-8ba6b3c29a2e.png" alt="Syde Vault" className="h-9 w-auto" />
+              <span className="syde-vault-logo text-xl">SYDE VAULT</span>
+            </div>
+            <p className="text-muted-foreground text-sm mb-5">
               Professional web design and development services to help your business succeed online.
             </p>
+            <div className="flex gap-3">
+              {[
+                { icon: Facebook, href: "#" },
+                { icon: Instagram, href: "#" },
+                { icon: Twitter, href: "#" },
+                { icon: Linkedin, href: "#" },
+              ].map(({ icon: Icon, href }, i) => (
+                <a
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
+                >
+                  <Icon size={16} />
+                </a>
+              ))}
+            </div>
           </div>
           
           <div>
