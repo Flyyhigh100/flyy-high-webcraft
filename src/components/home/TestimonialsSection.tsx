@@ -93,7 +93,9 @@ const TestimonialsSection = () => {
                 </p>
 
                 <div className="mb-2">
-                  <h4 className="font-bold text-lg text-foreground">{testimonials[activeIndex].name}</h4>
+                  {testimonials[activeIndex].name && (
+                    <h4 className="font-bold text-lg text-foreground">{testimonials[activeIndex].name}</h4>
+                  )}
                   <p className="text-muted-foreground text-sm">{testimonials[activeIndex].role}</p>
                   <p className="text-primary font-medium text-sm">{testimonials[activeIndex].company}</p>
                 </div>
