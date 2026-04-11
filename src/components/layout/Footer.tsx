@@ -11,7 +11,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src="/lovable-uploads/d26f7842-8e43-4e34-adf5-8ba6b3c29a2e.png" alt="Syde Vault" className="h-9 w-auto" />
+              <img src="/lovable-uploads/a1260ea6-f719-4e0e-a7ef-6ebd36869298.png" alt="Syde Vault" className="h-9 w-auto" />
               <span className="syde-vault-logo text-xl">SYDE VAULT</span>
             </div>
             <p className="text-muted-foreground text-sm mb-5">
