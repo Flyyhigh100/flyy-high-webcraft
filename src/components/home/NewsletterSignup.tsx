@@ -33,6 +33,10 @@ const NewsletterSignup = ({ source = 'footer' }: NewsletterSignupProps) => {
         }
       } else {
         toast({ title: 'Subscribed!', description: 'Thanks for joining our newsletter.' });
+        // Notify admins (fire-and-forget)
+        supabase.functions.invoke('notify-newsletter-signup', {
+          body: { email: trimmed.toLowerCase(), source },
+        }).catch(() => {});
       }
       setEmail('');
     } catch {
