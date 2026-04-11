@@ -251,7 +251,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to client
     const clientEmailResponse = await resend.emails.send({
-      from: "Syde Vault <onboarding@resend.dev>",
+      from: "Syde Vault <no-reply@notifications.sydevault.com>",
       to: [clean.email],
       subject: "We received your project inquiry!",
       html: `
@@ -281,7 +281,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification email to admin
     const adminEmailResponse = await resend.emails.send({
-      from: "Syde Vault <onboarding@resend.dev>",
+      from: "Syde Vault <no-reply@notifications.sydevault.com>",
       to: [ADMIN_EMAIL],
       subject: `New Project Inquiry from ${clean.name}`,
       html: `
