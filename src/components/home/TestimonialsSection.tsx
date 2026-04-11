@@ -13,17 +13,17 @@ const testimonials = [
   },
   {
     id: 2,
-    text: "The AI features they implemented on our website have drastically improved our user engagement. Their team was professional, communicative, and delivered everything on time.",
-    name: "Michael Rodriguez",
-    role: "Marketing Director",
-    company: "TechStart",
+    text: "I've run my daycare for years without a website. Syde Vault created my first one and helped me present my concept, routines, and values so clearly that parents now come to me already understanding how I work—and that makes choosing us much easier for them.",
+    name: "",
+    role: "Business Owner",
+    company: "Hakuna Matata Daycare",
   },
   {
     id: 3,
-    text: "We've worked with several web development agencies before, but Syde Vault truly stands out. Their attention to detail and commitment to our success has made them our go-to digital partner.",
-    name: "Emily Chang",
-    role: "Founder",
-    company: "Wellness Collective",
+    text: "As a new nursing recruitment agency, I needed a professional online presence to start building trust with hospitals and candidates. Syde Vault guided me from a blank page to a clear, credible website that explains our services, highlights our values, and gives international nurses an easy way to get in touch.",
+    name: "",
+    role: "Co-Owner",
+    company: "Delta Personal Services",
   },
 ];
 
