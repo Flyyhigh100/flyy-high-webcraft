@@ -46,10 +46,17 @@ const EngagementWidget = () => {
 
     try {
       // Store in newsletter_subscribers
-      await supabase.from("newsletter_subscribers").insert({
+      const { error: subError } = await supabase.from("newsletter_subscribers").insert({
         email: email.toLowerCase().trim(),
         source: "engagement_widget",
       });
+
+      // Notify admins if new subscriber (not duplicate)
+      if (!subError) {
+        supabase.functions.invoke("notify-newsletter-signup", {
+          body: { email: email.toLowerCase().trim(), source: "engagement_widget" },
+        }).catch(() => {});
+      }
 
       // Submit project inquiry via edge function
       const { error } = await supabase.functions.invoke("submit-project-inquiry", {
