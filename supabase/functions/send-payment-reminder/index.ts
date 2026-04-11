@@ -18,7 +18,7 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const getEmailTemplate = (reminderType: string, siteName: string, siteUrl: string, daysOverdue: number, amount: number) => {
   const baseTemplate = {
-    from: "SydeVault Billing <billing@sydevault.com>",
+    from: "SydeVault Billing <billing@notifications.sydevault.com>",
     subject: "",
     html: ""
   };
