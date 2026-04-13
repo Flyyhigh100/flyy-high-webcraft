@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from 'react-router-dom';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 // Completely standalone invite page - NO auth context, NO layout, NO dependencies
 export default function Invite() {
@@ -17,8 +18,11 @@ export default function Invite() {
   const [invitation, setInvitation] = useState<any>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(true);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(true);
   const [error, setError] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const token = searchParams.get('token');
   const site = searchParams.get('site');
@@ -35,7 +39,6 @@ export default function Invite() {
       return;
     }
 
-    // Verify invitation directly
     verifyInvitation();
   }, [token]);
 
@@ -43,7 +46,6 @@ export default function Invite() {
     try {
       console.log('Verifying token:', token);
       
-      // Use secure edge function to verify invitation
       const { data, error } = await supabase.functions.invoke('get-invitation-details', {
         body: { token }
       });
@@ -67,6 +69,7 @@ export default function Invite() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
     if (!termsAccepted) {
       setError('Please accept the Terms of Service to continue');
@@ -83,45 +86,47 @@ export default function Invite() {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       console.log('Creating account for:', invitation.email);
       
-      // Sign up the user (email confirmation handled server-side in accept-invitation)
-      const { data: authData, error: signupError } = await supabase.auth.signUp({
-        email: invitation.email,
-        password: password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            client_name: invitation.client_name,
-            invited_user: true
-          }
-        }
+      // Use server-side signup — creates user pre-confirmed, no Supabase email sent
+      const { data: signupData, error: signupError } = await supabase.functions.invoke('signup-invited-user', {
+        body: { token, password }
       });
 
-      if (signupError) throw signupError;
+      if (signupError || !signupData?.success) {
+        const errMsg = signupData?.error || signupError?.message || 'Failed to create account';
+        setError(errMsg);
+        setIsSubmitting(false);
+        return;
+      }
 
-      if (authData.user) {
-        // Securely accept invitation via Edge Function (no direct table writes)
-        try {
-          const { data: acceptData, error: acceptError } = await supabase.functions.invoke('accept-invitation', {
-            body: { token }
-          });
-          if (acceptError || !acceptData?.success) {
-            console.error('Accept invitation failed:', acceptError || acceptData?.error);
-          }
-        } catch (acceptErr) {
-          console.error('Error accepting invitation:', acceptErr);
-        }
+      // Sign in the newly created user
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: invitation.email,
+        password: password,
+      });
 
+      if (signInError) {
+        console.error('Sign-in error after signup:', signInError);
+        // Account was created successfully, just redirect to login
         setStatus('success');
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = '/login';
         }, 2000);
+        return;
       }
+
+      setStatus('success');
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 2000);
     } catch (err: any) {
       console.error('Signup error:', err);
       setError(err.message || 'Failed to create account');
+      setIsSubmitting(false);
     }
   };
 
@@ -229,28 +234,64 @@ export default function Invite() {
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                placeholder="Enter your password (min. 8 characters)"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  placeholder="Enter your password (min. 8 characters)"
+                  disabled={isSubmitting}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isSubmitting}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={8}
-                placeholder="Confirm your password"
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  placeholder="Confirm your password"
+                  disabled={isSubmitting}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={isSubmitting}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -258,6 +299,7 @@ export default function Invite() {
                 id="terms"
                 checked={termsAccepted}
                 onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                disabled={isSubmitting}
               />
               <Label htmlFor="terms" className="text-sm">
                 I agree to the{' '}
@@ -276,9 +318,16 @@ export default function Invite() {
             <Button 
               type="submit"
               className="w-full"
-              disabled={!termsAccepted}
+              disabled={!termsAccepted || isSubmitting}
             >
-              Create Account
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                "Create Account"
+              )}
             </Button>
           </form>
         </CardContent>
