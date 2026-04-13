@@ -1,0 +1,2 @@
+ALTER TABLE public.payment_reminders DROP CONSTRAINT payment_reminders_reminder_type_check;
+ALTER TABLE public.payment_reminders ADD CONSTRAINT payment_reminders_reminder_type_check CHECK (reminder_type = ANY (ARRAY['3_day'::text, '7_day'::text, '14_day'::text, '30_day'::text, 'final_notice'::text, 'upcoming_7d'::text, 'upcoming_3d'::text, 'upcoming_1d'::text]));
