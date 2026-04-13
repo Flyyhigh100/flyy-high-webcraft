@@ -68,16 +68,25 @@ export const MarketingEmailManager = () => {
         return;
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        console.warn('No access token for admin RPC call');
+        return;
+      }
+
       const { data: emailsData, error: emailsError } = await supabase
         .rpc('get_user_emails_bulk', { user_ids: userIds });
 
       if (emailsError) {
         console.error('Error fetching emails:', emailsError);
-        toast({
-          title: "Error",
-          description: "Failed to load subscriber emails",
-          variant: "destructive",
-        });
+        // Don't show error toast if it's just an RPC permission issue with no subscribers
+        if (userIds.length > 0) {
+          toast({
+            title: "Error",
+            description: "Failed to load subscriber emails. Ensure you have admin access.",
+            variant: "destructive",
+          });
+        }
         return;
       }
 
