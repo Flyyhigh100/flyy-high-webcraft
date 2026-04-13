@@ -153,6 +153,8 @@ serve(async (req) => {
       return { planName, ...prices, savings };
     };
 
+    const planInfo = getPlanPricing(planType);
+
     let emailSubject = `You're invited to join SydeVault - ${websiteName}`;
     let emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -166,13 +168,33 @@ serve(async (req) => {
           <h3 style="margin: 0; color: #333;">Website Details:</h3>
           <p style="margin: 5px 0;"><strong>Name:</strong> ${websiteName}</p>
           <p style="margin: 5px 0;"><strong>URL:</strong> <a href="${websiteUrl}" target="_blank">${websiteUrl}</a></p>
-          <p style="margin: 5px 0;"><strong>Plan:</strong> ${getPlanDisplayText(planType, nextPaymentAmount || 0, billingCycle || 'monthly')}</p>
+          <p style="margin: 5px 0;"><strong>Plan:</strong> Hosting ${planInfo.planName}</p>
+        </div>
+
+        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin: 0 0 12px; color: #333;">Billing Options:</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: white; width: 50%; vertical-align: top;">
+                <strong style="font-size: 16px;">Monthly</strong><br>
+                <span style="font-size: 22px; font-weight: bold; color: #333;">$${planInfo.monthly}/mo</span><br>
+                <span style="font-size: 12px; color: #666;">Billed monthly</span>
+              </td>
+              <td style="width: 10px;"></td>
+              <td style="padding: 12px; border: 2px solid #DAA520; border-radius: 6px; background: white; width: 50%; vertical-align: top; position: relative;">
+                <span style="background: #DAA520; color: white; font-size: 10px; padding: 2px 8px; border-radius: 3px; font-weight: bold;">SAVE $${planInfo.savings}/yr</span><br>
+                <strong style="font-size: 16px;">Yearly</strong><br>
+                <span style="font-size: 22px; font-weight: bold; color: #333;">$${planInfo.yearlyTotal}/yr</span><br>
+                <span style="font-size: 12px; color: #666;">$${planInfo.yearly}/mo equivalent</span>
+              </td>
+            </tr>
+          </table>
+          <p style="font-size: 12px; color: #888; margin: 10px 0 0;">You'll choose your billing cycle when you set up your account.</p>
         </div>
         
         <p>By creating your account, you'll be able to:</p>
         <ul>
-          <li>View and pay your monthly hosting bills</li>
-          <li>Access your website analytics and performance data</li>
+          <li>View and pay your hosting bills</li>
           <li>Submit support tickets and get personalized support</li>
           <li>Manage your account settings and billing information</li>
         </ul>
