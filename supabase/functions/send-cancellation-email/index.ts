@@ -107,7 +107,7 @@ serve(async (req) => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "Hosting Service <noreply@resend.dev>",
+      from: "Syde Vault <no-reply@notifications.sydevault.com>",
       to: [userEmail],
       subject: subject,
       html: emailHtml,

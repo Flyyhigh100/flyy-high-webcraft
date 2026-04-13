@@ -128,7 +128,7 @@ serve(async (req) => {
     // Send email via Resend
     const resend = new Resend(resendApiKey);
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: 'SydeVault <onboarding@resend.dev>',
+      from: 'SydeVault <no-reply@notifications.sydevault.com>',
       to: [invitation.email],
       subject,
       html: emailHtml,

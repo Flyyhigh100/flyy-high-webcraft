@@ -124,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
     for (const batch of batches) {
       try {
         const emailResponse = await resend.emails.send({
-          from: "SydeVault <marketing@resend.dev>",
+          from: "SydeVault <no-reply@notifications.sydevault.com>",
           to: batch,
           subject: subject,
           html: htmlContent,
