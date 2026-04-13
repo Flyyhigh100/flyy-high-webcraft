@@ -37,14 +37,11 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw userError;
 
-    // Verify admin role
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('id', userData.user.id)
-      .single();
+    // Verify admin role using has_role function
+    const { data: isAdmin, error: roleError } = await supabaseClient
+      .rpc('has_role', { _user_id: userData.user.id, _role: 'admin' });
 
-    if (profile?.role !== 'admin') {
+    if (roleError || !isAdmin) {
       throw new Error('Admin access required');
     }
 
