@@ -48,47 +48,35 @@ const sanitize = (text: string | undefined | null, max = 2000) =>
     .trim()
     .slice(0, max);
 
-// Rate limiting function
+const normalizeClientIp = (xForwardedFor: string | null, xRealIp: string | null): string => {
+  const raw = xForwardedFor || xRealIp || '127.0.0.1';
+  // Take first IP from comma-separated list
+  let ip = raw.split(',')[0]?.trim() ?? '127.0.0.1';
+  // Strip port from IPv4
+  if (ip.includes('.') && ip.includes(':')) {
+    ip = ip.split(':')[0] ?? ip;
+  }
+  // Validate
+  const ipv4Ok = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(ip);
+  const ipv6Ok = /^[0-9a-fA-F:]+$/.test(ip) && ip.includes(':');
+  return ipv4Ok || ipv6Ok ? ip : '127.0.0.1';
+};
+
+// Rate limiting function using DB-level RPC
 const checkRateLimit = async (supabase: any, ipAddress: string, endpoint: string, maxRequests = 2, windowMinutes = 15) => {
-  const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000);
-  
-  // Clean up old entries first
-  await supabase.rpc('cleanup_old_rate_limits');
-  
-  // Check current rate limit
-  const { data: existingLimits, error } = await supabase
-    .from('rate_limits')
-    .select('*')
-    .eq('ip_address', ipAddress)
-    .eq('endpoint', endpoint)
-    .gte('window_start', windowStart.toISOString());
-    
+  const { data: allowed, error } = await supabase.rpc('check_edge_function_rate_limit', {
+    ip_addr: ipAddress,
+    endpoint_name: endpoint,
+    max_requests: maxRequests,
+    window_minutes: windowMinutes,
+  });
+
   if (error) {
     console.error('Rate limit check error:', error);
-    return false; // Allow on error to avoid blocking legitimate users
+    return true; // Allow on error to avoid blocking legitimate users
   }
-  
-  const totalRequests = existingLimits?.reduce((sum, limit) => sum + limit.request_count, 0) || 0;
-  
-  if (totalRequests >= maxRequests) {
-    return false; // Rate limited
-  }
-  
-  // Update or insert rate limit entry
-  const { error: upsertError } = await supabase
-    .from('rate_limits')
-    .upsert({
-      ip_address: ipAddress,
-      endpoint: endpoint,
-      request_count: 1,
-      window_start: new Date().toISOString()
-    });
-    
-  if (upsertError) {
-    console.error('Rate limit update error:', upsertError);
-  }
-  
-  return true;
+
+  return allowed;
 };
 
 // Security logging function
@@ -121,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Get client IP and user agent for logging and rate limiting
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const clientIP = normalizeClientIp(req.headers.get('x-forwarded-for'), req.headers.get('x-real-ip'));
     const userAgent = req.headers.get('user-agent') || 'Unknown';
     
     // IP-based rate limiting check - max 2 project inquiries per 15 minutes per IP
@@ -338,7 +326,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error) {
     console.error("Error in submit-project-inquiry function:", error);
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const clientIP = normalizeClientIp(req.headers.get('x-forwarded-for'), req.headers.get('x-real-ip'));
     const userAgent = req.headers.get('user-agent') || 'Unknown';
     
     // Try to log the error (but don't fail if logging fails)
