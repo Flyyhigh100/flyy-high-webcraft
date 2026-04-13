@@ -27,45 +27,19 @@ const supabase = createClient(
 
 // Rate limiting function
 const checkRateLimit = async (ipAddress: string, endpoint: string, maxRequests = 3, windowMinutes = 10) => {
-  const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000);
-  
-  // Clean up old entries first
-  await supabase.rpc('cleanup_old_rate_limits');
-  
-  // Check current rate limit
-  const { data: existingLimits, error } = await supabase
-    .from('rate_limits')
-    .select('*')
-    .eq('ip_address', ipAddress)
-    .eq('endpoint', endpoint)
-    .gte('window_start', windowStart.toISOString());
-    
+  const { data: allowed, error } = await supabase.rpc('check_edge_function_rate_limit', {
+    ip_addr: ipAddress,
+    endpoint_name: endpoint,
+    max_requests: maxRequests,
+    window_minutes: windowMinutes,
+  });
+
   if (error) {
     console.error('Rate limit check error:', error);
-    return false; // Allow on error to avoid blocking legitimate users
+    return true; // Allow on error to avoid blocking legitimate users
   }
-  
-  const totalRequests = existingLimits?.reduce((sum, limit) => sum + limit.request_count, 0) || 0;
-  
-  if (totalRequests >= maxRequests) {
-    return false; // Rate limited
-  }
-  
-  // Update or insert rate limit entry
-  const { error: upsertError } = await supabase
-    .from('rate_limits')
-    .upsert({
-      ip_address: ipAddress,
-      endpoint: endpoint,
-      request_count: 1,
-      window_start: new Date().toISOString()
-    });
-    
-  if (upsertError) {
-    console.error('Rate limit update error:', upsertError);
-  }
-  
-  return true;
+
+  return allowed;
 };
 
 // Security logging function
