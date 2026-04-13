@@ -35,7 +35,7 @@ const CTASection = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 text-lg font-semibold">
+            <Button asChild variant="outline" className="border-foreground/60 !text-foreground hover:bg-foreground/10 px-8 py-6 text-lg font-semibold">
               <Link to="/portfolio">View Our Work</Link>
             </Button>
           </div>
