@@ -290,9 +290,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p><strong>Description:</strong> ${clean.projectDescription}</p>
           </div>
           
-          <p><a href="https://sydevault.com/admin" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View in Admin Dashboard</a></p>
-          
-          <p>Inquiry ID: ${inquiry.id}</p>
+          <p style="font-size: 12px; color: #999;">Inquiry ID: ${inquiry.id}</p>
         </div>
       `,
     });
