@@ -232,7 +232,7 @@ serve(async (req) => {
         .replace(/\{\{websiteName\}\}/g, websiteName)
         .replace(/\{\{websiteUrl\}\}/g, websiteUrl)
         .replace(/\{\{planType\}\}/g, planType)
-        .replace(/\{\{planDisplay\}\}/g, getPlanDisplayText(planType, nextPaymentAmount || 0, billingCycle || 'monthly'))
+        .replace(/\{\{planDisplay\}\}/g, `Hosting ${planInfo.planName}`)
         .replace(/\{\{inviteUrl\}\}/g, inviteUrl);
     } else {
       logStep("Using fallback email template", { templateError: templateError?.message });
