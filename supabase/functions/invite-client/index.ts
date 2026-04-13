@@ -139,14 +139,18 @@ serve(async (req) => {
       .eq('name', 'client_invitation')
       .single();
 
-    // Format plan with pricing
-    const getPlanDisplayText = (plan: string, amount: number, cycle: string = 'monthly') => {
+    // Format plan with pricing - show both monthly and yearly options
+    const getPlanPricing = (plan: string) => {
       const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-      if (cycle === 'yearly') {
-        const perMonth = amount / 12;
-        return `${planName} - $${amount?.toFixed(2) || '0.00'}/year ($${perMonth.toFixed(0)}/month equivalent)`;
-      }
-      return `${planName} - $${amount?.toFixed(2) || '0.00'}/month`;
+      const pricing: Record<string, { monthly: number; yearly: number; yearlyTotal: number }> = {
+        'basic': { monthly: 15, yearly: 10, yearlyTotal: 120 },
+        'pro': { monthly: 30, yearly: 20, yearlyTotal: 240 },
+        'standard': { monthly: 30, yearly: 20, yearlyTotal: 240 },
+        'premium': { monthly: 30, yearly: 20, yearlyTotal: 240 },
+      };
+      const prices = pricing[plan.toLowerCase()] || { monthly: 0, yearly: 0, yearlyTotal: 0 };
+      const savings = (prices.monthly * 12) - prices.yearlyTotal;
+      return { planName, ...prices, savings };
     };
 
     let emailSubject = `You're invited to join SydeVault - ${websiteName}`;
