@@ -1,0 +1,1 @@
+DELETE FROM websites WHERE id = '6753b64b-4bd3-4dc7-897a-4f8cb5b99203' AND url = 'kingshieldpc.org';
