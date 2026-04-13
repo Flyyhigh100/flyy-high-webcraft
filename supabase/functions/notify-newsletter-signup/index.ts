@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const adminEmails = ["kofi@sydevault.com", "chris.d.conley@gmail.com"];
+    const adminEmails = ["kofi@sydevault.com"];
 
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
