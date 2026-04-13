@@ -48,6 +48,20 @@ const sanitize = (text: string | undefined | null, max = 2000) =>
     .trim()
     .slice(0, max);
 
+const normalizeClientIp = (xForwardedFor: string | null, xRealIp: string | null): string => {
+  const raw = xForwardedFor || xRealIp || '127.0.0.1';
+  // Take first IP from comma-separated list
+  let ip = raw.split(',')[0]?.trim() ?? '127.0.0.1';
+  // Strip port from IPv4
+  if (ip.includes('.') && ip.includes(':')) {
+    ip = ip.split(':')[0] ?? ip;
+  }
+  // Validate
+  const ipv4Ok = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(ip);
+  const ipv6Ok = /^[0-9a-fA-F:]+$/.test(ip) && ip.includes(':');
+  return ipv4Ok || ipv6Ok ? ip : '127.0.0.1';
+};
+
 // Rate limiting function
 const checkRateLimit = async (supabase: any, ipAddress: string, endpoint: string, maxRequests = 2, windowMinutes = 15) => {
   const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000);
@@ -121,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Get client IP and user agent for logging and rate limiting
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const clientIP = normalizeClientIp(req.headers.get('x-forwarded-for'), req.headers.get('x-real-ip'));
     const userAgent = req.headers.get('user-agent') || 'Unknown';
     
     // IP-based rate limiting check - max 2 project inquiries per 15 minutes per IP
@@ -338,7 +352,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error) {
     console.error("Error in submit-project-inquiry function:", error);
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const clientIP = normalizeClientIp(req.headers.get('x-forwarded-for'), req.headers.get('x-real-ip'));
     const userAgent = req.headers.get('user-agent') || 'Unknown';
     
     // Try to log the error (but don't fail if logging fails)
